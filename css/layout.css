@@ -95,6 +95,14 @@ section > .container {
   .section-decor__mark {
     width: 40%;
   }
+
+  /* En móvil servimos la versión mobile del hero (32 KB en
+     lugar de 109 KB). El navegador solo descarga la que
+     matchea con el media query. */
+  .hero {
+    background-image: url("../assets/hero-bg-mobile.webp");
+    background-position: center center;
+  }
 }
 
 /* ---------- Header / Nav ---------- */
@@ -143,6 +151,39 @@ section > .container {
 /* ---------- Hero · grid principal ---------- */
 .hero {
   padding: 4rem 0 5rem;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-bg);
+  /* Default: versión desktop (109 KB) — se ve bien en cualquier
+     viewport. En móvil se reemplaza por la versión mobile (32 KB)
+     vía media query más abajo. */
+  background-image: url("../assets/hero-bg-desktop.webp");
+  background-size: cover;
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+
+/* Overlay oscuro para garantizar legibilidad del texto en
+   cualquier tema. ::before con position absolute cubre toda
+   la sección con un tinte oscuro semitransparente. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(13, 27, 30, 0.78) 0%,
+    rgba(13, 27, 30, 0.55) 50%,
+    rgba(13, 27, 30, 0.30) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* El contenido del hero va ENCIMA del overlay. */
+.hero .container {
+  position: relative;
+  z-index: 1;
 }
 
 .hero-grid {

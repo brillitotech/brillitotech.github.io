@@ -45,21 +45,26 @@
 
 /* ============================================================
    HERO · tipografía y elementos específicos
+   ------------------------------------------------------------
+   El hero tiene su propio background (assets/hero-bg.webp).
+   El texto se fuerza a color claro con text-shadow sutil
+   para garantizar legibilidad en AMBOS temas (claro y oscuro).
    ============================================================ */
 .hero h1 {
-  color: var(--color-text);
+  color: #F9F9F9;
   font-size: clamp(1.6rem, 4.5vw, 2.4rem);
   line-height: 1.2;
   margin-bottom: 1.25rem;
   font-weight: 700;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
 }
 
 .hero h2 {
-  color: var(--color-text);
+  color: rgba(249, 249, 249, 0.92);
   font-size: clamp(0.98rem, 2.2vw, 1.1rem);
   font-weight: 400;
   margin-bottom: 2rem;
-  opacity: 0.92;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
 }
 
 .hero-cta {
@@ -577,13 +582,19 @@ html:has(#diagnostico-toggle:checked) .modal {
 }
 
 /* Texto de apoyo debajo del CTA del hero — siempre visible,
-   persuade a hacer clic antes de abrir el modal. */
+   persuade a hacer clic antes de abrir el modal.
+   Color claro para legibilidad sobre el background del hero. */
 .hero-cta__help {
-  color: var(--color-text-muted);
+  color: rgba(249, 249, 249, 0.78);
   font-size: 0.8rem;
   line-height: 1.5;
   margin: 0.75rem 0 0;
   max-width: 32rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.hero-cta__help strong {
+  color: #F9F9F9;
 }
 
 /* ---------- Responsive · móvil ---------- */
