@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Tu diagnóstico Express ha sido enviado. Recibirás tu plano técnico en tu correo en los próximos minutos.">
+  <meta name="theme-color" content="#0D1B1E">
+  <title>¡Gracias! · Brillitotech</title>
+
+  <!--
+    Mismo stack de CSS que index.html: hereda paleta, tipografía y el
+    toggle de tema Sol/Luna sin duplicar reglas. Si en el futuro hay
+    un ajuste de marca, se hace una sola vez en tokens.css.
+  -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/themes.css">
+
+  <!--
+    Estilos mínimos, locales a esta página. Solo lo que NO se puede
+    resolver con la arquitectura existente sin inventar una clase
+    de un solo uso en components.css.
+  -->
+  <style>
+    .thanks-wrap {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: var(--space-xl) var(--space-md);
+    }
+
+    .thanks-card {
+      width: 100%;
+      max-width: 560px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-text-muted);
+      border-left: 4px solid var(--color-accent);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      box-shadow: 0 8px 30px var(--color-shadow-soft);
+    }
+
+    .thanks-card__eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--color-accent);
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-sm);
+    }
+
+    .thanks-card__title {
+      font-size: clamp(1.5rem, 2.4vw + 1rem, 2.25rem);
+      line-height: 1.2;
+      margin-bottom: var(--space-md);
+    }
+
+    .thanks-card__body {
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-lg);
+    }
+
+    .thanks-card__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Toggle de tema (mismo patrón que index.html, sin JS). -->
+  <input type="checkbox" id="theme-input" aria-label="Alternar entre modo oscuro y claro">
+
+  <!--
+    Marca de agua decorativa reutilizada (mismo <symbol> que el sitio
+    principal). El color lo controla CSS vía currentColor.
+  -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="decor-logo" viewBox="0 0 1080 1350" fill="none" stroke="currentColor" stroke-width="14"
+      stroke-linecap="round" stroke-linejoin="round">
+      <line x1="225" y1="600" x2="445" y2="600" />
+      <polyline points="445,600 485,640 555,640" />
+      <line x1="600" y1="640" x2="685" y2="640" />
+      <polyline points="685,640 725,600 875,600" />
+      <line x1="445" y1="690" x2="625" y2="690" />
+      <line x1="700" y1="690" x2="745" y2="690" />
+      <polyline points="335,690 375,730 555,730" />
+      <polyline points="625,730 745,730 785,690" />
+      <circle cx="210" cy="600" r="20" />
+      <circle cx="890" cy="600" r="20" />
+    </symbol>
+  </svg>
+
+  <main class="thanks-wrap" role="main">
+    <article class="thanks-card" role="status" aria-live="polite">
+      <p class="thanks-card__eyebrow">// Diagnóstico Express · enviado</p>
+      <h1 class="thanks-card__title">Recibimos tu solicitud. Tu plano técnico va en camino.</h1>
+      <p class="thanks-card__body">
+        Estamos procesando tu diagnóstico con nuestro motor de IA. En los
+        próximos minutos recibirás en tu correo corporativo el plano con el
+        diagnóstico financiero, la arquitectura propuesta en Mermaid y el
+        stack recomendado para tu proceso.
+      </p>
+      <p class="thanks-card__body">
+        Si en 10 minutos no ves el correo, revisa la carpeta de promociones
+        o spam, o escríbenos a
+        <a href="mailto:contacto@brillitotech.com" style="color: var(--color-accent);">contacto@brillitotech.com</a>.
+      </p>
+
+      <div class="thanks-card__actions">
+        <a href="/" class="btn btn--primary">Volver al inicio</a>
+        <a href="/#servicios" class="btn btn--ghost">Ver servicios</a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      © 2026 Briggitte Tatiana · Brillitotech — Alta eficiencia digital para tu negocio.
+    </div>
+  </footer>
+
+</body>
+
+</html>
