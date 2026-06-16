@@ -42,8 +42,14 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 OWNER_NOTIFICATION_EMAIL = os.environ.get("OWNER_NOTIFICATION_EMAIL", "")
 EMAIL_FROM = os.environ.get(
     "EMAIL_FROM",
-    "Brillitotech <no-reply@brillitotech.com>",
+    "onboarding@resend.dev",
 )
+
+# Si está en true, las respuestas de error 5xx incluyen el detalle de la
+# excepción interna (típicamente el body de respuesta de Gemini o Resend).
+# Útil en staging; en producción debe quedarse en false para no filtrar
+# información sensible (API keys parciales, payloads, etc.) al cliente.
+DEBUG_ERRORS = os.environ.get("DEBUG_ERRORS", "").lower() in ("1", "true", "yes")
 
 # Catálogo exacto de campos que exige el brief.
 REQUIRED_FIELDS = (
@@ -300,6 +306,19 @@ def send_email(to_email: str, subject: str, markdown_body: str, html_body: str) 
         json=payload,
         timeout=10,
     )
+    if not response.ok:
+        # Capturamos el body del error ANTES de raise_for_status para que
+        # quede en el log de Vercel. Resend devuelve JSON con {"message": "..."}
+        # que suele ser mucho más diagnóstico que el código de status.
+        try:
+            err_body = response.json()
+        except ValueError:
+            err_body = {"raw": response.text[:500]}
+        # Adjuntamos el detalle al raise para que el caller lo loguee completo.
+        raise requests.HTTPError(
+            f"Resend {response.status_code}: {err_body}",
+            response=response,
+        )
     response.raise_for_status()
 
 
@@ -412,15 +431,17 @@ class handler(BaseHTTPRequestHandler):
                     html_body=html_body,
                 )
             except Exception as exc:  # noqa: BLE001
+                # Logueo COMPLETO en Vercel: status + body de Resend si está
+                # disponible. Esto es lo que te dice si el problema es el
+                # 'from' no verificado, API key mala, rate limit, etc.
                 print(f"[resend] error: {exc!r}")
-                write_json(
-                    self,
-                    500,
-                    {
-                        "status": "error",
-                        "message": "Generamos tu plano pero falló el envío del correo. Escríbenos y te lo reenviamos.",
-                    },
-                )
+                err_body = {
+                    "status": "error",
+                    "message": "Generamos tu plano pero falló el envío del correo. Escríbenos y te lo reenviamos.",
+                }
+                if DEBUG_ERRORS:
+                    err_body["debug"] = repr(exc)
+                write_json(self, 500, err_body)
                 return
 
             # 6) Éxito. Default: redirect 302 a la página estática de gracias
