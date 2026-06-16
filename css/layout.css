@@ -20,6 +20,191 @@ section {
   padding: 3.5rem 0;
 }
 
+/* ============================================================
+   FONDO DECORATIVO · columnas de marcas de agua
+   ------------------------------------------------------------
+   Dos columnas fijas en viewport a izquierda y derecha. Cada
+   columna apila 3 logos (SVG) distribuidos verticalmente con
+   translateY variable y tamaños distintos para evitar el
+   efecto "patrón de pared".
+
+   · position: fixed  → acompaña al scroll
+   · z-index: -1      → queda detrás del contenido
+   · pointer-events: none → no captura clicks
+   · El color del stroke se controla desde themes.css vía
+     currentColor (el SVG hereda el color del .bg-decor__mark)
+   ============================================================ */
+.bg-decor {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bg-decor__col {
+  position: absolute;
+  top: 0;
+  width: 200px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6vh 0;
+}
+
+.bg-decor__col--left {
+  left: 0;
+}
+
+.bg-decor__col--right {
+  right: 0;
+}
+
+.bg-decor__mark {
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0.10;
+}
+
+/* Variación de tamaño y posición: cada marca es distinta */
+.bg-decor__col--left .bg-decor__mark:nth-child(1) {
+  width: 60%;
+  transform: translateX(-10%) translateY(0);
+}
+.bg-decor__col--left .bg-decor__mark:nth-child(2) {
+  width: 110%;
+  transform: translateX(15%) translateY(-8vh);
+  opacity: 0.07;
+}
+.bg-decor__col--left .bg-decor__mark:nth-child(3) {
+  width: 75%;
+  transform: translateX(-20%) translateY(4vh);
+}
+
+.bg-decor__col--right .bg-decor__mark:nth-child(1) {
+  width: 80%;
+  transform: translateX(10%) translateY(2vh);
+}
+.bg-decor__col--right .bg-decor__mark:nth-child(2) {
+  width: 55%;
+  transform: translateX(-5%) translateY(-6vh);
+  opacity: 0.13;
+}
+.bg-decor__col--right .bg-decor__mark:nth-child(3) {
+  width: 100%;
+  transform: translateX(18%) translateY(6vh);
+  opacity: 0.08;
+}
+
+/* ============================================================
+   COLUMNA CENTRAL · 8 marcas distribuidas elegantemente
+   ------------------------------------------------------------
+   Va detrás del contenido principal (z-index: -1 del .bg-decor).
+   Las 8 marcas se distribuyen en un grid 2×4 con offsets y
+   tamaños variables — opacidad baja para no competir con
+   el texto que va encima.
+   ============================================================ */
+.bg-decor__center {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, 70vw);
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(4, 1fr);
+  align-items: center;
+  justify-items: center;
+  gap: 0;
+}
+
+.bg-decor__mark--center {
+  opacity: 0.05;
+  display: block;
+  width: 80%;
+  height: auto;
+}
+
+/* Variación por marca: tamaño y desplazamiento únicos.
+   La idea es que NO se lea como un patrón: cada una se
+   ubica en un cuadrante distinto del centro con su propio
+   offset horizontal y vertical. */
+.bg-decor__mark--center:nth-child(1) {
+  width: 70%;
+  transform: translateX(-15%) translateY(-10%);
+}
+.bg-decor__mark--center:nth-child(2) {
+  width: 55%;
+  transform: translateX(20%) translateY(15%);
+  opacity: 0.07;
+}
+.bg-decor__mark--center:nth-child(3) {
+  width: 80%;
+  transform: translateX(10%) translateY(-8%);
+  opacity: 0.04;
+}
+.bg-decor__mark--center:nth-child(4) {
+  width: 50%;
+  transform: translateX(-25%) translateY(12%);
+  opacity: 0.06;
+}
+.bg-decor__mark--center:nth-child(5) {
+  width: 90%;
+  transform: translateX(25%) translateY(-15%);
+  opacity: 0.05;
+}
+.bg-decor__mark--center:nth-child(6) {
+  width: 60%;
+  transform: translateX(-10%) translateY(8%);
+  opacity: 0.06;
+}
+.bg-decor__mark--center:nth-child(7) {
+  width: 75%;
+  transform: translateX(15%) translateY(-12%);
+  opacity: 0.04;
+}
+.bg-decor__mark--center:nth-child(8) {
+  width: 65%;
+  transform: translateX(-20%) translateY(10%);
+  opacity: 0.05;
+}
+
+/* El contenido principal va ENCIMA del fondo decorativo.
+   Sin position:relative, z-index:0 no puede superar -1. */
+.site-header,
+main,
+.site-footer {
+  position: relative;
+  z-index: 0;
+}
+
+/* Móvil: columnas más finas y más sutiles para no robar
+   espacio al contenido. */
+@media (max-width: 720px) {
+  .bg-decor__col {
+    width: 110px;
+  }
+
+  .bg-decor__col--left {
+    left: -20px;
+  }
+
+  .bg-decor__col--right {
+    right: -20px;
+  }
+
+  /* Las marcas centrales se ocultan en móvil: el contenido
+     ya carga con poco espacio y agregar más marcas centrales
+     solo va a sumar ruido visual. */
+  .bg-decor__center {
+    display: none;
+  }
+}
+
 /* ---------- Header / Nav ---------- */
 .site-header {
   padding: var(--space-md) 0;

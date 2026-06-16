@@ -47,6 +47,58 @@
   -->
   <input type="checkbox" id="theme-input" aria-label="Alternar entre modo oscuro y claro">
 
+  <!--
+    ============================================================
+    FONDO DECORATIVO (marcas de agua)
+    ------------------------------------------------------------
+    Dos columnas laterales fijas en viewport. Cada columna
+    contiene múltiples instancias del mismo logo SVG,
+    distribuidas verticalmente con translateY variable.
+
+    El SVG se define UNA sola vez como <symbol> y se reutiliza
+    con <use>. El color lo controla CSS vía currentColor:
+    · Modo oscuro:  gris claro (visible sobre fondo verde abismo)
+    · Modo claro:   verde clorofila (visible sobre fondo gris claro)
+    aria-hidden=true: puramente decorativo, no aporta info.
+    ============================================================
+  -->
+  <div class="bg-decor" aria-hidden="true">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="decor-logo" viewBox="0 0 1080 1350" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="225" y1="600" x2="445" y2="600"/>
+        <polyline points="445,600 485,640 555,640"/>
+        <line x1="600" y1="640" x2="685" y2="640"/>
+        <polyline points="685,640 725,600 875,600"/>
+        <line x1="445" y1="690" x2="625" y2="690"/>
+        <line x1="700" y1="690" x2="745" y2="690"/>
+        <polyline points="335,690 375,730 555,730"/>
+        <polyline points="625,730 745,730 785,690"/>
+        <circle cx="210" cy="600" r="20"/>
+        <circle cx="890" cy="600" r="20"/>
+      </symbol>
+    </svg>
+    <div class="bg-decor__col bg-decor__col--left">
+      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+    </div>
+    <div class="bg-decor__center" aria-hidden="true">
+      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+    </div>
+    <div class="bg-decor__col bg-decor__col--right">
+      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
+    </div>
+  </div>
+
   <!-- ============================================================
        1 · HEADER / NAV
        ============================================================ -->

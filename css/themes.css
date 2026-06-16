@@ -43,9 +43,57 @@ html:has(#theme-input:checked) .card {
 
 /* En modo claro, el logo de Pacha no necesita inversión de color;
    solo bajamos la saturación del isotipo para integrarlo mejor. */
-html:has(#theme-input:checked) .logo-attribute {
+html:has(#theme-input:checked) .testimonial-card__logo img {
   filter: saturate(0.5);
 }
+
+/* ============================================================
+   FONDO DECORATIVO · color por tema
+   El SVG usa stroke=currentColor, así que con cambiar el color
+   del contenedor basta. El logo es siempre el mismo.
+   · Modo oscuro (default): gris muted → se ve sobre fondo verde
+   · Modo claro:             color de texto (verde abismo) → se ve
+                             sobre el fondo azul claro con contraste
+                             alto. Era verde clorofila, pero verde
+                             sobre azul claro se mimetizaba y daba
+                             aspecto "enfermo". Negro/verde abismo
+                             es lo que muestra la imagen de referencia.
+   ============================================================ */
+.bg-decor__mark {
+  color: var(--color-text-muted);
+}
+
+html:has(#theme-input:checked) .bg-decor__mark {
+  color: var(--color-text);
+}
+
+/* ============================================================
+   FONDO DECORATIVO · opacidad en modo claro
+   En modo claro el #0D1B1E con opacidad 0.05-0.13 se diluye
+   demasiado sobre el fondo #CCDFEC. Subimos ~×2.2 (laterales)
+   y ~×2.5 (centrales) para que se "resalten" sin perder
+   jerarquía — las más tenues siguen estándolo, solo a otro nivel.
+   Modo oscuro: opacidades originales (en layout.css) sin tocar.
+   ============================================================ */
+
+/* Columnas laterales */
+html:has(#theme-input:checked) .bg-decor__col--left .bg-decor__mark:nth-child(1) { opacity: 0.22; }
+html:has(#theme-input:checked) .bg-decor__col--left .bg-decor__mark:nth-child(2) { opacity: 0.15; }
+html:has(#theme-input:checked) .bg-decor__col--left .bg-decor__mark:nth-child(3) { opacity: 0.26; }
+
+html:has(#theme-input:checked) .bg-decor__col--right .bg-decor__mark:nth-child(1) { opacity: 0.20; }
+html:has(#theme-input:checked) .bg-decor__col--right .bg-decor__mark:nth-child(2) { opacity: 0.18; }
+html:has(#theme-input:checked) .bg-decor__col--right .bg-decor__mark:nth-child(3) { opacity: 0.15; }
+
+/* Columna central · 8 marcas */
+html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(1) { opacity: 0.14; }
+html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(2) { opacity: 0.16; }
+html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(3) { opacity: 0.10; }
+html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(4) { opacity: 0.14; }
+html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(5) { opacity: 0.12; }
+html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(6) { opacity: 0.14; }
+html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(7) { opacity: 0.10; }
+html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(8) { opacity: 0.12; }
 
 /* Iconos del toggle · alterna Sol/Luna según el estado */
 html:has(#theme-input:checked) .theme-toggle__sun  { display: none; }
