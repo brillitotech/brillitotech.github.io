@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Briggitte Tatiana — Ingeniera de software senior experta en alta eficiencia. Reduzco costos operativos y huella de carbono digital en Latam con infraestructura estática y micro-agentes de IA.">
+  <meta name="theme-color" content="#0D1B1E">
+  <title>Briggitte Tatiana — Alta Eficiencia para tu Software</title>
+
+  <!--
+    ============================================================
+    CSS EXTERNO · Arquitectura por responsabilidades
+    ------------------------------------------------------------
+    tokens.css      Variables de tema (paleta, tipografía, espacios)
+    base.css        Reset, body, defaults
+    layout.css      Container, nav, hero-grid, services-grid, breakpoints
+    components.css  Botones, cards, testimonio, métricas, logos
+    themes.css      Toggle Sol/Luna + reglas de modo claro
+
+    Orden de carga: importa. tokens primero (todo depende de él),
+    themes al final (sobreescribe lo que necesite).
+    ============================================================
+  -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/themes.css">
+</head>
+
+<body>
+
+  <!--
+    ============================================================
+    TOGGLE DE TEMA (Sol/Luna) — Sin JavaScript
+    Truco puro CSS:
+    1) <input type="checkbox"> oculto vive al INICIO del body.
+    2) El selector general de hermanos (~) propaga el estado
+       :checked a <header>, <main> y <footer>.
+    3) La etiqueta <label for="theme-input"> en el header es
+       la única superficie interactiva.
+    4) En modo claro, se añade el atributo data-theme="light"
+       a <body> vía selectores CSS inteligentes.
+    ============================================================
+  -->
+  <input type="checkbox" id="theme-input" aria-label="Alternar entre modo oscuro y claro">
+
+  <!-- ============================================================
+       1 · HEADER / NAV
+       ============================================================ -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="nav" aria-label="Navegación principal">
+        <a href="#" class="logo">brillitotech<span>.</span></a>
+        <ul class="nav-links">
+          <li><a href="#servicios">Servicios</a></li>
+          <li><a href="#testimonios">Testimonios</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+          <li><a href="#contacto" class="btn btn--primary">Agendar Sesión</a></li>
+          <li>
+            <label for="theme-input" class="theme-toggle" title="Alternar modo oscuro / claro">
+              <span class="theme-toggle__icon theme-toggle__sun" aria-hidden="true">☀</span>
+              <span class="theme-toggle__icon theme-toggle__moon" aria-hidden="true">☾</span>
+              <span class="theme-toggle__label">Tema</span>
+            </label>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============================================================
+         2 · HERO
+         ============================================================ -->
+    <section class="hero" id="inicio">
+      <div class="container">
+        <div class="hero-grid">
+
+          <div class="hero-text">
+            <h1>Tu software está quemando dinero en servidores y perdiendo clientes por lentitud.</h1>
+            <h2>Soy Briggitte Tatiana, ingeniera de software senior experta en alta eficiencia. Ayudo a empresas en
+              Latam a reducir costos operativos y huella de carbono digital mediante infraestructura web estática
+              ultra-rápida y micro-agentes de IA por bloques.</h2>
+            <div class="hero-cta">
+              <a href="#contacto" class="btn btn--primary">--&gt; Diagnosticar mi infraestructura (15 Minutos)</a>
+            </div>
+          </div>
+
+          <div class="hero-photo">
+            <!--
+              =====================================================
+              FOTO PROFESIONAL (PNG con fondo transparente)
+              Reemplaza el src con la URL final de tu imagen.
+              Formato recomendado: PNG 24-bit + alpha.
+              El contenedor NO tiene fondo: la silueta se integra
+              visualmente con el fondo del tema (oscuro o claro).
+              =====================================================
+            -->
+            <img src="https://placehold.co/420x520/transparent/8E9794?text=Tu+Foto+PNG"
+              alt="Briggitte Tatiana — Ingeniera de software senior" width="420" height="520" loading="eager">
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         3 · SERVICIOS
+         ============================================================ -->
+    <section id="servicios">
+      <div class="container">
+        <h2 class="services-title">Soluciones de Alta Eficiencia</h2>
+        <div class="services-grid">
+
+          <article class="card">
+            <h3>
+              <span class="card-icon card-icon--solid" aria-hidden="true"></span>
+              Micro-Agentes de IA Ligeros
+            </h3>
+            <p>Automatización de flujos operativos críticos (trazabilidad y finanzas) mediante bloques eficientes. Cero
+              interfaces infladas, procesamiento limpio.</p>
+          </article>
+
+          <article class="card">
+            <h3>
+              <span class="card-icon card-icon--dot" aria-hidden="true"></span>
+              Desintoxicación e Infra. Web
+            </h3>
+            <p>Migración de sitios pesados y vulnerables a arquitecturas estáticas en el borde (Edge). Velocidad máxima,
+              consumo base cero de servidor y seguridad blindada.</p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         4 · TESTIMONIOS
+         ============================================================
+         Sección de testimonio sobre el trabajo realizado para
+         Gaia Consultores (sitio construido desde cero con
+         enfoque de reducción de CO₂), narrado por Pacha EcoHub
+         como líder del proyecto.
+
+         Estado actual: placeholder honesto. Reemplazar
+         [TESTIMONIO PENDIENTE] con la cita aprobada por Pacha.
+         Los datos de auditoría (CO₂, LCP, peso) son reales.
+         ============================================================ -->
+    <section id="testimonios">
+      <div class="container">
+        <h2 class="section-title">Testimonios</h2>
+
+        <div class="testimonial-card">
+          <p class="testimonial-card__headline">
+            [TESTIMONIO PENDIENTE — pendiente de aprobación de Delphy Barcelona
+            y Pacha EcoHub. Cuando llegue, reemplazar este bloque con la cita
+            curada, enfocada al proceso de venta.]
+          </p>
+
+          <p class="testimonial-card__body">
+            Sitio web construido desde cero con enfoque de reducción de CO₂
+            digital, alineado con la certificación B de la empresa.
+          </p>
+
+          <!-- Logo del testimoniante (Pacha EcoHub) centrado en cuadro -->
+          <div class="testimonial-card__logo" aria-label="Pacha EcoHub">
+            <img src="assets/pacha-ecohub-logo.webp" alt="Pacha EcoHub" loading="lazy">
+          </div>
+
+          <p class="testimonial-card__cite">
+            <strong>Delphy Barcelona</strong>
+            <span>Consultora de Circularidad · Pacha EcoHub</span>
+          </p>
+
+          <!--
+            Nota de auditoría discreta al pie de la tarjeta.
+            Fuentes: Website Carbon Calculator + PageSpeed Insights + Lighthouse.
+          -->
+          <p class="testimonial-card__note">
+            Auditoría: <strong>0,08g de CO₂ por visita</strong> (nota B en
+            <a href="https://www.websitecarbon.com/" target="_blank" rel="noopener">Website Carbon</a>).
+            98.8 KiB transferidos, LCP 1.6s, TBT 0ms.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         5 · CIERRE
+         ============================================================ -->
+    <section id="contacto" class="closing">
+      <div class="container">
+        <h2>¿Listo para optimizar tu operación? Hablemos durante 15 minutos en LinkedIn o agenda directamente en mi
+          calendario.</h2>
+        <div class="closing-actions">
+          <!-- Reemplazar href con tu URL real de LinkedIn -->
+          <a href="#" class="btn btn--ghost">[ Enlace a LinkedIn ]</a>
+          <!-- Reemplazar href con tu URL real de Calendly o WhatsApp -->
+          <a href="#" class="btn btn--primary">[ Enlace a Calendly/WhatsApp ]</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      © 2026 Briggitte Tatiana · Brillitotech — Alta eficiencia, baja huella.
+    </div>
+  </footer>
+
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+# ============================================================
+# Sistema
+# ============================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+*.swp
+*.swo
+*~
+.~lock.*
+
+# ============================================================
+# Editores
+# ============================================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# ============================================================
+# Node / npm / npx (por si se usa `npx serve` localmente)
+# ============================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ============================================================
+# Python (por si se usa `python3 -m http.server` localmente)
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ============================================================
+# Servidores locales y caches de desarrollo
+# ============================================================
+.serve/
+.cache/
+.parcel-cache/
+.tmp/
+tmp/
+*.pid
+*.log
+*.bak
+*.orig
+
+# ============================================================
+# Assets NO optimizados (regla del proyecto: solo WebP / SVG)
+# Cualquier PNG/JPG/GIF sin convertir debe quedar fuera del repo
+# ============================================================
+*.psd
+*.ai
+*.sketch
+*.fig
+*.xd
+*.tif
+*.tiff
+*.heic
+*.raw
+
+# ============================================================
+# Convenciones del agente (no se commitean)
+# ============================================================
+.atl/
+
+# ============================================================
+# Builds intermedios y archivos sensibles
+# ============================================================
+dist/
+build/
+out/
+.env
+.env.local
+.env.*.local
+*.pem
+secrets/

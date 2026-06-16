@@ -1,0 +1,108 @@
+/* ============================================================
+   LAYOUT
+   ------------------------------------------------------------
+   Estructura macro: container, secciones, header/nav, grid
+   del hero, grid de servicios. Reglas que afectan cómo se
+   distribuyen los BLOQUES, no cómo se ven los componentes
+   individuales.
+   ============================================================ */
+
+/* ---------- Container global ---------- */
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+/* ---------- Sections · espaciado vertical ---------- */
+section {
+  padding: 3.5rem 0;
+}
+
+/* ---------- Header / Nav ---------- */
+.site-header {
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--color-text-muted);
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: center;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  opacity: 0.85;
+  transition: color 0.15s ease;
+}
+
+.nav-links a:hover {
+  color: var(--color-accent);
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+}
+
+.logo span {
+  color: var(--color-accent);
+}
+
+/* ---------- Hero · grid principal ---------- */
+.hero {
+  padding: 4rem 0 5rem;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+  align-items: center;
+}
+
+/* ---------- Servicios · grid de tarjetas ---------- */
+.services-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+/* ---------- Breakpoint: tablet / desktop ---------- */
+@media (min-width: 720px) {
+  section {
+    padding: 5rem 0;
+  }
+
+  .hero {
+    padding: 5.5rem 0 6.5rem;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 3.5rem;
+  }
+
+  .hero-photo {
+    max-width: 420px;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+}

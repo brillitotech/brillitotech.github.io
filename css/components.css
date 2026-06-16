@@ -1,0 +1,478 @@
+/* ============================================================
+   COMPONENTS
+   ------------------------------------------------------------
+   Cada bloque aquí es un componente reutilizable y autónomo.
+   Si necesitás tocar un botón, una card o un testimonio, este
+   es el único archivo que abrís (junto con themes.css si el
+   cambio depende del tema activo).
+   ============================================================ */
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+.btn {
+  display: inline-block;
+  padding: 0.85rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: opacity 0.15s ease;
+  border: 2px solid transparent;
+  text-align: center;
+  cursor: pointer;
+}
+
+.btn:hover {
+  opacity: 0.88;
+}
+
+.btn--primary {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+/* CTA secundario · borde técnico */
+.btn--ghost {
+  background: transparent;
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+}
+
+.btn--ghost:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ============================================================
+   HERO · tipografía y elementos específicos
+   ============================================================ */
+.hero h1 {
+  color: var(--color-text);
+  font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+  line-height: 1.2;
+  margin-bottom: 1.25rem;
+  font-weight: 700;
+}
+
+.hero h2 {
+  color: var(--color-text);
+  font-size: clamp(0.98rem, 2.2vw, 1.1rem);
+  font-weight: 400;
+  margin-bottom: 2rem;
+  opacity: 0.92;
+}
+
+.hero-cta {
+  margin-bottom: 2rem;
+}
+
+.hero-photo {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  /* Sin fondo sólido: la silueta se mezcla con el fondo del tema */
+}
+
+.hero-photo img {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
+}
+
+/* ============================================================
+   TOGGLE DE TEMA (Sol/Luna)
+   Truco puro CSS: <input> oculto + <label> visible.
+   La etiqueta cambia el checkbox, y html:has() en themes.css
+   detecta el estado para alternar la paleta.
+   ============================================================ */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: 1px solid var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) 0.7rem;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.theme-toggle__icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* ============================================================
+   SERVICIOS · tarjetas
+   ============================================================ */
+.services-title {
+  color: var(--color-text);
+  font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+  margin-bottom: 2rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.card {
+  background: var(--color-surface);
+  padding: 2rem var(--space-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-text-muted);
+  /* Sombra técnica sutil: offset corto, blur bajo, color de la paleta */
+  box-shadow: 0 2px 8px var(--color-shadow);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 12px var(--color-accent-glow);
+}
+
+.card h3 {
+  color: var(--color-accent);
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* Cuadrado CSS · icono geométrico, sin tipografía decorativa */
+.card-icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-accent);
+  background: transparent;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.card-icon--solid {
+  background: var(--color-accent);
+}
+
+.card-icon--dot::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: var(--color-accent);
+  transform: translate(-50%, -50%);
+}
+
+.card p {
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+/* ============================================================
+   TESTIMONIOS · bloque narrativo
+   ============================================================ */
+.case {
+  background: var(--color-surface);
+  border-top: 3px solid var(--color-accent);   /* mobile: simétrico */
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl) var(--space-lg);
+  box-shadow: 0 2px 8px var(--color-shadow);
+  text-align: center;                          /* mobile: todo centrado */
+}
+
+.case > * {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.case-banner {
+  color: var(--color-accent);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.case h3 {
+  color: var(--color-text);
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  margin-bottom: 1.75rem;
+  font-weight: 600;
+}
+
+.case-context {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.case-logo {
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Wrapper transparente — sin borde */
+}
+
+.case-logo--link {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.case-logo--link:hover {
+  opacity: 0.8;
+}
+
+/* ---------- Bloque de testimonio (cita) — diseño circular ----------
+   Estructura:
+     · .testimonial__avatar  → foto circular centrada arriba (slot vacío por ahora)
+     · comillas tipográficas “ ” como ::before / ::after (sin íconos, sin peso)
+     · .testimonial__quote   → texto justificado
+     · .testimonial__cite    → nombre + cargo centrados
+   El bloque se centra respecto a .case (text-align:center ya viene de .case). */
+.testimonial {
+  position: relative;
+  background: var(--color-accent-tint);
+  border-radius: var(--radius-md);
+  padding: 2rem 1.5rem 1.5rem;
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+/* Foto circular del testimoniante (slot). El placeholder se ve hasta
+   que se suba la imagen real. */
+.testimonial__avatar {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  background: var(--color-surface);
+  border: 2px solid var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.testimonial__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;                 /* oculta hasta que haya src real */
+}
+
+.testimonial__avatar-placeholder {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 0 0.5rem;
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+}
+
+/* Cuando la foto esté cargada, ocultar el placeholder */
+.testimonial__avatar-img[src]:not([src=""]) {
+  display: block;
+}
+
+.testimonial__avatar-img[src]:not([src=""]) + .testimonial__avatar-placeholder {
+  display: none;
+}
+
+/* Comillas tipográficas como pseudo-elementos. Cero peso adicional:
+   son caracteres Unicode del set base. Posicionadas a izquierda y
+   derecha de la foto, replicando el layout de la referencia. */
+.testimonial::before,
+.testimonial::after {
+  position: absolute;
+  font-size: 2.5rem;
+  line-height: 1;
+  color: var(--color-accent);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.testimonial::before {
+  content: "\201C";              /* “  comilla izquierda */
+  top: 1.5rem;
+  left: 1rem;
+}
+
+.testimonial::after {
+  content: "\201D";              /* ”  comilla derecha */
+  top: 4.5rem;                   /* baja para alinearse con la cintura de la foto */
+  right: 1rem;
+}
+
+.testimonial__quote {
+  color: var(--color-text);
+  font-style: normal;            /* diseño de referencia: las itálicas no aparecen */
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0.5rem 0 0;
+  text-align: justify;           /* cuerpo justificado, como en la referencia */
+  hyphens: auto;
+}
+
+.testimonial__cite {
+  display: block;
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+  font-style: normal;
+  color: var(--color-accent);
+  line-height: 1.4;
+}
+
+.testimonial__cite strong {
+  display: block;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.15rem;
+}
+
+/* ---------- Grilla de métricas del testimonio ---------- */
+.testimonial-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--color-text-muted);
+  border-radius: var(--radius-lg);
+  margin: 1.5rem 0 0;
+  max-width: 100%;
+}
+
+.testimonial-metrics .metric {
+  padding: 0.85rem 0.4rem;
+  text-align: center;
+  border-right: 1px solid var(--color-text-muted);
+}
+
+.testimonial-metrics .metric:last-child {
+  border-right: none;
+}
+
+/* ---------- Logos del cliente y testimoniante ---------- */
+.testimonial-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.testimonial-logos img {
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Logo del cliente (Gaia): prominencia media */
+.testimonial-logos .logo-client {
+  max-width: 130px;
+  max-height: 60px;
+}
+
+/* Logo del testimoniante (Pacha): más pequeño, contiene el impacto
+   del isotipo multicolor sobre la paleta verde. */
+.testimonial-logos .logo-attribute {
+  max-width: 110px;
+  max-height: 45px;
+  filter: invert(1) saturate(0.4) brightness(0.95);
+}
+
+/* ---------- Nota al pie y CTA del testimonio ---------- */
+.testimonial-note {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-top: 0.85rem;
+  line-height: 1.5;
+}
+
+.testimonial-note strong {
+  color: var(--color-accent);
+}
+
+.testimonial-note a {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.testimonial-cta {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.testimonial-cta a {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.testimonial-cta a:hover {
+  opacity: 0.85;
+}
+
+/* ---------- Breakpoint desktop: testimonios a la izquierda ---------- */
+@media (min-width: 720px) {
+  .case {
+    padding: 3rem 2.5rem;
+    text-align: left;
+    border-top: none;
+    border-left: 4px solid var(--color-accent);
+  }
+
+  .case > * {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* Centrar banner y título del proyecto en desktop (encabezado) */
+  .case-banner,
+  .case h3 {
+    text-align: center;
+  }
+}
+
+/* ============================================================
+   CIERRE / CTA FINAL
+   ============================================================ */
+.closing {
+  text-align: center;
+}
+
+.closing h2 {
+  color: var(--color-text);
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  font-weight: 500;
+  max-width: 640px;
+  margin: 0 auto 2rem;
+  line-height: 1.4;
+}
+
+.closing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.site-footer {
+  padding: 1.5rem 0;
+  text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  border-top: 1px solid var(--color-text-muted);
+}

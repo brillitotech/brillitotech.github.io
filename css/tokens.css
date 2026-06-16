@@ -1,0 +1,42 @@
+/* ============================================================
+   TOKENS DE DISEÑO
+   ------------------------------------------------------------
+   Custom properties de la landing. Cualquier cambio de paleta,
+   tipografía o espaciado se hace ACÁ, no en los componentes.
+   Esto permite mantener coherencia visual sin cazar valores
+   hardcodeados por todo el código.
+   ============================================================ */
+
+:root {
+  /* ---------- Paleta · Modo Oscuro (default) ----------
+     Optimizado para OLED: ahorra batería y reduce CO₂. */
+  --color-bg:           #0D1B1E;   /* Verde Abismo · fondo principal */
+  --color-surface:      #103035;   /* Verde Tierra · tarjetas/bloques */
+  --color-surface-alt:  #FFFFFF;   /* reservado para modo claro */
+  --color-text:         #F9F9F9;   /* Blanco Nube · texto principal */
+  --color-text-muted:   #8E9794;   /* Gris Técnico · bordes, textos secundarios */
+  --color-accent:       #2ECC71;   /* Verde Clorofila · CTAs, acentos (≤20%) */
+  --color-shadow:       rgba(13, 27, 30, 0.4);
+  --color-shadow-soft:  rgba(13, 27, 30, 0.18);
+  --color-accent-glow:  rgba(46, 204, 113, 0.18);
+  --color-accent-tint:  rgba(46, 204, 113, 0.06);
+
+  /* ---------- Tipografía ----------
+     SOLO fuentes nativas del sistema. Google Fonts y externas
+     están ESTRICTAMENTE prohibidas por el brief del proyecto. */
+  --font-sans:  system-ui, -apple-system, BlinkMacSystemFont,
+                "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono:  ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+                Consolas, monospace;
+
+  /* ---------- Espaciado y radios ----------
+     Valores coherentes para todo el sitio. */
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   10px;
+  --space-xs:    0.4rem;
+  --space-sm:    0.75rem;
+  --space-md:    1.25rem;
+  --space-lg:    1.75rem;
+  --space-xl:    2.5rem;
+}

@@ -1,0 +1,46 @@
+/* ============================================================
+   BASE
+   ------------------------------------------------------------
+   Reset minimalista, tipografía, comportamiento por defecto
+   de elementos estructurales. No tiene selectores específicos
+   de componentes — eso vive en components.css.
+   ============================================================ */
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- html / scroll suave ---------- */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ---------- Body · tipografía y fondo del tema activo ---------- */
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  font-size: 16px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  /* Transición de tema al alternar Sol/Luna */
+  transition: background-color 0.2s linear, color 0.2s linear;
+}
+
+/* ---------- Defaults de elementos ---------- */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

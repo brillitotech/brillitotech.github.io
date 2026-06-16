@@ -1,0 +1,54 @@
+/* ============================================================
+   THEMES · MODO CLARO + TOGGLE
+   ------------------------------------------------------------
+   Toda la lógica de alternancia de tema vive acá. Si querés
+   agregar un modo "alto contraste" o "sepia", agregás un
+   bloque similar más abajo.
+
+   Mecánica: <input type="checkbox" id="theme-input"> oculto
+   en el body. El selector html:has() detecta si está :checked
+   y aplica el modo claro. La etiqueta <label for="theme-input">
+   en el header es la única superficie interactiva.
+
+   Compatible con Safari 15.4+, Chrome 105+, Firefox 121+.
+   ============================================================ */
+
+/* ---------- Input oculto · sigue siendo interactivo ---------- */
+#theme-input {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+/* ============================================================
+   MODO CLARO
+   Activado por html:has(#theme-input:checked)
+   Reasigna los tokens del :root con valores claros.
+   ============================================================ */
+html:has(#theme-input:checked) {
+  --color-bg:          #CCDFEC;   /* fondo modo claro (solicitado) */
+  --color-surface:     #FFFFFF;   /* tarjetas modo claro */
+  --color-text:        #0D1B1E;   /* texto modo claro */
+  --color-text-muted:  #8E9794;   /* bordes igual en ambos modos */
+  --color-shadow:      rgba(13, 27, 30, 0.18);   /* sombra más sutil */
+  --color-accent-tint: rgba(13, 27, 30, 0.05);
+}
+
+/* Sobrescrituras específicas que no encajan en un solo token */
+html:has(#theme-input:checked) .card {
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+/* En modo claro, el logo de Pacha no necesita inversión de color;
+   solo bajamos la saturación del isotipo para integrarlo mejor. */
+html:has(#theme-input:checked) .logo-attribute {
+  filter: saturate(0.5);
+}
+
+/* Iconos del toggle · alterna Sol/Luna según el estado */
+html:has(#theme-input:checked) .theme-toggle__sun  { display: none; }
+html:has(#theme-input:checked) .theme-toggle__moon { display: inline; }
+html:has(#theme-input:not(:checked)) .theme-toggle__sun  { display: inline; }
+html:has(#theme-input:not(:checked)) .theme-toggle__moon { display: none; }
