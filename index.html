@@ -49,55 +49,48 @@
 
   <!--
     ============================================================
-    FONDO DECORATIVO (marcas de agua)
+    TOGGLE DEL MODAL DE DIAGNÓSTICO — Sin JavaScript
     ------------------------------------------------------------
-    Dos columnas laterales fijas en viewport. Cada columna
-    contiene múltiples instancias del mismo logo SVG,
-    distribuidas verticalmente con translateY variable.
-
-    El SVG se define UNA sola vez como <symbol> y se reutiliza
-    con <use>. El color lo controla CSS vía currentColor:
-    · Modo oscuro:  gris claro (visible sobre fondo verde abismo)
-    · Modo claro:   verde clorofila (visible sobre fondo gris claro)
-    aria-hidden=true: puramente decorativo, no aporta info.
+    Mismo patrón que el toggle de tema:
+    1) <input type="checkbox"> oculto al inicio del body.
+    2) El CTA del hero (línea ~172) usa <label for="diagnostico-toggle">
+       en vez de <a>: al hacer clic marca/desmarca el checkbox.
+    3) El bloque .modal (al final del body) se muestra/oculta
+       según el estado de este checkbox, vía CSS puro.
+    4) El botón "X" dentro del modal es otro <label for="diagnostico-toggle">:
+       al hacer clic desmarca el checkbox y cierra el modal.
     ============================================================
   -->
-  <div class="bg-decor" aria-hidden="true">
-    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-      <symbol id="decor-logo" viewBox="0 0 1080 1350" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="225" y1="600" x2="445" y2="600"/>
-        <polyline points="445,600 485,640 555,640"/>
-        <line x1="600" y1="640" x2="685" y2="640"/>
-        <polyline points="685,640 725,600 875,600"/>
-        <line x1="445" y1="690" x2="625" y2="690"/>
-        <line x1="700" y1="690" x2="745" y2="690"/>
-        <polyline points="335,690 375,730 555,730"/>
-        <polyline points="625,730 745,730 785,690"/>
-        <circle cx="210" cy="600" r="20"/>
-        <circle cx="890" cy="600" r="20"/>
-      </symbol>
-    </svg>
-    <div class="bg-decor__col bg-decor__col--left">
-      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-    </div>
-    <div class="bg-decor__center" aria-hidden="true">
-      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-      <svg class="bg-decor__mark bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-    </div>
-    <div class="bg-decor__col bg-decor__col--right">
-      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo"/></svg>
-    </div>
-  </div>
+  <input type="checkbox" id="diagnostico-toggle" aria-label="Abrir formulario de diagnóstico">
+
+  <!--
+    ============================================================
+    FONDO DECORATIVO (marcas de agua)
+    ------------------------------------------------------------
+    Un único <symbol id="decor-logo"> global. Las marcas se
+    insertan como <use> dentro de wrappers .section-decor
+    position:absolute en cada sección (excepto el hero, que
+    queda limpio con su propio background).
+
+    El color lo controla CSS vía currentColor.
+    aria-hidden=true: puramente decorativo.
+    ============================================================
+  -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="decor-logo" viewBox="0 0 1080 1350" fill="none" stroke="currentColor" stroke-width="14"
+      stroke-linecap="round" stroke-linejoin="round">
+      <line x1="225" y1="600" x2="445" y2="600" />
+      <polyline points="445,600 485,640 555,640" />
+      <line x1="600" y1="640" x2="685" y2="640" />
+      <polyline points="685,640 725,600 875,600" />
+      <line x1="445" y1="690" x2="625" y2="690" />
+      <line x1="700" y1="690" x2="745" y2="690" />
+      <polyline points="335,690 375,730 555,730" />
+      <polyline points="625,730 745,730 785,690" />
+      <circle cx="210" cy="600" r="20" />
+      <circle cx="890" cy="600" r="20" />
+    </symbol>
+  </svg>
 
   <!-- ============================================================
        1 · HEADER / NAV
@@ -133,12 +126,19 @@
         <div class="hero-grid">
 
           <div class="hero-text">
-            <h1>Tu software está quemando dinero en servidores y perdiendo clientes por lentitud.</h1>
-            <h2>Soy Briggitte Tatiana, ingeniera de software senior experta en alta eficiencia. Ayudo a empresas en
-              Latam a reducir costos operativos y huella de carbono digital mediante infraestructura web estática
-              ultra-rápida y micro-agentes de IA por bloques.</h2>
+            <h1>Toma el control operativo de tu empresa con IA y software de bajo costo en infraestructura.</h1>
+            <h2>Olvídate del desperdicio de procesamiento y las implementaciones costosas.
+              Conecto agentes de IA ligeros para automatizar tus flujos críticos y migro tus plataformas lentas
+              a entornos estáticos de alto rendimiento. Permitiendote menor consumo de servidor por transacción y
+              mayor margen de ganancia para tu operación.
+            </h2>
             <div class="hero-cta">
-              <a href="#contacto" class="btn btn--primary">--&gt; Diagnosticar mi infraestructura (15 Minutos)</a>
+              <label for="diagnostico-toggle" class="btn btn--primary" role="button" tabindex="0"> Obtén tu Diagnostico
+                Express (5 Min)</label>
+              <p class="hero-cta__help">
+                Sin llamadas ni agendas. Nuestro <strong>motor de IA</strong> procesa tus datos al instante y te envía a tu correo
+                el mapa de optimización de procesamiento para tu flujo más crítico.
+              </p>
             </div>
           </div>
 
@@ -164,6 +164,11 @@
          3 · SERVICIOS
          ============================================================ -->
     <section id="servicios">
+      <div class="section-decor" aria-hidden="true">
+        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      </div>
       <div class="container">
         <h2 class="services-title">Soluciones de Alta Eficiencia</h2>
         <div class="services-grid">
@@ -203,6 +208,11 @@
          Los datos de auditoría (CO₂, LCP, peso) son reales.
          ============================================================ -->
     <section id="testimonios">
+      <div class="section-decor" aria-hidden="true">
+        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      </div>
       <div class="container">
         <h2 class="section-title">Testimonios</h2>
 
@@ -245,6 +255,11 @@
          5 · CIERRE
          ============================================================ -->
     <section id="contacto" class="closing">
+      <div class="section-decor" aria-hidden="true">
+        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      </div>
       <div class="container">
         <h2>¿Listo para optimizar tu operación? Hablemos durante 15 minutos en LinkedIn o agenda directamente en mi
           calendario.</h2>
@@ -264,6 +279,94 @@
       © 2026 Briggitte Tatiana · Brillitotech — Alta eficiencia, baja huella.
     </div>
   </footer>
+
+  <!--
+    ============================================================
+    MODAL · DIAGNÓSTICO DE INFRAESTRUCTURA
+    ------------------------------------------------------------
+    Visibilidad controlada por #diagnostico-toggle (checkbox
+    hack). El CTA del hero y el botón X dentro del modal son
+    <label for="diagnostico-toggle">: alternan el estado.
+
+    Estética intencionalmente distinta al resto de la página
+    (cyberpunk / verde neón) — entrar al diagnóstico es entrar
+    a "otro modo", más técnico.
+
+    Sin JS. Cero librerías. Cero fuentes externas.
+    Tipografía monoespaciada del sistema (Consolas/Monaco).
+
+    El action del form queda en "#" hasta que exista un
+    endpoint real. Cuando lo tengas, reemplazar action
+    por la URL del backend o servicio (Formspree, Tally, etc.)
+    ============================================================
+  -->
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <label for="diagnostico-toggle" class="modal__backdrop" aria-label="Cerrar modal"></label>
+
+    <div class="modal__panel" role="document">
+      <label for="diagnostico-toggle" class="modal__close" aria-label="Cerrar" title="Cerrar">×</label>
+
+      <header class="modal__header">
+        <p class="modal__eyebrow">// Diagnóstico Express</p>
+        <h2 id="modal-title" class="modal__title">Diseña tu Piloto de IA en 5 minutos</h2>
+        <p class="modal__sub">Contesta 6 preguntas. Recibirás un mapa de optimización por correo.</p>
+      </header>
+
+      <!--
+        action="#" hasta que exista endpoint. method="post" es
+        el método esperado cuando se conecte. enctype default
+        (application/x-www-form-urlencoded) alcanza para los
+        tipos de campos que hay acá.
+      -->
+      <form class="modal__form" action="#" method="post" novalidate>
+
+        <div class="modal__field">
+          <label for="d-nombre">Nombre Completo</label>
+          <input type="text" id="d-nombre" name="nombre" placeholder="Ej. Briggitte Tatiana" required
+            autocomplete="name">
+        </div>
+
+        <div class="modal__field">
+          <label for="d-empresa">Nombre de la Empresa</label>
+          <input type="text" id="d-empresa" name="empresa" placeholder="Ej. Liwaisi Tech" required
+            autocomplete="organization">
+        </div>
+
+        <div class="modal__field">
+          <label for="d-correo">Correo Electrónico Corporativo</label>
+          <input type="email" id="d-correo" name="correo" placeholder="tucorreo@empresa.com" required
+            autocomplete="email">
+        </div>
+
+        <div class="modal__field">
+          <label for="d-proceso">¿Cuál es el proceso manual o repetitivo que más tiempo le quita a tu equipo
+            hoy?</label>
+          <textarea id="d-proceso" name="proceso" rows="4" maxlength="300"
+            placeholder="Ej. Conciliar manualmente las facturas en Excel que nos envían los proveedores por correo..."
+            required></textarea>
+          <span class="modal__counter" aria-live="polite">0/300</span>
+        </div>
+
+        <div class="modal__field">
+          <label for="d-stack">¿Qué herramientas o software usan actualmente en ese proceso?</label>
+          <input type="text" id="d-stack" name="stack" placeholder="Ej. Excel, Gmail, Google Drive, Hubspot">
+        </div>
+
+        <div class="modal__field">
+          <label for="d-volumen">¿Cuál es el volumen aproximado de transacciones o registros procesados al mes?</label>
+          <select id="d-volumen" name="volumen" required>
+            <option value="" disabled selected>Selecciona un rango…</option>
+            <option value="lt-100">Menos de 100 operaciones / mes</option>
+            <option value="100-1000">100 a 1,000 operaciones / mes</option>
+            <option value="1000-10000">1,000 a 10,000 operaciones / mes</option>
+            <option value="gt-10000">Más de 10,000 operaciones / mes</option>
+          </select>
+        </div>
+
+        <button type="submit" class="modal__submit">Obtener informe</button>
+      </form>
+    </div>
+  </div>
 
 </body>
 

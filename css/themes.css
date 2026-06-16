@@ -22,6 +22,17 @@
   opacity: 0;
 }
 
+/* Misma técnica para el toggle del modal de diagnóstico.
+   Si no se oculta acá, el checkbox aparece visible en la
+   esquina superior izquierda del body. */
+#diagnostico-toggle {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
 /* ============================================================
    MODO CLARO
    Activado por html:has(#theme-input:checked)
@@ -59,41 +70,24 @@ html:has(#theme-input:checked) .testimonial-card__logo img {
                              aspecto "enfermo". Negro/verde abismo
                              es lo que muestra la imagen de referencia.
    ============================================================ */
-.bg-decor__mark {
+.section-decor__mark {
   color: var(--color-text-muted);
 }
 
-html:has(#theme-input:checked) .bg-decor__mark {
+html:has(#theme-input:checked) .section-decor__mark {
   color: var(--color-text);
 }
 
 /* ============================================================
    FONDO DECORATIVO · opacidad en modo claro
-   En modo claro el #0D1B1E con opacidad 0.05-0.13 se diluye
-   demasiado sobre el fondo #CCDFEC. Subimos ~×2.2 (laterales)
-   y ~×2.5 (centrales) para que se "resalten" sin perder
-   jerarquía — las más tenues siguen estándolo, solo a otro nivel.
-   Modo oscuro: opacidades originales (en layout.css) sin tocar.
+   En modo claro el #0D1B1E se diluye sobre el fondo #CCDFEC.
+   Subimos la opacidad de las 3 marcas locales para que se
+   "resalten" sin gritar. Cada una con su valor (mismo
+   factor de proporción que en oscuro).
    ============================================================ */
-
-/* Columnas laterales */
-html:has(#theme-input:checked) .bg-decor__col--left .bg-decor__mark:nth-child(1) { opacity: 0.22; }
-html:has(#theme-input:checked) .bg-decor__col--left .bg-decor__mark:nth-child(2) { opacity: 0.15; }
-html:has(#theme-input:checked) .bg-decor__col--left .bg-decor__mark:nth-child(3) { opacity: 0.26; }
-
-html:has(#theme-input:checked) .bg-decor__col--right .bg-decor__mark:nth-child(1) { opacity: 0.20; }
-html:has(#theme-input:checked) .bg-decor__col--right .bg-decor__mark:nth-child(2) { opacity: 0.18; }
-html:has(#theme-input:checked) .bg-decor__col--right .bg-decor__mark:nth-child(3) { opacity: 0.15; }
-
-/* Columna central · 8 marcas */
-html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(1) { opacity: 0.14; }
-html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(2) { opacity: 0.16; }
-html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(3) { opacity: 0.10; }
-html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(4) { opacity: 0.14; }
-html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(5) { opacity: 0.12; }
-html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(6) { opacity: 0.14; }
-html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(7) { opacity: 0.10; }
-html:has(#theme-input:checked) .bg-decor__mark--center:nth-child(8) { opacity: 0.12; }
+html:has(#theme-input:checked) .section-decor__mark:nth-child(1) { opacity: 0.20; }
+html:has(#theme-input:checked) .section-decor__mark:nth-child(2) { opacity: 0.14; }
+html:has(#theme-input:checked) .section-decor__mark:nth-child(3) { opacity: 0.26; }
 
 /* Iconos del toggle · alterna Sol/Luna según el estado */
 html:has(#theme-input:checked) .theme-toggle__sun  { display: none; }

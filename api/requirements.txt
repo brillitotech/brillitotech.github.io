@@ -1,0 +1,5 @@
+# Brillitotech · Lead Capture Serverless Backend
+# Footprint intencionalmente mínimo: solo lo estrictamente necesario
+# para hablar con Google Generative AI y Resend. Sin frameworks web.
+google-generativeai==0.8.5
+requests==2.32.3
