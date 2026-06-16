@@ -77,7 +77,8 @@ Datos del cliente:
 Tu respuesta DEBE ser en formato Markdown estricto y contener:
 1. DIAGNÓSTICO FINANCIERO: Estimación cruda del desperdicio operativo.
 2. ARQUITECTURA DE LA SOLUCIÓN: Un diagrama de flujo funcional estructurado estrictamente en código de bloques Mermaid.js (dentro de un bloque de código ```mermaid) que muestre cómo webhooks o agentes ligeros reemplazan el paso manual.
-3. STACK RECOMENDADO: Herramientas asíncronas y eficientes para implementarlo."""
+3. STACK RECOMENDADO: Qué herramientas de bajo costo (ej. Webhooks, APIs ligeras, serverless) solucionan esto con consumo mínimo de recursos.
+Sé crítico. Si el proceso no se puede o no se debe automatizar con IA, dilo claramente y propón una optimización de base segun el caso."""
 
 
 # ---------------------------------------------------------------------------
@@ -306,6 +307,27 @@ def send_email(to_email: str, subject: str, markdown_body: str, html_body: str) 
 # Helpers de respuesta HTTP
 # ---------------------------------------------------------------------------
 
+# URL a la que redirigir tras un POST exitoso desde el formulario HTML.
+# En éxito, SIEMPRE se prefiere redirect (302) sobre JSON para que el navegador
+# nativo siga el flujo sin requerir JavaScript. Si el cliente pidió
+# explícitamente JSON (Accept: application/json o header X-Requested-With),
+# se devuelve 200 con cuerpo JSON para integraciones programáticas.
+SUCCESS_REDIRECT_URL = os.environ.get(
+    "SUCCESS_REDIRECT_URL",
+    "https://brillitotech.com/gracias.html",
+)
+
+
+def wants_json_response(handler: BaseHTTPRequestHandler) -> bool:
+    """Detecta si el cliente espera JSON en vez de un redirect HTML."""
+    accept = (handler.headers.get("Accept") or "").lower()
+    if "application/json" in accept:
+        return True
+    if handler.headers.get("X-Requested-With", "").lower() == "fetch":
+        return True
+    return False
+
+
 def write_json(handler: BaseHTTPRequestHandler, status: int, body: dict) -> None:
     encoded = json.dumps(body, ensure_ascii=False).encode("utf-8")
     handler.send_response(status)
@@ -314,6 +336,19 @@ def write_json(handler: BaseHTTPRequestHandler, status: int, body: dict) -> None
     handler.send_header("Cache-Control", "no-store")
     handler.end_headers()
     handler.wfile.write(encoded)
+
+
+def write_redirect(handler: BaseHTTPRequestHandler, location: str) -> None:
+    """
+    Emite un 302 Found con header Location. Usado en la rama de éxito del
+    formulario HTML nativo: el navegador sigue el redirect sin necesidad
+    de JavaScript en el cliente.
+    """
+    handler.send_response(302)
+    handler.send_header("Location", location)
+    handler.send_header("Content-Length", "0")
+    handler.send_header("Cache-Control", "no-store")
+    handler.end_headers()
 
 
 # ---------------------------------------------------------------------------
@@ -388,12 +423,18 @@ class handler(BaseHTTPRequestHandler):
                 )
                 return
 
-            # 6) Éxito.
-            write_json(
-                self,
-                200,
-                {"status": "success", "message": "Plano técnico enviado con éxito."},
-            )
+            # 6) Éxito. Default: redirect 302 a la página estática de gracias
+            #    (compatible con el flujo del <form> sin JavaScript). Si el
+            #    cliente pidió JSON explícitamente, devolvemos 200 + JSON
+            #    para integraciones programáticas (fetch, curl, tests).
+            if wants_json_response(self):
+                write_json(
+                    self,
+                    200,
+                    {"status": "success", "message": "Plano técnico enviado con éxito."},
+                )
+            else:
+                write_redirect(self, SUCCESS_REDIRECT_URL)
 
         except Exception as exc:  # noqa: BLE001
             # Última barrera: jamás propagues stacktrace al cliente.
