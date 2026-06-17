@@ -51,6 +51,14 @@ EMAIL_FROM = os.environ.get(
 # información sensible (API keys parciales, payloads, etc.) al cliente.
 DEBUG_ERRORS = os.environ.get("DEBUG_ERRORS", "").lower() in ("1", "true", "yes")
 
+# Header secreto de bypass para diagnóstico ad-hoc sin reconfigurar
+# variables de entorno en Vercel. Si la request trae "X-Debug: 1",
+# el handler incluye el repr(exc) en la respuesta 5xx. No hace nada
+# en éxito: solo en errores. Seguro de exponer porque no revela
+# secretos por sí mismo — solo lo que el servidor iba a loguear.
+DEBUG_HEADER_NAME = "X-Debug"
+DEBUG_HEADER_VALUE = "1"
+
 # Catálogo exacto de campos que exige el brief.
 REQUIRED_FIELDS = (
     "nombre",
@@ -347,6 +355,33 @@ def wants_json_response(handler: BaseHTTPRequestHandler) -> bool:
     return False
 
 
+def is_debug_request(handler: BaseHTTPRequestHandler) -> bool:
+    """
+    Devuelve True si el handler debe incluir detalles internos en la
+    respuesta de error. Se activa si:
+      - DEBUG_ERRORS=true en el entorno (Vercel env var), o
+      - la request trae el header X-Debug: 1 (diagnóstico ad-hoc con curl).
+    """
+    if DEBUG_ERRORS:
+        return True
+    if handler.headers.get(DEBUG_HEADER_NAME, "").strip() == DEBUG_HEADER_VALUE:
+        return True
+    return False
+
+
+def error_response(
+    handler: BaseHTTPRequestHandler,
+    status: int,
+    public_message: str,
+    exc: BaseException | None = None,
+) -> None:
+    """Escribe una respuesta 5xx uniforme, con campo debug opcional."""
+    body: dict = {"status": "error", "message": public_message}
+    if exc is not None and is_debug_request(handler):
+        body["debug"] = repr(exc)
+    write_json(handler, status, body)
+
+
 def write_json(handler: BaseHTTPRequestHandler, status: int, body: dict) -> None:
     encoded = json.dumps(body, ensure_ascii=False).encode("utf-8")
     handler.send_response(status)
@@ -400,21 +435,19 @@ class handler(BaseHTTPRequestHandler):
             except Exception as exc:  # noqa: BLE001
                 # Log interno sin filtrar al cliente.
                 print(f"[gemini] error: {exc!r}")
-                write_json(
+                error_response(
                     self,
                     500,
-                    {
-                        "status": "error",
-                        "message": "No fue posible generar el plano técnico. Intenta de nuevo en unos minutos.",
-                    },
+                    "No fue posible generar el plano técnico. Intenta de nuevo en unos minutos.",
+                    exc=exc,
                 )
                 return
 
             if not markdown_body:
-                write_json(
+                error_response(
                     self,
                     500,
-                    {"status": "error", "message": "El modelo no devolvió contenido."},
+                    "El modelo no devolvió contenido.",
                 )
                 return
 
@@ -435,13 +468,12 @@ class handler(BaseHTTPRequestHandler):
                 # disponible. Esto es lo que te dice si el problema es el
                 # 'from' no verificado, API key mala, rate limit, etc.
                 print(f"[resend] error: {exc!r}")
-                err_body = {
-                    "status": "error",
-                    "message": "Generamos tu plano pero falló el envío del correo. Escríbenos y te lo reenviamos.",
-                }
-                if DEBUG_ERRORS:
-                    err_body["debug"] = repr(exc)
-                write_json(self, 500, err_body)
+                error_response(
+                    self,
+                    500,
+                    "Generamos tu plano pero falló el envío del correo. Escríbenos y te lo reenviamos.",
+                    exc=exc,
+                )
                 return
 
             # 6) Éxito. Default: redirect 302 a la página estática de gracias
