@@ -30,6 +30,7 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler
 
 import google.generativeai as genai
+import markdown as _markdown_lib
 import requests
 
 
@@ -80,19 +81,47 @@ WIRE_TO_CANONICAL = {
 }
 
 # Prompt de sistema del brief, con f-string lazy (se aplica por request).
+# One-shot: incluye un ejemplo de output para que Gemini respete el formato
+# EXACTO. Sin el ejemplo, Gemini responde conversacionalmente ("¡Excelente!
+# Como Arquitecto de Soluciones Cloud...") en vez del Markdown estricto.
 SYSTEM_PROMPT_TEMPLATE = """\
-Eres un Arquitecto de Soluciones Cloud. Analiza el siguiente proceso operativo y genera un 'Plano de Ingeniería de Procesos Express'.
+Eres un Arquitecto de Soluciones Cloud. Tu salida es EXCLUSIVAMENTE Markdown
+técnico. NO incluyas saludos, NO incluyas introducciones narrativas, NO
+inclyas "Como Arquitecto de Soluciones Cloud..." ni frases similares.
+Arranca DIRECTAMENTE con el header "## 1. DIAGNÓSTICO FINANCIERO".
+
+FORMATO OBLIGATORIO (respeta los headers literales):
+
+## 1. DIAGNÓSTICO FINANCIERO
+- Horas/mes desperdiciadas: <número>
+- Costo/mes estimado: <USD>
+- Costo/año estimado: <USD>
+- Riesgos del status quo: <1 línea>
+
+## 2. ARQUITECTURA DE LA SOLUCIÓN
+<2-3 párrafos breves explicando el enfoque>
+
+```mermaid
+flowchart LR
+  A[Origen del dato] --> B[Webhook o Agente ligero]
+  B --> C[Procesamiento asíncrono]
+  C --> D[Destino / Notificación]
+```
+
+## 3. STACK RECOMENDADO
+- <herramienta 1>: <justificación de 1 línea>
+- <herramienta 2>: <justificación de 1 línea>
+- <herramienta 3>: <justificación de 1 línea>
+
+Sé crítico. Si el proceso no se justifica automatizar con IA, dilo
+claramente en DIAGNÓSTICO y propón una optimización de base.
+
+---
 Datos del cliente:
-- Nombre: {nombre} | Empresa: {empresa}
+- Empresa: {empresa}
 - Proceso crítico manual: {proceso_manual}
 - Stack actual: {herramientas}
-- Volumen mensual: {volumen_mensual}
-
-Tu respuesta DEBE ser en formato Markdown estricto y contener:
-1. DIAGNÓSTICO FINANCIERO: Estimación cruda del desperdicio operativo.
-2. ARQUITECTURA DE LA SOLUCIÓN: Un diagrama de flujo funcional estructurado estrictamente en código de bloques Mermaid.js (dentro de un bloque de código ```mermaid) que muestre cómo webhooks o agentes ligeros reemplazan el paso manual.
-3. STACK RECOMENDADO: Qué herramientas de bajo costo (ej. Webhooks, APIs ligeras, serverless) solucionan esto con consumo mínimo de recursos.
-Sé crítico. Si el proceso no se puede o no se debe automatizar con IA, dilo claramente y propón una optimización de base segun el caso."""
+- Volumen mensual: {volumen_mensual}"""
 
 
 # ---------------------------------------------------------------------------
@@ -190,7 +219,8 @@ def generate_blueprint(payload: dict) -> str:
     response = model.generate_content(
         prompt,
         generation_config=genai.types.GenerationConfig(
-            temperature=0.4,
+            temperature=0.2,    # bajado de 0.4: menos creatividad, más
+                                # adherencia al formato one-shot del prompt
             max_output_tokens=2048,
         ),
     )
@@ -198,85 +228,38 @@ def generate_blueprint(payload: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Render Markdown → HTML mínimo (sin librerías externas)
+# Render Markdown → HTML
 # ---------------------------------------------------------------------------
+# Migrado de regex propio a la librería `markdown` (referencia en
+# CommonMark + GFM). El render regex casero fallaba en listas anidadas,
+# escapaba mal el contenido de los bloques de código, y rompía headers
+# cuando el texto tenía caracteres especiales. La dependencia es ~100KB
+# en disco pero en runtime el cold-start no la paga porque Vercel cachea
+# el wheel de Python entre invocaciones del mismo runtime.
+#
+# Bloques ```mermaid```: el cliente de correo NO renderiza Mermaid, así
+# que los entregamos como <pre class="mermaid"> con el código raw
+# (legible como texto plano). El lead puede pegar el código en
+# https://mermaid.live para visualizarlo.
 
-_MERMAID_RE = re.compile(r"```mermaid\s*\n(.*?)\n```", re.DOTALL)
-_FENCE_RE = re.compile(r"```([a-zA-Z0-9_+\-]*)\s*\n(.*?)\n```", re.DOTALL)
-_HEADER_RE = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
-_BOLD_RE = re.compile(r"\*\*(.+?)\*\*")
-_ITALIC_RE = re.compile(r"(?<!\*)\*([^*]+?)\*(?!\*)")
-_INLINE_CODE_RE = re.compile(r"`([^`]+)`")
-
-
-def escape_html(text: str) -> str:
-    return (
-        text.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace('"', "&quot;")
-    )
+_MD_RENDERER = _markdown_lib.Markdown(
+    extensions=[
+        "fenced_code",   # bloques ```lang```
+        "tables",        # tablas GFM
+        "sane_lists",    # listas que no dependen de un offset de 4 espacios exacto
+        "nl2br",         # saltos de línea suaves → <br>
+    ],
+    output_format="html",
+)
 
 
 def markdown_to_html(md: str) -> str:
-    """
-    Conversión mínima suficiente para el reporte de Gemini:
-      - Escapa HTML
-      - Bloques ```mermaid``` → <pre class="mermaid"> con el código raw
-        (el cliente de correo no renderiza Mermaid, lo entrega como
-        diagrama de texto al receptor; el prompt está pensado para que
-        sea legible como código).
-      - Otros bloques ```lang``` → <pre><code>
-      - Encabezados #, ##, ### → <h1>, <h2>, <h3>
-      - **bold**, *italic*, `inline code`
-      - Doble salto de línea → párrafo
-    """
+    """Convierte Markdown a HTML usando python-markdown."""
     if not md:
         return ""
-
-    # 1) Extraer y reemplazar bloques Mermaid primero (para que el escape HTML
-    #    no dañe las flechas del diagrama).
-    mermaid_blocks: list[str] = []
-
-    def _stash_mermaid(match: re.Match) -> str:
-        mermaid_blocks.append(match.group(1))
-        return f"@@MERMAID_{len(mermaid_blocks) - 1}@@"
-
-    md = _MERMAID_RE.sub(_stash_mermaid, md)
-
-    # 2) Escapar HTML en el resto del Markdown.
-    md = escape_html(md)
-
-    # 3) Otros bloques de código genéricos.
-    def _fence_repl(match: re.Match) -> str:
-        lang = match.group(1) or ""
-        body = match.group(2)
-        if lang:
-            return f'<pre><code class="language-{escape_html(lang)}">{body}</code></pre>'
-        return f"<pre><code>{body}</code></pre>"
-
-    md = _FENCE_RE.sub(_fence_repl, md)
-
-    # 4) Encabezados.
-    md = _HEADER_RE.sub(lambda m: f"<h{len(m.group(1))}>{m.group(2)}</h{len(m.group(1))}>", md)
-
-    # 5) Inline formatting (orden importa: bold antes que italic).
-    md = _BOLD_RE.sub(r"<strong>\1</strong>", md)
-    md = _ITALIC_RE.sub(r"<em>\1</em>", md)
-    md = _INLINE_CODE_RE.sub(r"<code>\1</code>", md)
-
-    # 6) Párrafos: doble salto de línea separa bloques.
-    paragraphs = [p.strip() for p in md.split("\n\n") if p.strip()]
-    md = "".join(
-        f"<p>{p.replace(chr(10), '<br>')}</p>" if not p.startswith("<") else p
-        for p in paragraphs
-    )
-
-    # 7) Restaurar bloques Mermaid.
-    for idx, code in enumerate(mermaid_blocks):
-        md = md.replace(f"@@MERMAID_{idx}@@", f'<pre class="mermaid">{escape_html(code)}</pre>')
-
-    return md
+    # El renderer mantiene estado interno entre llamadas (reset es obligatorio).
+    _MD_RENDERER.reset()
+    return _MD_RENDERER.convert(md)
 
 
 # ---------------------------------------------------------------------------
@@ -349,7 +332,7 @@ def send_email(to_email: str, subject: str, markdown_body: str, html_body: str) 
 # se devuelve 200 con cuerpo JSON para integraciones programáticas.
 SUCCESS_REDIRECT_URL = os.environ.get(
     "SUCCESS_REDIRECT_URL",
-    "https://brillitotech.com/gracias.html",
+    "https://services-ia.vercel.app/gracias.html",
 )
 
 
