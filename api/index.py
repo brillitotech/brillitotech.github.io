@@ -84,19 +84,36 @@ WIRE_TO_CANONICAL = {
 # One-shot: incluye un ejemplo de output para que Gemini respete el formato
 # EXACTO. Sin el ejemplo, Gemini responde conversacionalmente ("¡Excelente!
 # Como Arquitecto de Soluciones Cloud...") en vez del Markdown estricto.
+#
+# Reglas reforzadas en este commit:
+# - "completar las 3 secciones": antes Gemini cortaba en la sección 1
+#   porque el one-shot sugería un output corto.
+# - "cifras como [estimación sin auditoría]": el brief del proyecto
+#   prohíbe fabricar números de rendimiento. En vez de eliminar los
+#   rangos, los marcamos honestamente para que el lead los entienda
+#   como orientativos.
 SYSTEM_PROMPT_TEMPLATE = """\
 Eres un Arquitecto de Soluciones Cloud. Tu salida es EXCLUSIVAMENTE Markdown
 técnico. NO incluyas saludos, NO incluyas introducciones narrativas, NO
-inclyas "Como Arquitecto de Soluciones Cloud..." ni frases similares.
+incluyas "Como Arquitecto de Soluciones Cloud..." ni frases similares.
 Arranca DIRECTAMENTE con el header "## 1. DIAGNÓSTICO FINANCIERO".
+
+REGLA CRÍTICA: Tu respuesta DEBE incluir las TRES secciones completas
+(1, 2 y 3) en orden. Después de la sección 1 continuá con la 2, y
+después de la 2 con la 3. NO termines el reporte hasta completar las 3.
 
 FORMATO OBLIGATORIO (respeta los headers literales):
 
 ## 1. DIAGNÓSTICO FINANCIERO
-- Horas/mes desperdiciadas: <número>
-- Costo/mes estimado: <USD>
-- Costo/año estimado: <USD>
+- Horas/mes desperdiciadas (estimación): <rango orientativo>
+- Costo/mes estimado (orientativo): <USD en rango>
+- Costo/año estimado (orientativo): <USD en rango>
 - Riesgos del status quo: <1 línea>
+
+IMPORTANTE: Todas las cifras de esta sección son ESTIMACIONES
+ORIENTATIVAS sin auditoría. Marcá cada cifra con el sufijo
+"[estimación sin auditoría]" para que el lead entienda que requiere
+validación con datos reales.
 
 ## 2. ARQUITECTURA DE LA SOLUCIÓN
 <2-3 párrafos breves explicando el enfoque>
@@ -112,6 +129,7 @@ flowchart LR
 - <herramienta 1>: <justificación de 1 línea>
 - <herramienta 2>: <justificación de 1 línea>
 - <herramienta 3>: <justificación de 1 línea>
+- <herramienta 4>: <justificación de 1 línea>
 
 Sé crítico. Si el proceso no se justifica automatizar con IA, dilo
 claramente en DIAGNÓSTICO y propón una optimización de base.
@@ -219,9 +237,12 @@ def generate_blueprint(payload: dict) -> str:
     response = model.generate_content(
         prompt,
         generation_config=genai.types.GenerationConfig(
-            temperature=0.2,    # bajado de 0.4: menos creatividad, más
-                                # adherencia al formato one-shot del prompt
-            max_output_tokens=2048,
+            temperature=0.15,   # bajado a 0.15: más determinístico, mejor
+                                # adherencia al formato completo de 3
+                                # secciones (antes cortaba en sección 1)
+            max_output_tokens=3500,   # subido de 2048: las 3 secciones +
+                                       # el bloque Mermaid + el stack no
+                                       # entraban en 2048 tokens
         ),
     )
     return (response.text or "").strip()
@@ -277,16 +298,18 @@ def send_email(to_email: str, subject: str, markdown_body: str, html_body: str) 
         raise RuntimeError("RESEND_API_KEY no configurada en el entorno.")
 
     to_list = [to_email]
-    # Solo añadimos al owner si su email es válido. Resend rechaza toda la
-    # request con 422 si ALGÚN destinatario del array 'to' es inválido,
-    # así que es más seguro omitir al owner que enviar la request rota.
+    # BCC para el owner (no destinatario visible). El lead no ve el email
+    # del owner en la cabecera "Para:", sigue siendo una sola request a
+    # Resend. Validamos que el email del owner sea parseable para no
+    # romper toda la request con un 422.
+    bcc_list = None
     if (
         OWNER_NOTIFICATION_EMAIL
         and OWNER_NOTIFICATION_EMAIL.strip()
         and "@" in OWNER_NOTIFICATION_EMAIL
         and OWNER_NOTIFICATION_EMAIL.lower() != to_email.lower()
     ):
-        to_list.append(OWNER_NOTIFICATION_EMAIL.strip())
+        bcc_list = [OWNER_NOTIFICATION_EMAIL.strip()]
 
     payload = {
         "from": EMAIL_FROM,
@@ -295,6 +318,8 @@ def send_email(to_email: str, subject: str, markdown_body: str, html_body: str) 
         "text": markdown_body,
         "html": html_body,
     }
+    if bcc_list:
+        payload["bcc"] = bcc_list
 
     response = requests.post(
         "https://api.resend.com/emails",
