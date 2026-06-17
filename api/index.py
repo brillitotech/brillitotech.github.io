@@ -294,8 +294,16 @@ def send_email(to_email: str, subject: str, markdown_body: str, html_body: str) 
         raise RuntimeError("RESEND_API_KEY no configurada en el entorno.")
 
     to_list = [to_email]
-    if OWNER_NOTIFICATION_EMAIL and OWNER_NOTIFICATION_EMAIL.lower() != to_email.lower():
-        to_list.append(OWNER_NOTIFICATION_EMAIL)
+    # Solo añadimos al owner si su email es válido. Resend rechaza toda la
+    # request con 422 si ALGÚN destinatario del array 'to' es inválido,
+    # así que es más seguro omitir al owner que enviar la request rota.
+    if (
+        OWNER_NOTIFICATION_EMAIL
+        and OWNER_NOTIFICATION_EMAIL.strip()
+        and "@" in OWNER_NOTIFICATION_EMAIL
+        and OWNER_NOTIFICATION_EMAIL.lower() != to_email.lower()
+    ):
+        to_list.append(OWNER_NOTIFICATION_EMAIL.strip())
 
     payload = {
         "from": EMAIL_FROM,
