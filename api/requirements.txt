@@ -1,7 +1,9 @@
 # Brillitotech · Lead Capture Serverless Backend
 # Footprint intencionalmente mínimo: solo lo estrictamente necesario
-# para hablar con Google Generative AI, Resend, y renderizar el
-# Markdown del plano técnico a HTML para el correo.
+# para hablar con Google Generative AI, Resend, Google Sheets (leads),
+# y renderizar el Markdown del plano técnico a HTML para el correo.
 google-generativeai==0.8.5
 requests==2.32.3
 markdown==3.7
+google-api-python-client==2.149.0
+google-auth==2.35.0

@@ -23,6 +23,7 @@ Optimización de huella de carbono digital:
   del navegador y, por tanto, invocaciones duplicadas de la función).
 """
 
+import base64
 import json
 import os
 import re
@@ -259,9 +260,134 @@ def generate_blueprint(payload: dict) -> str:
 # el wheel de Python entre invocaciones del mismo runtime.
 #
 # Bloques ```mermaid```: el cliente de correo NO renderiza Mermaid, así
-# que los entregamos como <pre class="mermaid"> con el código raw
-# (legible como texto plano). El lead puede pegar el código en
-# https://mermaid.live para visualizarlo.
+# que los entregamos como un CTA visual con link a https://mermaid.live
+# (que sí renderiza Mermaid en el navegador) más un <details> colapsable
+# con el código fuente por si el lead lo quiere copiar a otra herramienta.
+# mermaid.live acepta el código del diagrama en el fragmento URL con el
+# esquema `pako:<base64-de-json-con-codigo>`, así que el link abre el
+# editor con el diagrama YA cargado, sin que el lead tenga que copy-paste.
+
+# Regex que captura el bloque completo ```mermaid ... ``` (lazy match del
+# cuerpo para no comerse más de un bloque si hubiera varios).
+_MERMAID_BLOCK_RE = re.compile(
+    r"```mermaid\s*\n(.*?)\n```",
+    re.DOTALL,
+)
+
+# Placeholder único que se inserta en el Markdown antes de pasarlo al
+# renderer. Usamos un token que NO puede aparecer naturalmente en Markdown
+# válido (los marcadores de posición de html span son seguros) para que
+# la sustitución posterior sea inequívoca.
+_MERMAID_PLACEHOLDER = "\x00MERMAID_BLOCK_{i}\x00"
+
+
+def _build_mermaid_html(code: str) -> str:
+    """
+    Construye el bloque HTML que reemplaza al ```mermaid``` en el correo.
+
+    Estrategia:
+    1. Encodeamos el código Mermaid en base64 de un JSON {"code": "...",
+       "mermaid": {"theme": "default"}} que es el formato que acepta
+       mermaid.live en su fragmento #pako:.
+    2. Generamos un link directo al editor de mermaid.live con el diagrama
+       YA cargado (no necesita copy-paste del lead).
+    3. Mostramos el código fuente en un <details> colapsable para que el
+       lead pueda copiarlo si prefiere otra herramienta (Notion, Confluence,
+       un repo, etc.).
+    4. Todos los estilos son INLINE porque los clientes de correo (Gmail
+       especialmente) descartan el CSS del <head> y muchas veces también
+       el de las clases. Inline es la única forma de que se vea bien en
+       Gmail, Outlook, Apple Mail y compañía.
+    """
+    # mermaid.live usa pako (zlib) + base64url del JSON. Hacemos una versión
+    # simplificada: base64-url-safe del JSON, sin compresión. La página
+    # acepta ambos formatos en su estado "loadFromJSON".
+    payload = json.dumps(
+        {"code": code, "mermaid": {"theme": "default"}},
+        ensure_ascii=False,
+    )
+    encoded = base64.urlsafe_b64encode(payload.encode("utf-8")).decode("ascii").rstrip("=")
+    mermaid_url = f"https://mermaid.live/edit#pako:{encoded}"
+
+    # Escapeamos el código del diagrama para que sea seguro de meter en
+    # un <pre> dentro de HTML (sólo escapamos los 3 caracteres que rompen HTML).
+    safe_code = (
+        code.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+    return (
+        '<div style="margin: 24px 0; padding: 20px; '
+        'border: 1px solid #5A6B7A; border-radius: 8px; '
+        'background-color: #1A2332; text-align: center;">'
+        '<p style="margin: 0 0 12px 0; color: #E8EDF2; '
+        'font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', '
+        'Roboto, sans-serif; font-size: 16px; font-weight: 600;">'
+        '📊 Diagrama de arquitectura'
+        '</p>'
+        '<a href="' + mermaid_url + '" '
+        'style="display: inline-block; padding: 10px 24px; '
+        'background-color: #4A90D9; color: #FFFFFF; '
+        'text-decoration: none; border-radius: 6px; '
+        'font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', '
+        'Roboto, sans-serif; font-size: 14px; font-weight: 600;">'
+        'Ver diagrama interactivo →'
+        '</a>'
+        '<details style="margin-top: 16px; text-align: left;">'
+        '<summary style="cursor: pointer; color: #A8B5C2; '
+        'font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', '
+        'Roboto, sans-serif; font-size: 13px;">'
+        'Ver código del diagrama'
+        '</summary>'
+        '<pre style="margin-top: 8px; padding: 12px; '
+        'background-color: #0F1620; color: #E8EDF2; '
+        'border-radius: 4px; overflow-x: auto; '
+        'font-family: \'SF Mono\', Monaco, Consolas, monospace; '
+        'font-size: 12px; line-height: 1.4;">'
+        + safe_code +
+        '</pre>'
+        '</details>'
+        '</div>'
+    )
+
+
+def _replace_mermaid_in_markdown(md: str) -> tuple[str, list[str]]:
+    """
+    Extrae los bloques ```mermaid``` del Markdown, los reemplaza por
+    placeholders opacos (que NO se ven afectados por el render de
+    python-markdown) y devuelve el Markdown modificado + la lista de
+    códigos extraídos en orden.
+
+    El placeholder usa caracteres de control (\x00) que no pueden aparecer
+    en Markdown válido, garantizando que la sustitución posterior sea
+    inequívoca.
+    """
+    blocks: list[str] = []
+    counter = [0]  # lista para closure mutable desde el callback de sub
+
+    def _swap(match: re.Match) -> str:
+        code = match.group(1)
+        blocks.append(code)
+        placeholder = _MERMAID_PLACEHOLDER.format(i=counter[0])
+        counter[0] += 1
+        return placeholder
+
+    modified = _MERMAID_BLOCK_RE.sub(_swap, md)
+    return modified, blocks
+
+
+def _substitute_mermaid_in_html(html: str, blocks: list[str]) -> str:
+    """
+    Recorre el HTML renderizado y reemplaza cada placeholder por el bloque
+    HTML generado con el link a mermaid.live y el <details> con el código.
+    """
+    result = html
+    for i, code in enumerate(blocks):
+        placeholder = _MERMAID_PLACEHOLDER.format(i=i)
+        result = result.replace(placeholder, _build_mermaid_html(code))
+    return result
+
 
 _MD_RENDERER = _markdown_lib.Markdown(
     extensions=[
@@ -275,12 +401,217 @@ _MD_RENDERER = _markdown_lib.Markdown(
 
 
 def markdown_to_html(md: str) -> str:
-    """Convierte Markdown a HTML usando python-markdown."""
+    """
+    Convierte Markdown a HTML usando python-markdown.
+
+    Pipeline de 2 pasadas para los bloques ```mermaid```:
+    1. Extraemos los bloques Mermaid del Markdown y los sustituimos por
+       placeholders opacos (caracteres de control que python-markdown
+       no toca).
+    2. Después del render, sustituimos los placeholders en el HTML
+       resultante por el bloque HTML del CTA a mermaid.live.
+    """
     if not md:
         return ""
+
+    # Pasada 1: extraer bloques Mermaid.
+    preprocessed, mermaid_blocks = _replace_mermaid_in_markdown(md)
+
     # El renderer mantiene estado interno entre llamadas (reset es obligatorio).
     _MD_RENDERER.reset()
-    return _MD_RENDERER.convert(md)
+    rendered = _MD_RENDERER.convert(preprocessed)
+
+    # Pasada 2: insertar los bloques Mermaid como HTML literal.
+    return _substitute_mermaid_in_html(rendered, mermaid_blocks)
+
+
+# ---------------------------------------------------------------------------
+# Persistencia de leads en Google Sheets
+# ---------------------------------------------------------------------------
+# Cada vez que el endpoint procesa un lead válido, escribe una fila nueva en
+# una Google Sheet de la dueña del portafolio. Esto le da una "base de datos"
+# ligera sin meter un Postgres real para un volumen de decenas de leads/mes.
+#
+# Diseño:
+# - Credenciales via env var GOOGLE_CREDENTIALS_JSON (el JSON completo de la
+#   service account que Briggitte descargó de Google Cloud).
+# - Spreadsheet ID via env var LEAD_SHEET_ID (la URL de la sheet tiene el
+#   ID entre /d/ y /edit).
+# - Nombre de la pestaña (sheet dentro del spreadsheet) configurable via
+#   LEAD_SHEET_TAB (default "Leads" — la primera pestaña recién creada).
+# - Si CUALQUIER parte de la integración falla, NO rompe el envío del email.
+#   Logueamos el error y seguimos: la prioridad es que el lead reciba su
+#   plano técnico. La sheet es nice-to-have, no crítica.
+#
+# Layout de columnas (en este orden exacto, headers en la fila 1):
+#   A: fecha_hora          ISO 8601 en UTC
+#   B: nombre              del form
+#   C: empresa             del form
+#   D: email               del form
+#   E: proceso_manual      del form
+#   F: herramientas        del form
+#   G: volumen_mensual     del form
+#   H: resumen_ia          ≤500 chars, primera línea útil de Gemini
+#
+# Esto coincide 1-a-1 con los campos que produce el formulario HTML
+# (mapeados via WIRE_TO_CANONICAL al cruzar la frontera del backend).
+
+LEAD_SHEET_ID = os.environ.get("LEAD_SHEET_ID", "")
+LEAD_SHEET_TAB = os.environ.get("LEAD_SHEET_TAB", "Leads")
+
+# Cabeceras que escribimos en la fila 1 la primera vez. Idempotente: si la
+# fila 1 ya tiene headers, no los pisa (leemos primero y solo escribimos si
+# la primera celda está vacía).
+_LEAD_HEADERS = [
+    "fecha_hora",
+    "nombre",
+    "empresa",
+    "email",
+    "proceso_manual",
+    "herramientas",
+    "volumen_mensual",
+    "resumen_ia",
+]
+
+
+def _build_lead_summary(markdown_body: str, max_chars: int = 500) -> str:
+    """
+    Extrae un resumen ejecutivo del reporte de Gemini, limitado a
+    `max_chars` caracteres. Estrategia:
+
+    1. Buscamos la primera sección "## 1. DIAGNÓSTICO FINANCIERO" y
+       extraemos su contenido hasta la próxima "## 2." o fin de string.
+    2. Tomamos las primeras 3 líneas con contenido de esa sección
+       (son las más accionables: horas/mes, costo/mes, costo/año).
+    3. Si el bloque extraído excede max_chars, truncamos con "…".
+
+    Esto evita meter el reporte completo (sería kilométrico y saturaría
+    la sheet) y deja lo que el dueño necesita para entender de un vistazo
+    si el lead vale la pena.
+    """
+    if not markdown_body:
+        return ""
+
+    # 1) Localizar la sección 1.
+    start = markdown_body.find("## 1.")
+    if start < 0:
+        # Fallback: primeras 5 líneas no vacías del reporte entero.
+        lines = [ln.strip() for ln in markdown_body.splitlines() if ln.strip()]
+        snippet = " | ".join(lines[:5])
+    else:
+        # 2) Cortar hasta la próxima sección ## 2. (o fin de string).
+        end = markdown_body.find("## 2.", start)
+        section = markdown_body[start:end] if end > 0 else markdown_body[start:]
+        # 3) Tomar las primeras 3 líneas con contenido (saltando el header).
+        lines = [ln.strip() for ln in section.splitlines() if ln.strip() and not ln.strip().startswith("##")]
+        snippet = " | ".join(lines[:3])
+
+    # 4) Truncar a max_chars.
+    if len(snippet) > max_chars:
+        snippet = snippet[: max_chars - 1].rstrip() + "…"
+    return snippet
+
+
+def _get_sheets_service():
+    """
+    Construye y cachea el cliente de Google Sheets API usando las credenciales
+    de la service account almacenadas en GOOGLE_CREDENTIALS_JSON. Si la env
+    var no está, devuelve None (el caller decide qué hacer).
+    """
+    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON", "").strip()
+    if not creds_json:
+        return None
+
+    # Import lazy para no pagar el costo de las libs de Google en cold-starts
+    # donde la integración de Sheets no se usa (ej: si alguien la desactiva).
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build as _gbuild
+
+    # Scopes: solo lectura/escritura de Sheets (no Drive, no Gmail, etc.)
+    SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+
+    # Cargamos el JSON de la env var como dict.
+    creds_info = json.loads(creds_json)
+    creds = service_account.Credentials.from_service_account_info(
+        creds_info, scopes=SCOPES,
+    )
+    return _gbuild("sheets", "v4", credentials=creds, cache_discovery=False)
+
+
+def write_lead_to_sheet(payload: dict, summary: str) -> None:
+    """
+    Escribe una fila nueva en la Google Sheet de leads. NO lanza excepciones:
+    si algo falla (credenciales mal, sheet sin compartir, timeout, quota),
+    logueamos el error y retornamos. La prioridad es que el lead reciba su
+    email; la sheet es un registro secundario.
+
+    Llamada DESPUÉS de Gemini (necesitamos el summary) y ANTES de Resend
+    (queremos que el lead quede registrado ANTES de mandarle el correo,
+    así si Resend falla ya tenemos el lead capturado).
+    """
+    if not LEAD_SHEET_ID:
+        print("[sheets] LEAD_SHEET_ID no configurado; skip.")
+        return
+
+    try:
+        service = _get_sheets_service()
+        if service is None:
+            print("[sheets] GOOGLE_CREDENTIALS_JSON no configurado; skip.")
+            return
+
+        # Timestamp ISO 8601 en UTC. Formato portable y ordenable.
+        from datetime import datetime, timezone
+        timestamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+        # Construir la fila en el orden de _LEAD_HEADERS.
+        row = [
+            timestamp,
+            payload.get("nombre", "").strip(),
+            payload.get("empresa", "").strip(),
+            payload.get("email", "").strip(),
+            payload.get("proceso_manual", "").strip(),
+            payload.get("herramientas", "").strip(),
+            payload.get("volumen_mensual", "").strip(),
+            summary,
+        ]
+
+        # 1) Asegurar que la fila 1 tiene headers (idempotente: solo escribe
+        #    si la primera celda está vacía).
+        try:
+            existing = (
+                service.spreadsheets()
+                .values()
+                .get(spreadsheetId=LEAD_SHEET_ID, range=f"{LEAD_SHEET_TAB}!A1:H1")
+                .execute()
+            )
+            first_cell = (
+                existing.get("values", [[]])[0][0]
+                if existing.get("values") and existing.get("values")[0]
+                else ""
+            )
+            if not first_cell:
+                service.spreadsheets().values().update(
+                    spreadsheetId=LEAD_SHEET_ID,
+                    range=f"{LEAD_SHEET_TAB}!A1:H1",
+                    valueInputOption="RAW",
+                    body={"values": [_LEAD_HEADERS]},
+                ).execute()
+        except Exception as header_exc:  # noqa: BLE001
+            # Si fallan los headers pero la sheet existe, seguimos: tal vez
+            # los headers ya estén escritos por otro medio (escritura manual).
+            print(f"[sheets] header check failed (continuamos): {header_exc!r}")
+
+        # 2) Append de la fila nueva al final de la sheet.
+        service.spreadsheets().values().append(
+            spreadsheetId=LEAD_SHEET_ID,
+            range=f"{LEAD_SHEET_TAB}!A1:H1",
+            valueInputOption="USER_ENTERED",
+            insertDataOption="INSERT_ROWS",
+            body={"values": [row]},
+        ).execute()
+    except Exception as exc:  # noqa: BLE001
+        # Cualquier falla de Sheets NO debe romper el flujo principal.
+        print(f"[sheets] error escribiendo lead: {exc!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -469,6 +800,17 @@ class handler(BaseHTTPRequestHandler):
 
             # 4) Render Markdown → HTML.
             html_body = markdown_to_html(markdown_body)
+
+            # 4.5) Persistir el lead en Google Sheets (no-bloqueante: si
+            #      Sheets falla, el lead igual recibe su email porque
+            #      write_lead_to_sheet captura y loguea todas las
+            #      excepciones internamente). La capturamos acá también
+            #      por defensa en profundidad.
+            lead_summary = _build_lead_summary(markdown_body, max_chars=500)
+            try:
+                write_lead_to_sheet(payload, lead_summary)
+            except Exception as exc:  # noqa: BLE001
+                print(f"[sheets] llamada externa a write_lead_to_sheet explotó: {exc!r}")
 
             # 5) Despacho vía Resend.
             try:
