@@ -65,19 +65,20 @@
 
   <!--
     ============================================================
-    FONDO DECORATIVO (marcas de agua)
+    FONDO DECORATIVO (marcas de agua globales)
     ------------------------------------------------------------
-    Un único <symbol id="decor-logo"> global. Las marcas se
-    insertan como <use> dentro de wrappers .section-decor
-    position:absolute en cada sección (excepto el hero, que
-    queda limpio con su propio background).
-
-    El color lo controla CSS vía currentColor.
+    Wrapper .bg-decor position:fixed cubre todo el viewport
+    con tres capas:
+      · .bg-decor__col--left  → 3 marcas (SVG <use>) a la izq
+      · .bg-decor__col--right → 3 marcas (SVG <use>) a la der
+      · .bg-decor__center     → 8 marcas distribuidas en grid 2×4
+    z-index: -1 → queda detrás del contenido.
+    Color controlado por currentColor desde themes.css.
     aria-hidden=true: puramente decorativo.
     ============================================================
   -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <symbol id="decor-logo" viewBox="0 0 1080 1350" fill="none" stroke="currentColor" stroke-width="14"
+    <symbol id="decor-logo" viewBox="0 0 1080 1350" fill="none" stroke="#5A6B68" stroke-width="14"
       stroke-linecap="round" stroke-linejoin="round">
       <line x1="225" y1="600" x2="445" y2="600" />
       <polyline points="445,600 485,640 555,640" />
@@ -91,6 +92,29 @@
       <circle cx="890" cy="600" r="20" />
     </symbol>
   </svg>
+
+  <div class="bg-decor" aria-hidden="true">
+    <div class="bg-decor__col bg-decor__col--left">
+      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+    </div>
+    <div class="bg-decor__col bg-decor__col--right">
+      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      <svg class="bg-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+    </div>
+    <div class="bg-decor__center">
+      <svg class="bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      <svg class="bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      <svg class="bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      <svg class="bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      <svg class="bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      <svg class="bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      <svg class="bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+      <svg class="bg-decor__mark--center" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
+    </div>
+  </div>
 
   <!-- ============================================================
        1 · HEADER / NAV
@@ -164,11 +188,6 @@
          3 · SERVICIOS
          ============================================================ -->
     <section id="servicios">
-      <div class="section-decor" aria-hidden="true">
-        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
-        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
-        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
-      </div>
       <div class="container">
         <h2 class="services-title">Soluciones de Alta Eficiencia</h2>
         <div class="services-grid">
@@ -208,11 +227,6 @@
          Los datos de auditoría (CO₂, LCP, peso) son reales.
          ============================================================ -->
     <section id="testimonios">
-      <div class="section-decor" aria-hidden="true">
-        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
-        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
-        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
-      </div>
       <div class="container">
         <h2 class="section-title">Testimonios</h2>
 
@@ -255,11 +269,6 @@
          5 · CIERRE
          ============================================================ -->
     <section id="contacto" class="closing">
-      <div class="section-decor" aria-hidden="true">
-        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
-        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
-        <svg class="section-decor__mark" viewBox="0 0 1080 1350" preserveAspectRatio="xMidYMid meet"><use href="#decor-logo" /></svg>
-      </div>
       <div class="container">
         <h2>¿Listo para optimizar tu operación? Hablemos durante 15 minutos en LinkedIn o agenda directamente en mi
           calendario.</h2>

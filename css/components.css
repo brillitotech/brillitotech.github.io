@@ -46,25 +46,22 @@
 /* ============================================================
    HERO · tipografía y elementos específicos
    ------------------------------------------------------------
-   El hero tiene su propio background (assets/hero-bg.webp).
-   El texto se fuerza a color claro con text-shadow sutil
-   para garantizar legibilidad en AMBOS temas (claro y oscuro).
+   El hero es plano (sin imagen de fondo) — el texto usa
+   los tokens de tema, así que se lee correctamente en modo
+   oscuro y claro sin necesidad de forzarlo a un color
+   específico ni de aplicar text-shadow.
    ============================================================ */
 .hero h1 {
-  color: #F9F9F9;
   font-size: clamp(1.6rem, 4.5vw, 2.4rem);
   line-height: 1.2;
   margin-bottom: 1.25rem;
   font-weight: 700;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
 }
 
 .hero h2 {
-  color: rgba(249, 249, 249, 0.92);
   font-size: clamp(0.98rem, 2.2vw, 1.1rem);
   font-weight: 400;
   margin-bottom: 2rem;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
 }
 
 .hero-cta {

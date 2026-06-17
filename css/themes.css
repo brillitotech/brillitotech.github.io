@@ -70,24 +70,15 @@ html:has(#theme-input:checked) .testimonial-card__logo img {
                              aspecto "enfermo". Negro/verde abismo
                              es lo que muestra la imagen de referencia.
    ============================================================ */
-.section-decor__mark {
+.bg-decor__mark,
+.bg-decor__mark--center {
   color: var(--color-text-muted);
 }
 
-html:has(#theme-input:checked) .section-decor__mark {
+html:has(#theme-input:checked) .bg-decor__mark,
+html:has(#theme-input:checked) .bg-decor__mark--center {
   color: var(--color-text);
 }
-
-/* ============================================================
-   FONDO DECORATIVO · opacidad en modo claro
-   En modo claro el #0D1B1E se diluye sobre el fondo #CCDFEC.
-   Subimos la opacidad de las 3 marcas locales para que se
-   "resalten" sin gritar. Cada una con su valor (mismo
-   factor de proporción que en oscuro).
-   ============================================================ */
-html:has(#theme-input:checked) .section-decor__mark:nth-child(1) { opacity: 0.20; }
-html:has(#theme-input:checked) .section-decor__mark:nth-child(2) { opacity: 0.14; }
-html:has(#theme-input:checked) .section-decor__mark:nth-child(3) { opacity: 0.26; }
 
 /* Iconos del toggle · alterna Sol/Luna según el estado */
 html:has(#theme-input:checked) .theme-toggle__sun  { display: none; }

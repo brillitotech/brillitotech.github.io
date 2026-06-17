@@ -15,23 +15,31 @@
   padding: 0;
 }
 
-/* ---------- html / scroll suave ---------- */
+/* ---------- html / scroll suave + fondo del tema activo ----------
+   El fondo va en <html> (no en <body>) para que las marcas
+   globales fijas al viewport (z-index: 0 en el .bg-decor) se
+   vean ENCIMA del fondo pero DETRÁS del contenido textual de
+   cada sección. Si el fondo estuviera en <body>, ningún hijo
+   con z-index positivo podría verse por debajo del body, y
+   las marcas quedarían tapadas. */
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  background: var(--color-bg);
+  transition: background-color 0.2s linear;
 }
 
-/* ---------- Body · tipografía y fondo del tema activo ---------- */
+/* ---------- Body · tipografía y color del tema activo ---------- */
 body {
   font-family: var(--font-sans);
-  background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.6;
   font-size: 16px;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-  /* Transición de tema al alternar Sol/Luna */
-  transition: background-color 0.2s linear, color 0.2s linear;
+  /* Sin background: hereda el de <html> y deja pasar las marcas
+     globales a través de las secciones. */
+  transition: color 0.2s linear;
 }
 
 /* ---------- Defaults de elementos ---------- */

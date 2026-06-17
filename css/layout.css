@@ -21,88 +21,170 @@ section {
 }
 
 /* ============================================================
-   FONDO DECORATIVO · marcas locales por sección
+   FONDO DECORATIVO · columnas fijas de marcas de agua
    ------------------------------------------------------------
-   Sistema liviano: cada sección (excepto el hero) lleva un
-   wrapper .section-decor position:absolute con 3 marcas
-   distribuidas. El <symbol id="decor-logo"> es global (al
-   inicio del body) y se reutiliza con <use> por sección.
-
-   · position: absolute  → vive dentro de la sección, no fixed
-   · z-index: 0          → detrás del .container (que va z:1)
-   · pointer-events: none → no captura clicks
-   · El color del stroke se controla desde themes.css vía
-     currentColor sobre .section-decor__mark
-
-   El hero NO lleva marcas — tiene su propio background.
+   Wrapper .bg-decor position:fixed cubre todo el viewport con
+   tres capas:
+     · .bg-decor__col--left  → 3 marcas apiladas a la izquierda
+     · .bg-decor__col--right → 3 marcas apiladas a la derecha
+     · .bg-decor__center     → 8 marcas en grid 2×4 al centro
+   z-index: -1 → queda detrás del contenido.
+   pointer-events: none → no captura clicks.
+   Color por currentColor (themes.css lo controla).
    ============================================================ */
-.section-decor {
-  position: absolute;
+.bg-decor {
+  position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  align-items: center;
-  justify-items: center;
-  padding: 0 4%;
 }
 
-.section-decor__mark {
-  display: block;
-  width: 60%;
-  height: auto;
-  opacity: 0.10;
-}
-
-/* Variación de tamaño/offset por marca: que no se lea como
-   un patrón. Cada .section-decor tiene 3 marks idénticas
-   en estructura, pero las reglas :nth-child las distinguen. */
-.section-decor__mark:nth-child(1) {
-  width: 50%;
-  transform: translateX(-30%) translateY(-20%);
-}
-.section-decor__mark:nth-child(2) {
-  width: 65%;
-  transform: translateY(15%);
-  opacity: 0.07;
-}
-.section-decor__mark:nth-child(3) {
-  width: 45%;
-  transform: translateX(30%) translateY(-10%);
-  opacity: 0.13;
-}
-
-/* El .container de cada sección va ENCIMA del .section-decor
-   (z:1 vs z:0). Y la sección misma es relative para anclar
-   el wrapper absoluto. */
-section {
-  position: relative;
-}
-
-section > .container {
+/* Para que las marcas globales se vean a través de las secciones
+   (incluido el hero, que tiene background sólido), el contenido
+   textual y los CTAs van ENCIMA con z-index 1. El header/main/footer
+   heredan z-index auto (debajo de las marcas) pero su contenido
+   interno va con z-index 1.
+   sections sin fondo sólido dejan pasar las marcas naturalmente. */
+.hero .container,
+.site-header > .container,
+.services-grid,
+.testimonial-card,
+.closing > .container,
+.site-footer > .container {
   position: relative;
   z-index: 1;
 }
 
-/* Móvil: marcas más sutiles y un poco más chicas para no
-   competir con el contenido. */
-@media (max-width: 720px) {
-  .section-decor {
-    padding: 0 2%;
-  }
-  .section-decor__mark {
-    width: 40%;
-  }
+.bg-decor__col {
+  position: absolute;
+  top: 0;
+  width: 200px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6vh 0;
+}
 
-  /* En móvil servimos la versión mobile del hero (32 KB en
-     lugar de 109 KB). El navegador solo descarga la que
-     matchea con el media query. */
-  .hero {
-    background-image: url("../assets/hero-bg-mobile.webp");
-    background-position: center center;
-  }
+.bg-decor__col--left  { left: 0; }
+.bg-decor__col--right { right: 0; }
+
+.bg-decor__mark {
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0.55;
+}
+
+/* Variación de tamaño y posición: cada marca es distinta para
+   que no se lea como un patrón de pared. */
+.bg-decor__col--left .bg-decor__mark:nth-child(1) {
+  width: 60%;
+  transform: translateX(-10%) translateY(0);
+  opacity: 0.50;
+}
+.bg-decor__col--left .bg-decor__mark:nth-child(2) {
+  width: 110%;
+  transform: translateX(15%) translateY(-8vh);
+  opacity: 0.35;
+}
+.bg-decor__col--left .bg-decor__mark:nth-child(3) {
+  width: 75%;
+  transform: translateX(-20%) translateY(4vh);
+  opacity: 0.45;
+}
+
+.bg-decor__col--right .bg-decor__mark:nth-child(1) {
+  width: 80%;
+  transform: translateX(10%) translateY(2vh);
+  opacity: 0.55;
+}
+.bg-decor__col--right .bg-decor__mark:nth-child(2) {
+  width: 55%;
+  transform: translateX(-5%) translateY(-6vh);
+  opacity: 0.40;
+}
+.bg-decor__col--right .bg-decor__mark:nth-child(3) {
+  width: 100%;
+  transform: translateX(18%) translateY(6vh);
+  opacity: 0.50;
+}
+
+/* ============================================================
+   COLUMNA CENTRAL · 8 marcas distribuidas elegantemente
+   ------------------------------------------------------------
+   Va detrás del contenido principal (z-index: -1 del .bg-decor).
+   Las 8 marcas se distribuyen en un grid 2×4 con offsets y
+   tamaños variables — opacidad baja para no competir con
+   el texto que va encima.
+   ============================================================ */
+.bg-decor__center {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, 70vw);
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(4, 1fr);
+  align-items: center;
+  justify-items: center;
+  gap: 0;
+}
+
+.bg-decor__mark--center {
+  opacity: 0.30;
+  display: block;
+  width: 80%;
+  height: auto;
+}
+
+/* Variación por marca: tamaño y desplazamiento únicos.
+   La idea es que NO se lea como un patrón: cada una se
+   ubica en un cuadrante distinto del centro con su propio
+   offset horizontal y vertical. */
+.bg-decor__mark--center:nth-child(1) {
+  width: 70%;
+  transform: translateX(-15%) translateY(-10%);
+  opacity: 0.32;
+}
+.bg-decor__mark--center:nth-child(2) {
+  width: 55%;
+  transform: translateX(20%) translateY(15%);
+  opacity: 0.28;
+}
+.bg-decor__mark--center:nth-child(3) {
+  width: 80%;
+  transform: translateX(10%) translateY(-8%);
+  opacity: 0.26;
+}
+.bg-decor__mark--center:nth-child(4) {
+  width: 50%;
+  transform: translateX(-25%) translateY(12%);
+  opacity: 0.30;
+}
+.bg-decor__mark--center:nth-child(5) {
+  width: 90%;
+  transform: translateX(25%) translateY(-15%);
+  opacity: 0.26;
+}
+.bg-decor__mark--center:nth-child(6) {
+  width: 60%;
+  transform: translateX(-10%) translateY(8%);
+  opacity: 0.30;
+}
+.bg-decor__mark--center:nth-child(7) {
+  width: 75%;
+  transform: translateX(15%) translateY(-12%);
+  opacity: 0.24;
+}
+.bg-decor__mark--center:nth-child(8) {
+  width: 65%;
+  transform: translateX(-20%) translateY(10%);
+  opacity: 0.28;
 }
 
 /* ---------- Header / Nav ---------- */
@@ -152,38 +234,8 @@ section > .container {
 .hero {
   padding: 4rem 0 5rem;
   position: relative;
-  overflow: hidden;
-  background-color: var(--color-bg);
-  /* Default: versión desktop (109 KB) — se ve bien en cualquier
-     viewport. En móvil se reemplaza por la versión mobile (32 KB)
-     vía media query más abajo. */
-  background-image: url("../assets/hero-bg-desktop.webp");
-  background-size: cover;
-  background-position: right center;
-  background-repeat: no-repeat;
-}
-
-/* Overlay oscuro para garantizar legibilidad del texto en
-   cualquier tema. ::before con position absolute cubre toda
-   la sección con un tinte oscuro semitransparente. */
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to right,
-    rgba(13, 27, 30, 0.78) 0%,
-    rgba(13, 27, 30, 0.55) 50%,
-    rgba(13, 27, 30, 0.30) 100%
-  );
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* El contenido del hero va ENCIMA del overlay. */
-.hero .container {
-  position: relative;
-  z-index: 1;
+  /* Sin background-color: el del body se ve a través, dejando
+     pasar las marcas globales. */
 }
 
 .hero-grid {
