@@ -176,10 +176,10 @@
 .hero-illustration {
   display: block;
   width: 100%;
-  max-width: 420px;
+  max-width: 588px; /* era 420px — +40% para balancear con el H1 */
   height: auto;
   margin: 0 auto;
-  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.45));
 }
 
 .hero-photo {
