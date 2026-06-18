@@ -165,29 +165,35 @@
   margin-bottom: 0;
 }
 
-/* ============================================================
-   HERO · ILUSTRACIÓN SVG ABSTRACTA
-   ------------------------------------------------------------
-   "Transformación de stack": bloques pesados a la izquierda
-   descomponiéndose en livianos a la derecha, con el isotipo
-   BT en el centro como agente. Sin logos de terceros, sin
-   números inventados. Comunica el diferencial visualmente.
-   ============================================================ */
+/* Hero · ilustración flotante (patrón decorativo) */
+.hero-illustration-float {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: clamp(420px, 55vw, 900px);
+  height: clamp(420px, 70vw, 900px);
+  max-height: 900px;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 1;
+  display: block;
+  overflow: hidden;
+}
+
 .hero-illustration {
   display: block;
   width: 100%;
-  max-width: 588px; /* era 420px — +40% para balancear con el H1 */
-  height: auto;
-  margin: 0 auto;
-  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.45));
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: drop-shadow(0 16px 40px rgba(13, 27, 30, 0.25));
 }
 
-.hero-photo {
+/* Texto del hero siempre por encima de la imagen */
+.hero-text {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+  z-index: 1;
 }
 
 .hero-availability {
@@ -204,6 +210,10 @@
   background: var(--color-surface);
   border: 1px solid var(--color-text-muted);
   border-radius: 999px;
+  position: absolute;
+  bottom: 2rem;
+  right: clamp(1rem, 4vw, 4rem);
+  z-index: 2; /* por encima de la ilustración flotante (z-index 0) */
 }
 
 .hero-availability__dot {
@@ -218,37 +228,6 @@
 @keyframes pulse-availability {
   0%, 100% { box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.25); }
   50%      { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
-}
-
-/* ============================================================
-   TOGGLE DE TEMA (Sol/Luna)
-   Truco puro CSS: <input> oculto + <label> visible.
-   La etiqueta cambia el checkbox, y html:has() en themes.css
-   detecta el estado para alternar la paleta.
-   ============================================================ */
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: transparent;
-  border: 1px solid var(--color-text-muted);
-  border-radius: var(--radius-sm);
-  padding: var(--space-xs) 0.7rem;
-  font-size: 0.85rem;
-  color: var(--color-text);
-  cursor: pointer;
-  font-family: inherit;
-  transition: border-color 0.15s ease, color 0.15s ease;
-}
-
-.theme-toggle:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-.theme-toggle__icon {
-  font-size: 0.95rem;
-  line-height: 1;
 }
 
 /* ============================================================

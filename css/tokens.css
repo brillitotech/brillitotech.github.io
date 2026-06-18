@@ -12,7 +12,6 @@
      Optimizado para OLED: ahorra batería y reduce CO₂. */
   --color-bg:           #0D1B1E;   /* Verde Abismo · fondo principal */
   --color-surface:      #103035;   /* Verde Tierra · tarjetas/bloques */
-  --color-surface-alt:  #FFFFFF;   /* reservado para modo claro */
   --color-text:         #F9F9F9;   /* Blanco Nube · texto principal */
   --color-text-muted:   #8E9794;   /* Gris Técnico · bordes, textos secundarios */
   --color-accent:       #2ECC71;   /* Verde Clorofila · CTAs, acentos (≤20%) */
