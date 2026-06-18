@@ -104,8 +104,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 4px var(--color-accent-tint); }
-  50%      { box-shadow: 0 0 0 8px transparent; }
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px var(--color-accent-tint);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px transparent;
+  }
 }
 
 .hero h1 {
@@ -213,7 +220,8 @@
   position: absolute;
   bottom: 2rem;
   right: clamp(1rem, 4vw, 4rem);
-  z-index: 2; /* por encima de la ilustración flotante (z-index 0) */
+  z-index: 2;
+  /* por encima de la ilustración flotante (z-index 0) */
 }
 
 .hero-availability__dot {
@@ -226,8 +234,15 @@
 }
 
 @keyframes pulse-availability {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.25); }
-  50%      { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.25);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(46, 204, 113, 0);
+  }
 }
 
 /* ============================================================
@@ -602,8 +617,6 @@
   grid-template-columns: 1fr;
   gap: 2rem;
   align-items: center;
-  max-width: 880px;
-  margin: 0 auto;
 }
 
 .bio-photo {
@@ -615,21 +628,34 @@
 
 .bio-photo__img {
   display: block;
-  width: 70%;
-  max-width: 320px;
-  aspect-ratio: 1 / 1;
+  width: 280px;
+  height: 280px;
+  max-width: 100%;
   object-fit: cover;
   border-radius: 12px;
   border: 2px solid var(--color-accent-tint);
   box-shadow:
     0 12px 32px rgba(0, 0, 0, 0.32),
     0 0 0 1px var(--color-shadow-soft);
+  /* Asomar arriba del contenedor: la cabeza se 'sale' del recuadro
+     para darle más presencia y dejar ver mejor las marcas de agua
+     decorativas como textura de fondo. */
+  transform: translateY(-8%);
 }
 
 @media (min-width: 720px) {
   .bio-photo__img {
-    width: 192px;
+    width: 320px;
+    height: 320px;
+    /* Desktop: 15% de asomar, equivalente a ~48px por encima */
+    transform: translateY(-15%);
   }
+}
+
+.bio-text {
+  /* Cap de lectura cómoda: 65ch evita líneas demasiado largas
+     ahora que .bio-grid ocupa el ancho completo del .container. */
+  max-width: 65ch;
 }
 
 .bio-eyebrow {
@@ -1000,19 +1026,22 @@ html:has(#diagnostico-toggle:checked) .modal {
 .modal__overlay {
   position: absolute;
   inset: 0;
-  z-index: 10;            /* encima del form (z=auto) y del header */
+  z-index: 10;
+  /* encima del form (z=auto) y del header */
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(10, 14, 23, 0.92);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
-  border-radius: 6px;     /* mismo radius que .modal__panel */
+  border-radius: 6px;
+  /* mismo radius que .modal__panel */
   animation: overlay-fade-in 180ms ease-out;
 }
 
 .modal__overlay[hidden] {
-  display: none;          /* por si el UA ignora el atributo hidden */
+  display: none;
+  /* por si el UA ignora el atributo hidden */
 }
 
 .modal__overlay-inner {
@@ -1022,7 +1051,8 @@ html:has(#diagnostico-toggle:checked) .modal {
   gap: 0.75rem;
   padding: 1.5rem;
   text-align: center;
-  color: #E1EBF5;         /* mismo color de texto que .modal__panel */
+  color: #E1EBF5;
+  /* mismo color de texto que .modal__panel */
 }
 
 .modal__overlay-logo {
@@ -1048,13 +1078,27 @@ html:has(#diagnostico-toggle:checked) .modal {
 }
 
 @keyframes overlay-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes overlay-logo-pulse {
-  0%, 100% { transform: scale(1);    opacity: 1;   }
-  50%      { transform: scale(1.06); opacity: 0.8; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.06);
+    opacity: 0.8;
+  }
 }
 
 /* En móvil el panel pasa a height: 100vh → el overlay
