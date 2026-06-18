@@ -52,3 +52,20 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* ---------- Checkboxes visually hidden ----------
+   Los <input type="checkbox"> se usan como toggles puros CSS
+   (modal de diagnóstico). Existen en el DOM y siguen siendo
+   accesibles (lectores de pantalla los anuncian), pero no se
+   renderizan visualmente ni ocupan espacio en el layout. */
+input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
