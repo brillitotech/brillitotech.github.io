@@ -11,24 +11,46 @@
    BOTONES
    ============================================================ */
 .btn {
-  display: inline-block;
-  padding: 0.85rem 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.95rem 1.6rem;
+  min-height: 44px;
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 0.95rem;
-  transition: opacity 0.15s ease;
+  letter-spacing: 0.005em;
+  transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
   border: 2px solid transparent;
   text-align: center;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .btn:hover {
-  opacity: 0.88;
+  opacity: 0.92;
+  transform: translateY(-1px);
 }
 
 .btn--primary {
   background: var(--color-accent);
   color: var(--color-bg);
+  box-shadow: 0 2px 12px var(--color-accent-glow);
+}
+
+.btn--primary:hover {
+  box-shadow: 0 6px 20px var(--color-accent-glow);
+}
+
+.btn__arrow {
+  display: inline-block;
+  transition: transform 0.15s ease;
+  font-weight: 700;
+}
+
+.btn:hover .btn__arrow {
+  transform: translateX(3px);
 }
 
 /* CTA secundario · borde técnico */
@@ -50,35 +72,152 @@
    los tokens de tema, así que se lee correctamente en modo
    oscuro y claro sin necesidad de forzarlo a un color
    específico ni de aplicar text-shadow.
+
+   Jerarquía tipográfica (de mayor a menor):
+     H1   52px desktop · weight 700 · letter-spacing -0.02em
+     H2   19px desktop · weight 400 · line-height 1.55
+     eyebrow  12px · mono · letter-spacing 0.18em · uppercase
+     props    14px · opacity 0.9
+     help     13px · opacity 0.78
    ============================================================ */
-.hero h1 {
-  font-size: clamp(1.6rem, 4.5vw, 2.4rem);
-  line-height: 1.2;
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
   margin-bottom: 1.25rem;
-  font-weight: 700;
+  font-weight: 500;
 }
 
-.hero h2 {
-  font-size: clamp(0.98rem, 2.2vw, 1.1rem);
+.hero-eyebrow__dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-accent-tint);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 4px var(--color-accent-tint); }
+  50%      { box-shadow: 0 0 0 8px transparent; }
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 5.5vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.hero-sub {
+  font-size: clamp(1.05rem, 2vw, 1.2rem);
   font-weight: 400;
-  margin-bottom: 2rem;
+  line-height: 1.55;
+  color: var(--color-text);
+  opacity: 0.85;
+  margin-bottom: 1.75rem;
+  max-width: 36rem;
+}
+
+.hero-props {
+  list-style: none;
+  margin: 0 0 2rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.hero-props li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.92rem;
+  color: var(--color-text);
+  opacity: 0.92;
+  line-height: 1.5;
+}
+
+.hero-props__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-top: 2px;
 }
 
 .hero-cta {
-  margin-bottom: 2rem;
+  margin-bottom: 0;
+}
+
+/* ============================================================
+   HERO · ILUSTRACIÓN SVG ABSTRACTA
+   ------------------------------------------------------------
+   "Transformación de stack": bloques pesados a la izquierda
+   descomponiéndose en livianos a la derecha, con el isotipo
+   BT en el centro como agente. Sin logos de terceros, sin
+   números inventados. Comunica el diferencial visualmente.
+   ============================================================ */
+.hero-illustration {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin: 0 auto;
+  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.35));
 }
 
 .hero-photo {
-  width: 100%;
-  max-width: 380px;
-  margin: 0 auto;
-  /* Sin fondo sólido: la silueta se mezcla con el fondo del tema */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
 
-.hero-photo img {
-  width: 100%;
-  height: auto;
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
+.hero-availability {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  opacity: 0.75;
+  padding: 0.45rem 0.85rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-text-muted);
+  border-radius: 999px;
+}
+
+.hero-availability__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2ECC71;
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.25);
+  animation: pulse-availability 2s ease-in-out infinite;
+}
+
+@keyframes pulse-availability {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.25); }
+  50%      { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
 }
 
 /* ============================================================
@@ -118,131 +257,211 @@
 .services-title {
   color: var(--color-text);
   font-size: clamp(1.4rem, 3.5vw, 1.9rem);
-  margin-bottom: 2rem;
+  margin-bottom: 0.75rem;
   text-align: center;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.services-sub {
+  color: var(--color-text);
+  opacity: 0.75;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  text-align: center;
+  max-width: 36rem;
+  margin: 0 auto 2.5rem;
 }
 
 .card {
   background: var(--color-surface);
-  padding: 2rem var(--space-lg);
+  padding: 2rem 1.75rem;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-text-muted);
-  /* Sombra técnica sutil: offset corto, blur bajo, color de la paleta */
   box-shadow: 0 2px 8px var(--color-shadow);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
 .card:hover {
   border-color: var(--color-accent);
-  box-shadow: 0 2px 12px var(--color-accent-glow);
+  box-shadow: 0 4px 16px var(--color-accent-glow);
+  transform: translateY(-2px);
 }
 
 .card h3 {
-  color: var(--color-accent);
-  font-size: 1.2rem;
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-/* Cuadrado CSS · icono geométrico, sin tipografía decorativa */
-.card-icon {
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  border: 2px solid var(--color-accent);
-  background: transparent;
-  flex-shrink: 0;
-  position: relative;
-}
-
-.card-icon--solid {
-  background: var(--color-accent);
-}
-
-.card-icon--dot::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  background: var(--color-accent);
-  transform: translate(-50%, -50%);
-}
-
-.card p {
   color: var(--color-text);
-  font-size: 0.95rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+/* Icono SVG · hereda color del contenedor, color verde clorofila */
+.card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Variantes de icono · todas comparten la base, cambian solo el
+   fondo tintado para que las 3 cards sean distinguibles al ojo. */
+.card-icon--bolt,
+.card-icon--leaf,
+.card-icon--scope {
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+}
+
+/* Texto de las cards · tres tipos diferenciados */
+.card__problem {
+  color: var(--color-text);
+  opacity: 0.8;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.card__solution {
+  color: var(--color-text);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-text-muted);
+  border-top-style: dashed;
+  border-top-width: 1px;
+  opacity: 0.95;
+}
+
+.card__arrow {
+  color: var(--color-accent);
+  font-weight: 700;
+  margin-right: 0.4rem;
+}
+
+.card__deliverable {
+  color: var(--color-text);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  background: var(--color-accent-tint);
+  border-left: 2px solid var(--color-accent);
+  border-radius: 4px;
+}
+
+.card__deliverable strong {
+  color: var(--color-accent);
+  font-weight: 700;
 }
 
 /* ============================================================
-   TESTIMONIOS · tarjeta única con cita + atribución
+   TESTIMONIOS · grid de tarjetas con cita + atribución + impacto
    ------------------------------------------------------------
    Jerarquía visual (de arriba a abajo):
-     1. Título de sección "Testimonios"
-     2. Tarjeta blanca con sombra
-        2a. Cita en negrita (headline)
-        2b. Texto descriptivo centrado
-        2c. Logo del testimoniante en cuadro con borde
-        2d. Nombre bold + cargo en gris claro
-        2e. Nota de auditoría discreta al pie
-   La tarjeta se adapta a la paleta activa: usa tokens.
+     1. Título de sección "Trabajos publicados"
+     2. Subtítulo
+     3. Grid 1→3 columnas
+        3a. Cita en negrita (headline)
+        3b. Texto descriptivo
+        3c. Logo del testimoniante
+        3d. Atribución
+        3e. Barra de auditoría de impacto (la prueba)
+   Placeholders honestos (testimonial-card--pending) para slots
+   sin testimonio aprobado todavía.
    ============================================================ */
 .section-title {
   color: var(--color-text);
   font-size: clamp(1.6rem, 4vw, 2.2rem);
   font-weight: 700;
+  letter-spacing: -0.01em;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 0.6rem;
+}
+
+.section-sub {
+  color: var(--color-text);
+  opacity: 0.7;
+  font-size: 0.95rem;
+  text-align: center;
+  margin: 0 0 2.5rem;
+}
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
 }
 
 .testimonial-card {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
-  padding: 2.5rem 1.75rem 2rem;
+  padding: 2.25rem 1.75rem 1.75rem;
   box-shadow: 0 4px 20px var(--color-shadow);
   text-align: center;
-  max-width: 720px;
-  margin: 0 auto;
+  border: 1px solid var(--color-text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-/* Cita principal · en negrita como en la imagen de referencia */
+/* Placeholders honestos (slots vacíos) */
+.testimonial-card--pending {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.testimonial-card--pending .testimonial-card__headline {
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
 .testimonial-card__headline {
   color: var(--color-text);
-  font-size: clamp(1rem, 2.4vw, 1.1rem);
+  font-size: 1.05rem;
   font-weight: 700;
   line-height: 1.5;
-  margin: 0 0 1rem;
+  margin: 0;
 }
 
-/* Texto descriptivo del proyecto · centrado, en color muted */
 .testimonial-card__body {
-  color: var(--color-text-muted);
-  font-size: 0.95rem;
+  color: var(--color-text);
+  opacity: 0.8;
+  font-size: 0.92rem;
   line-height: 1.6;
-  margin: 0 0 1.5rem;
-  max-width: 540px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0;
 }
 
-/* Logo del testimoniante · cuadro con borde y sombra,
-   como en la imagen de referencia. */
 .testimonial-card__logo {
-  width: 88px;
-  height: 88px;
-  margin: 0 auto 1.25rem;
-  background: var(--color-surface);
+  width: 72px;
+  height: 72px;
+  margin: 0.25rem auto 0;
+  background: var(--color-bg);
   border: 1px solid var(--color-text-muted);
   border-radius: var(--radius-md);
-  box-shadow: 0 2px 8px var(--color-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0.5rem;
+  align-self: center;
 }
 
 .testimonial-card__logo img {
@@ -251,50 +470,250 @@
   object-fit: contain;
 }
 
-/* Atribución · nombre bold + cargo en gris claro */
 .testimonial-card__cite {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
-  margin: 0 0 1.5rem;
+  margin: 0;
   font-style: normal;
 }
 
 .testimonial-card__cite strong {
   color: var(--color-text);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .testimonial-card__cite span {
   color: var(--color-text-muted);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
 }
 
-/* Nota de auditoría · al pie de la tarjeta, discreta */
-.testimonial-card__note {
-  color: var(--color-text-muted);
-  font-size: 0.78rem;
-  line-height: 1.5;
-  margin: 0;
-  padding-top: 1rem;
+/* ============================================================
+   BARRA DE IMPACTO · la auditoría convertida en trofeo
+   ------------------------------------------------------------
+   Bloque dentro del testimonial-card que muestra la auditoría
+   técnica del proyecto con barras de progreso. Es tu prueba
+   social más fuerte: código, números, hechos.
+   ============================================================ */
+.impact {
+  margin-top: 0.5rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--color-text-muted);
+  text-align: left;
 }
 
-.testimonial-card__note strong {
+.impact__title {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--color-accent);
+  margin: 0 0 0.85rem;
+  font-weight: 500;
 }
 
-.testimonial-card__note a {
+.impact__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.impact__list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "label value"
+    "bar   bar";
+  gap: 0.25rem 0.5rem;
+  align-items: center;
+}
+
+.impact__label {
+  grid-area: label;
+  font-size: 0.78rem;
+  color: var(--color-text);
+  opacity: 0.85;
+}
+
+.impact__value {
+  grid-area: value;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.impact__bar {
+  grid-area: bar;
+  height: 4px;
+  background: var(--color-bg);
+  border-radius: 2px;
+  overflow: hidden;
+  display: block;
+}
+
+.impact__fill {
+  display: block;
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.impact__bar--perfect .impact__fill {
+  background: linear-gradient(90deg, var(--color-accent), #1AFF77);
+}
+
+.impact__source {
+  margin: 0.85rem 0 0;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.impact__source a {
   color: var(--color-accent);
   text-decoration: underline;
 }
 
-/* Breakpoint desktop · más aire lateral */
+/* Breakpoint · 3 cards en fila */
+@media (min-width: 720px) {
+  .testimonial-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
 @media (min-width: 720px) {
   .testimonial-card {
-    padding: 3rem 2.5rem 2.25rem;
+    padding: 2.5rem 1.75rem 2rem;
   }
+}
+
+/* ============================================================
+   SOBRE BRIGGITTE (BIO)
+   ------------------------------------------------------------
+   Bloque de marca personal con avatar y comentario.
+   El avatar es un placeholder con gradiente hasta que llegue
+   la foto real.
+   ============================================================ */
+.bio {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-text-muted);
+  border-bottom: 1px solid var(--color-text-muted);
+}
+
+.bio-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.bio-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.bio-avatar {
+  width: 180px;
+  height: 220px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, var(--color-accent) 0%, #1A8B4E 100%);
+  border: 2px solid var(--color-accent-tint);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.32),
+    0 0 0 1px var(--color-shadow-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.bio-avatar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.14) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(0,0,0,0.18) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.bio-avatar__initial {
+  position: relative;
+  font-size: 4rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.bio-photo__caption {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.bio-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin: 0 0 0.75rem;
+  font-weight: 500;
+}
+
+.bio-title {
+  color: var(--color-text);
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 1rem;
+  line-height: 1.2;
+}
+
+.bio-lead {
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1.65;
+  margin: 0 0 1rem;
+  opacity: 0.92;
+}
+
+.bio-lead strong {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.bio-sign {
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.bio-sign span {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
 }
 
 /* ============================================================
@@ -302,15 +721,26 @@
    ============================================================ */
 .closing {
   text-align: center;
+  position: relative;
 }
 
-.closing h2 {
+.closing-title {
   color: var(--color-text);
-  font-size: clamp(1.2rem, 3vw, 1.5rem);
-  font-weight: 500;
-  max-width: 640px;
+  font-size: clamp(1.4rem, 3.5vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  max-width: 720px;
+  margin: 0 auto 0.75rem;
+  line-height: 1.25;
+}
+
+.closing-sub {
+  color: var(--color-text);
+  opacity: 0.75;
+  font-size: 1rem;
+  line-height: 1.5;
+  max-width: 36rem;
   margin: 0 auto 2rem;
-  line-height: 1.4;
 }
 
 .closing-actions {
@@ -318,6 +748,24 @@
   flex-wrap: wrap;
   gap: 1rem;
   justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.closing-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 1.75rem;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  opacity: 0.7;
+  margin: 0;
+}
+
+.closing-trust span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 /* ============================================================
@@ -577,6 +1025,76 @@ html:has(#diagnostico-toggle:checked) .modal {
   outline: 2px solid #00FF66;
   outline-offset: 3px;
 }
+
+/* ---------- Overlay de "Generando diagnóstico" ----------
+   Se monta encima del .modal__panel con position: absolute,
+   tapando el form con un fondo del mismo color del panel
+   (#0A0E17) + un blur sutil para legibilidad.
+   El atributo HTML `hidden` lo arranca oculto; el JS lo muestra
+   en el submit. Si JS está apagado, el form nativo funciona
+   exactamente como antes (mejora progresiva). */
+.modal__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;            /* encima del form (z=auto) y del header */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 14, 23, 0.92);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border-radius: 6px;     /* mismo radius que .modal__panel */
+  animation: overlay-fade-in 180ms ease-out;
+}
+
+.modal__overlay[hidden] {
+  display: none;          /* por si el UA ignora el atributo hidden */
+}
+
+.modal__overlay-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  color: #E1EBF5;         /* mismo color de texto que .modal__panel */
+}
+
+.modal__overlay-logo {
+  width: 96px;
+  height: 120px;
+  animation: overlay-logo-pulse 1.6s ease-in-out infinite;
+}
+
+.modal__overlay-eyebrow {
+  margin: 0;
+  font-family: Consolas, Monaco, "Courier New", monospace;
+  font-size: 0.75rem;
+  color: #00FF66;
+  letter-spacing: 0.05em;
+  text-transform: lowercase;
+}
+
+.modal__overlay-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #E1EBF5;
+  font-weight: 500;
+}
+
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes overlay-logo-pulse {
+  0%, 100% { transform: scale(1);    opacity: 1;   }
+  50%      { transform: scale(1.06); opacity: 0.8; }
+}
+
+/* En móvil el panel pasa a height: 100vh → el overlay
+   ya cubre todo por el inset:0, no necesita overrides. */
 
 /* Texto de apoyo debajo del CTA del hero — siempre visible,
    persuade a hacer clic antes de abrir el modal.

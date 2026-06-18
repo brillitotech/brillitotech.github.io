@@ -17,7 +17,7 @@
 
 /* ---------- Sections · espaciado vertical ---------- */
 section {
-  padding: 3.5rem 0;
+  padding: 4.5rem 0;
 }
 
 /* ============================================================
@@ -232,7 +232,7 @@ section {
 
 /* ---------- Hero · grid principal ---------- */
 .hero {
-  padding: 4rem 0 5rem;
+  padding: 5rem 0 6rem;
   position: relative;
   /* Sin background-color: el del body se ve a través, dejando
      pasar las marcas globales. */
@@ -241,7 +241,7 @@ section {
 .hero-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-xl);
+  gap: 3rem;
   align-items: center;
 }
 
@@ -252,27 +252,53 @@ section {
   gap: 1.5rem;
 }
 
+/* ---------- Sobre mí · grid foto + texto ---------- */
+.bio-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
 /* ---------- Breakpoint: tablet / desktop ---------- */
 @media (min-width: 720px) {
   section {
-    padding: 5rem 0;
+    padding: 6rem 0;
   }
 
   .hero {
-    padding: 5.5rem 0 6.5rem;
+    padding: 6rem 0 7rem;
   }
 
+  /* Hero · texto domina, avatar complementa. Ratio 1.15 : 0.85 */
   .hero-grid {
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 3.5rem;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 4rem;
   }
 
-  .hero-photo {
-    max-width: 420px;
+  /* Bio · foto a la izquierda (33%), texto a la derecha (67%) */
+  .bio-grid {
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 4rem;
   }
 
+  /* Servicios · responsive natural, 3 columnas cuando entren 3 */
   .services-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Breakpoint intermedio · tablet 720-1024: bio vuelve a 1 col,
+   servicios 2 cols (la 3ra card ocupa fila propia). */
+@media (min-width: 720px) and (max-width: 1024px) {
+  .bio-grid {
+    grid-template-columns: 1fr;
     gap: 2rem;
+    text-align: center;
+  }
+
+  .bio-photo {
+    align-items: center;
   }
 }
