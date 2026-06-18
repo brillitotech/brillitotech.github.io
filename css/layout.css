@@ -221,12 +221,36 @@ section {
 }
 
 .logo {
-  font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  color: var(--color-text);
+  transition: opacity 0.15s ease;
 }
 
-.logo span {
+.logo:hover {
+  opacity: 0.85;
+}
+
+.logo__mark {
+  display: block;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  /* El isotipo ya es verde clorofila — no necesita filter.
+     Funciona tal cual en modo oscuro (#0D1B1E) y claro (#CCDFEC)
+     porque el verde #2ECC71 tiene contraste alto contra ambos. */
+}
+
+.logo__text {
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.logo__dot {
   color: var(--color-accent);
 }
 
