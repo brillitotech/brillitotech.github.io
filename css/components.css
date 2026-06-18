@@ -613,47 +613,17 @@
   gap: 0.6rem;
 }
 
-.bio-avatar {
-  width: 180px;
-  height: 220px;
+.bio-photo__img {
+  display: block;
+  width: 192px;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
   border-radius: 12px;
-  background: linear-gradient(160deg, var(--color-accent) 0%, #1A8B4E 100%);
   border: 2px solid var(--color-accent-tint);
   box-shadow:
     0 12px 32px rgba(0, 0, 0, 0.32),
     0 0 0 1px var(--color-shadow-soft);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-bg);
-  position: relative;
-  overflow: hidden;
-}
-
-.bio-avatar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.14) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(0,0,0,0.18) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.bio-avatar__initial {
-  position: relative;
-  font-size: 4rem;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1;
-}
-
-.bio-photo__caption {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
 }
 
 .bio-eyebrow {
