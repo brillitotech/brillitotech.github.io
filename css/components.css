@@ -615,8 +615,8 @@
 
 .bio-photo__img {
   display: block;
-  width: 192px;
-  max-width: 100%;
+  width: 70%;
+  max-width: 320px;
   aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: 12px;
@@ -624,6 +624,12 @@
   box-shadow:
     0 12px 32px rgba(0, 0, 0, 0.32),
     0 0 0 1px var(--color-shadow-soft);
+}
+
+@media (min-width: 720px) {
+  .bio-photo__img {
+    width: 192px;
+  }
 }
 
 .bio-eyebrow {
