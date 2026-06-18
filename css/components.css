@@ -273,6 +273,15 @@
   margin: 0 auto 2.5rem;
 }
 
+/* CTA unificado de la sección servicios.
+   Wrapper centrado bajo la grilla; el .btn--primary adentro
+   hereda su display: inline-flex. Un solo botón evita que 3
+   CTAs compitan entre sí y le quita jerarquía al hero. */
+.services-cta {
+  text-align: center;
+  margin-top: 2.5rem;
+}
+
 .card {
   background: var(--color-surface);
   padding: 2rem 1.75rem;
