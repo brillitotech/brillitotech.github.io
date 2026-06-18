@@ -17,34 +17,17 @@
     base.css        Reset, body, defaults
     layout.css      Container, nav, hero-grid, services-grid, breakpoints
     components.css  Botones, cards, testimonio, métricas, logos
-    themes.css      Toggle Sol/Luna + reglas de modo claro
 
-    Orden de carga: importa. tokens primero (todo depende de él),
-    themes al final (sobreescribe lo que necesite).
+    Orden de carga: importa. tokens primero (todo depende de él).
     ============================================================
   -->
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/themes.css">
 </head>
 
 <body>
-
-  <!--
-    ============================================================
-    MODO ÚNICO: solo oscuro
-    ------------------------------------------------------------
-    Anteriormente había un toggle Sol/Luna en el header controlado
-    por #theme-input + temas duales en themes.css. Removido el
-    2026-06-18: el cliente pidió un look limpio, modo único oscuro.
-    themes.css queda vacío como link simbólico (no se borra para
-    no romper el <link>). Si en el futuro se quiere sumar modo
-    claro, restaurar #theme-input + poblar themes.css con los
-    selectores html:has(#theme-input:checked) { ... }.
-    ============================================================
-  -->
 
   <!--
     ============================================================
@@ -72,7 +55,6 @@
       · .bg-decor__col--right → 3 marcas (SVG <use>) a la der
       · .bg-decor__center     → 8 marcas distribuidas en grid 2×4
     z-index: -1 → queda detrás del contenido.
-    Color controlado por currentColor desde themes.css.
     aria-hidden=true: puramente decorativo.
     ============================================================
   -->
