@@ -1,0 +1,75 @@
+/* ============================================================
+   HEADER
+   ------------------------------------------------------------
+   Componentes del header y la navegación principal: la franja
+   superior con borde inferior, el contenedor flex de la nav,
+   los links de navegación y el logo (marca + texto + punto
+   de acento). No distribuye secciones — eso es layout.css.
+   ============================================================ */
+
+/* ---------- Header / Nav ---------- */
+.site-header {
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--color-text-muted);
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: center;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  opacity: 0.85;
+  transition: color 0.15s ease;
+}
+
+.nav-links a:hover {
+  color: var(--color-accent);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  color: var(--color-text);
+  transition: opacity 0.15s ease;
+}
+
+.logo:hover {
+  opacity: 0.85;
+}
+
+.logo__mark {
+  display: block;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  /* El isotipo ya es verde clorofila — no necesita filter.
+     Funciona tal cual en modo oscuro (#0D1B1E) y claro (#CCDFEC)
+     porque el verde #2ECC71 tiene contraste alto contra ambos. */
+}
+
+.logo__text {
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.logo__dot {
+  color: var(--color-accent);
+}

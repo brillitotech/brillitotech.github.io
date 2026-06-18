@@ -1,0 +1,182 @@
+/* ============================================================
+   DECOR
+   ------------------------------------------------------------
+   Marcas de agua de fondo fijas al viewport y reglas necesarias
+   para que el contenido textual y los CTAs floten por encima
+   de ellas. No es layout (no distribuye bloques) ni componente
+   (no tiene estado ni variante) — es decoración persistente.
+
+   Componentes:
+     · .bg-decor                     wrapper full-viewport
+     · .bg-decor__col--left/right    columnas de 3 marcas
+     · .bg-decor__mark               marca individual de columna
+     · .bg-decor__center             grid 2×4 central
+     · .bg-decor__mark--center       marca individual central
+   ============================================================ */
+
+/* ---------- Wrapper + capa de contenido sobre el decor ---------- */
+.bg-decor {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Para que las marcas globales se vean a través de las secciones
+   (incluido el hero, que tiene background sólido), el contenido
+   textual y los CTAs van ENCIMA con z-index 1. El header/main/footer
+   heredan z-index auto (debajo de las marcas) pero su contenido
+   interno va con z-index 1.
+   sections sin fondo sólido dejan pasar las marcas naturalmente. */
+.hero .container,
+.site-header > .container,
+.services-grid,
+.testimonial-card,
+.closing > .container,
+.site-footer > .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================
+   COLUMNAS LATERALES · 3 marcas apiladas a cada lado
+   ------------------------------------------------------------
+   Wrapper .bg-decor position:fixed cubre todo el viewport con
+   tres capas:
+     · .bg-decor__col--left  → 3 marcas apiladas a la izquierda
+     · .bg-decor__col--right → 3 marcas apiladas a la derecha
+   z-index: -1 → queda detrás del contenido.
+   pointer-events: none → no captura clicks.
+   Color por currentColor (themes.css lo controla).
+   ============================================================ */
+.bg-decor__col {
+  position: absolute;
+  top: 0;
+  width: 200px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6vh 0;
+}
+
+.bg-decor__col--left  { left: 0; }
+.bg-decor__col--right { right: 0; }
+
+.bg-decor__mark {
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0.55;
+}
+
+/* Variación de tamaño y posición: cada marca es distinta para
+   que no se lea como un patrón de pared. */
+.bg-decor__col--left .bg-decor__mark:nth-child(1) {
+  width: 60%;
+  transform: translateX(-10%) translateY(0);
+  opacity: 0.50;
+}
+.bg-decor__col--left .bg-decor__mark:nth-child(2) {
+  width: 110%;
+  transform: translateX(15%) translateY(-8vh);
+  opacity: 0.35;
+}
+.bg-decor__col--left .bg-decor__mark:nth-child(3) {
+  width: 75%;
+  transform: translateX(-20%) translateY(4vh);
+  opacity: 0.45;
+}
+
+.bg-decor__col--right .bg-decor__mark:nth-child(1) {
+  width: 80%;
+  transform: translateX(10%) translateY(2vh);
+  opacity: 0.55;
+}
+.bg-decor__col--right .bg-decor__mark:nth-child(2) {
+  width: 55%;
+  transform: translateX(-5%) translateY(-6vh);
+  opacity: 0.40;
+}
+.bg-decor__col--right .bg-decor__mark:nth-child(3) {
+  width: 100%;
+  transform: translateX(18%) translateY(6vh);
+  opacity: 0.50;
+}
+
+/* ============================================================
+   COLUMNA CENTRAL · 8 marcas distribuidas elegantemente
+   ------------------------------------------------------------
+   Va detrás del contenido principal (z-index: -1 del .bg-decor).
+   Las 8 marcas se distribuyen en un grid 2×4 con offsets y
+   tamaños variables — opacidad baja para no competir con
+   el texto que va encima.
+   ============================================================ */
+.bg-decor__center {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, 70vw);
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(4, 1fr);
+  align-items: center;
+  justify-items: center;
+  gap: 0;
+}
+
+.bg-decor__mark--center {
+  opacity: 0.30;
+  display: block;
+  width: 80%;
+  height: auto;
+}
+
+/* Variación por marca: tamaño y desplazamiento únicos.
+   La idea es que NO se lea como un patrón: cada una se
+   ubica en un cuadrante distinto del centro con su propio
+   offset horizontal y vertical. */
+.bg-decor__mark--center:nth-child(1) {
+  width: 70%;
+  transform: translateX(-15%) translateY(-10%);
+  opacity: 0.32;
+}
+.bg-decor__mark--center:nth-child(2) {
+  width: 55%;
+  transform: translateX(20%) translateY(15%);
+  opacity: 0.28;
+}
+.bg-decor__mark--center:nth-child(3) {
+  width: 80%;
+  transform: translateX(10%) translateY(-8%);
+  opacity: 0.26;
+}
+.bg-decor__mark--center:nth-child(4) {
+  width: 50%;
+  transform: translateX(-25%) translateY(12%);
+  opacity: 0.30;
+}
+.bg-decor__mark--center:nth-child(5) {
+  width: 90%;
+  transform: translateX(25%) translateY(-15%);
+  opacity: 0.26;
+}
+.bg-decor__mark--center:nth-child(6) {
+  width: 60%;
+  transform: translateX(-10%) translateY(8%);
+  opacity: 0.30;
+}
+.bg-decor__mark--center:nth-child(7) {
+  width: 75%;
+  transform: translateX(15%) translateY(-12%);
+  opacity: 0.24;
+}
+.bg-decor__mark--center:nth-child(8) {
+  width: 65%;
+  transform: translateX(-20%) translateY(10%);
+  opacity: 0.28;
+}
