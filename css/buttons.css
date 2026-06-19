@@ -1,0 +1,65 @@
+/* ============================================================
+   BOTONES
+   ------------------------------------------------------------
+   Componente reutilizable. Vive solo acá — si necesitás cambiar
+   cómo se ve un botón, este es el único archivo que abrís.
+
+   Variantes:
+     .btn            base compartida (flex, padding, radius)
+     .btn--primary   fondo verde accent + sombra glow
+     .btn--ghost     borde técnico, fondo transparente
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.95rem 1.6rem;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.005em;
+  transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  border: 2px solid transparent;
+  text-align: center;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.btn--primary {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  box-shadow: 0 2px 12px var(--color-accent-glow);
+}
+
+.btn--primary:hover {
+  box-shadow: 0 6px 20px var(--color-accent-glow);
+}
+
+.btn__arrow {
+  display: inline-block;
+  transition: transform 0.15s ease;
+  font-weight: 700;
+}
+
+.btn:hover .btn__arrow {
+  transform: translateX(3px);
+}
+
+/* CTA secundario · borde técnico */
+.btn--ghost {
+  background: transparent;
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+}
+
+.btn--ghost:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}

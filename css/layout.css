@@ -8,16 +8,19 @@
 
    Lo que NO vive acá:
      · marcas de agua y capa sobre el decor → decor.css
-     · header, nav y logo                          → header.css
-     · estilos de cada componente (botones, cards) → components.css
+     · header, nav y logo                   → header.css
+     · estilos de cada componente           → buttons.css,
+                                              sections.css,
+                                              bio.css,
+                                              modal.css
    ============================================================ */
 
 /* ---------- Container global ---------- */
 .container {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 var(--space-md);
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
 }
 
 /* ---------- Sections · espaciado vertical ---------- */
@@ -27,7 +30,7 @@ section {
 
 /* ---------- Hero · grid principal ---------- */
 .hero {
-  padding: 5rem 0 6rem;
+  padding: 2.5rem 0 5rem;
   position: relative;
   /* Sin background-color: el del body se ve a través, dejando
      pasar las marcas globales. */
@@ -62,7 +65,7 @@ section {
   }
 
   .hero {
-    padding: 6rem 0 7rem;
+    padding: 3rem 0 6rem;
   }
 
   .hero-grid {

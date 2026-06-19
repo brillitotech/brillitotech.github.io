@@ -1,0 +1,105 @@
+/* ============================================================
+   BIO · sobre mí
+   ------------------------------------------------------------
+   Bloque de marca personal con foto y comentario.
+   El .bio-grid (estructura de columnas) vive en layout.css
+   porque es layout, no estilo de componente.
+
+   Detalles visuales pendientes (próxima sesión):
+     · Rombo decorativo detrás de la foto
+     · Micro-CTA ".bio-link · Ver cómo trabajo"
+     · Separadores ::before/::after con gradiente verde
+     · Ajuste de tamaño de foto y tipografía
+   ============================================================ */
+.bio {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-text-muted);
+  border-bottom: 1px solid var(--color-text-muted);
+}
+
+.bio-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.bio-photo__img {
+  display: block;
+  width: 280px;
+  height: 280px;
+  max-width: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid var(--color-accent-tint);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.32),
+    0 0 0 1px var(--color-shadow-soft);
+  /* Asomar arriba del contenedor: la cabeza se 'sale' del recuadro
+     para darle más presencia y dejar ver mejor las marcas de agua
+     decorativas como textura de fondo. */
+  transform: translateY(-8%);
+}
+
+@media (min-width: 720px) {
+  .bio-photo__img {
+    width: 320px;
+    height: 320px;
+    /* Desktop: 15% de asomar, equivalente a ~48px por encima */
+    transform: translateY(-15%);
+  }
+}
+
+.bio-text {
+  /* Cap de lectura cómoda: 65ch evita líneas demasiado largas
+     ahora que .bio-grid ocupa el ancho completo del .container. */
+  max-width: 65ch;
+}
+
+.bio-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin: 0 0 0.75rem;
+  font-weight: 500;
+}
+
+.bio-title {
+  color: var(--color-text);
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 1rem;
+  line-height: 1.2;
+}
+
+.bio-lead {
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1.65;
+  margin: 0 0 1rem;
+  opacity: 0.92;
+}
+
+.bio-lead strong {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.bio-sign {
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.bio-sign span {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
