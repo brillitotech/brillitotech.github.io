@@ -56,12 +56,8 @@
   object-fit: cover;
   border-radius: 12px;
   border: none;
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.42),
-    0 0 0 1px var(--color-shadow-soft);
-  /* Asomar arriba del contenedor: la cabeza se 'sale' del recuadro
-     para darle más presencia y dejar ver mejor las marcas de agua
-     decorativas como textura de fondo. */
+  /* Sin box-shadow: la referencia no tiene sombra rectangular.
+     Solo el rombo verde detrás marca la profundidad. */
   transform: translateY(-12%);
   position: relative;
   z-index: 1;
@@ -86,6 +82,34 @@
   /* Cap de lectura cómoda: 65ch evita líneas demasiado largas
      ahora que .bio-grid ocupa el ancho completo del .container. */
   max-width: 65ch;
+  position: relative;
+}
+
+/* Líneas verdes largas con difuminado hacia los lados.
+   ::before encima del título, ::after debajo del micro-CTA.
+   Son puramente decorativas: aria-hidden en el HTML (span auxiliar). */
+.bio-text::before,
+.bio-text::after {
+  content: "";
+  display: block;
+  height: 1px;
+  width: 100%;
+  max-width: 65ch;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--color-accent) 50%,
+    transparent 100%
+  );
+  opacity: 0.5;
+}
+
+.bio-text::before {
+  margin: 0 0 2rem;
+}
+
+.bio-text::after {
+  margin: 1.75rem 0 0;
 }
 
 .bio-eyebrow {
