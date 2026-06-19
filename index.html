@@ -339,34 +339,100 @@
       </div>
     </section>
 
-    <!-- 5 · TESTIMONIOS -->
+    <!-- 5 · CÓMO TRABAJO + RESULTADOS
+         ------------------------------------------------------------
+         Reemplazo del antiguo bloque de testimonios. Misma id
+         (#testimonios) para no romper anchors del nav y del menú.
+         Dos sub-secciones dentro de una sección unificada:
+           1. Cómo trabajo    → flujo SVG de 3 pasos
+           2. Resultados      → caso real auditado (Gaia/Delphy/Pacha)
+         Sin testimonios fabricados. Sin métricas inventadas. Sin JS. -->
     <section id="testimonios">
       <div class="container">
-        <h2 class="section-title">Trabajos publicados</h2>
-        <p class="section-sub">Cada proyecto viene con auditoría de impacto publicada.</p>
+        <h2 class="section-title">Cómo trabajo + Resultados</h2>
+        <p class="section-sub">Sistemas pequeños, decisiones técnicas, resultados medibles.</p>
 
-        <div class="testimonial-grid">
+        <!-- ============================================================
+             5.1 · CÓMO TRABAJO
+             ------------------------------------------------------------
+             Diagrama SVG inline: 3 nodos + 2 flechas. Sin dependencias.
+             aria-label describe el flujo completo para lectores de pantalla.
+             ============================================================ -->
+        <div class="subsection">
+          <h3 class="subsection-title">Cómo trabajo</h3>
+          <p class="subsection-sub">De tu problema a tu sistema funcionando en tres pasos.</p>
 
-          <article class="testimonial-card">
-            <p class="testimonial-card__headline">
-              [Cita pendiente de aprobación de Delphy Barcelona.]
+          <svg class="flow-diagram" viewBox="0 0 800 180" xmlns="http://www.w3.org/2000/svg"
+            role="img" aria-label="Flujo de trabajo: 1 Diagnóstico, 2 Prototipo, 3 Entrega">
+            <defs>
+              <marker id="flow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6"
+                orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+              </marker>
+            </defs>
+
+            <!-- Nodo 1 · Diagnóstico -->
+            <g class="flow-node">
+              <rect x="20" y="20" width="220" height="100" rx="8" fill="none" stroke="currentColor" stroke-width="2" />
+              <text x="130" y="55" text-anchor="middle" class="flow-num">1</text>
+              <text x="130" y="80" text-anchor="middle" class="flow-title">DIAGNÓSTICO</text>
+              <text x="130" y="105" text-anchor="middle" class="flow-desc">30 min · sin costo</text>
+            </g>
+
+            <!-- Flecha 1 -->
+            <line x1="245" y1="70" x2="285" y2="70" stroke="currentColor" stroke-width="2"
+              marker-end="url(#flow-arrow)" />
+
+            <!-- Nodo 2 · Prototipo -->
+            <g class="flow-node">
+              <rect x="290" y="20" width="220" height="100" rx="8" fill="none" stroke="currentColor" stroke-width="2" />
+              <text x="400" y="55" text-anchor="middle" class="flow-num">2</text>
+              <text x="400" y="80" text-anchor="middle" class="flow-title">PROTOTIPO</text>
+              <text x="400" y="105" text-anchor="middle" class="flow-desc">1–2 semanas</text>
+            </g>
+
+            <!-- Flecha 2 -->
+            <line x1="515" y1="70" x2="555" y2="70" stroke="currentColor" stroke-width="2"
+              marker-end="url(#flow-arrow)" />
+
+            <!-- Nodo 3 · Entrega -->
+            <g class="flow-node">
+              <rect x="560" y="20" width="220" height="100" rx="8" fill="none" stroke="currentColor" stroke-width="2" />
+              <text x="670" y="55" text-anchor="middle" class="flow-num">3</text>
+              <text x="670" y="80" text-anchor="middle" class="flow-title">ENTREGA</text>
+              <text x="670" y="105" text-anchor="middle" class="flow-desc">1 sesión handover</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- ============================================================
+             5.2 · RESULTADOS · caso real auditado
+             ------------------------------------------------------------
+             Reutiliza la barra .impact (clases existentes). Cita textual
+             de Delphy sigue pendiente de aprobación: usamos solo métricas.
+             ============================================================ -->
+        <div class="subsection">
+          <h3 class="subsection-title">Resultados concretos</h3>
+          <p class="subsection-sub">Un sitio auditado de punta a punta. Métricas reales, sin marketing.</p>
+
+          <article class="resultado-card">
+            <p class="resultado-card__headline">Sitio institucional para Gaia Consultores</p>
+            <p class="resultado-card__body">
+              Empresa B Certificada. Sin frameworks, sin JavaScript en el cliente.
+              Alojado en hosting verde <strong>greenheeks</strong>, en colaboración con
+              <strong>Pacha EcoHub</strong>.
             </p>
-            <p class="testimonial-card__body">
-              Sitio institucional construido desde cero para Gaia Consultores,
-              empresa B Certificada. Stack: HTML + CSS, sin frameworks,
-              alojado en hosting verde greenheeks. en colaboracion con Pacha Eco-Hub.
-            </p>
 
-            <div class="testimonial-card__logo" aria-label="Pacha EcoHub">
-              <img src="assets/pacha-ecohub-logo.webp" alt="Pacha EcoHub" loading="lazy">
+            <div class="resultado-card__meta">
+              <div class="resultado-card__logo" aria-label="Pacha EcoHub">
+                <img src="assets/pacha-ecohub-logo.webp" alt="Pacha EcoHub" loading="lazy">
+              </div>
+              <p class="resultado-card__cite">
+                <strong>Delphy Barcelona</strong>
+                <span>Consultora de Circularidad · Pacha EcoHub</span>
+              </p>
             </div>
 
-            <p class="testimonial-card__cite">
-              <strong>Delphy Barcelona</strong>
-              <span>Consultora de Circularidad · Pacha EcoHub</span>
-            </p>
-
-            <!-- BARRA DE IMPACTO · la auditoría convertida en trofeo -->
             <div class="impact" role="group" aria-label="Auditoría de impacto">
               <p class="impact__title">Auditoría del sitio publicado</p>
               <ul class="impact__list">
@@ -399,16 +465,6 @@
               </p>
             </div>
           </article>
-
-          <!-- Placeholder honesto · no inventamos testimonios -->
-          <article class="testimonial-card testimonial-card--pending">
-            <p class="testimonial-card__headline">Más proyectos próximamente</p>
-            <p class="testimonial-card__body">
-              Si trabajaste conmigo y querés dejar tu testimonio,
-              <a href="#contacto">escribime</a>.
-            </p>
-          </article>
-
         </div>
       </div>
     </section>
