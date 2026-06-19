@@ -5,51 +5,82 @@
    El .bio-grid (estructura de columnas) vive en layout.css
    porque es layout, no estilo de componente.
 
-   Detalles visuales pendientes (próxima sesión):
-     · Rombo decorativo detrás de la foto
-     · Micro-CTA ".bio-link · Ver cómo trabajo"
-     · Separadores ::before/::after con gradiente verde
-     · Ajuste de tamaño de foto y tipografía
+   Detalles visuales:
+     · Foto grande con cabeza asomando del recuadro
+     · Rombo verde decorativo detrás de la foto
+     · Eyebrow mono verde + título bold + lead generoso
+     · Separador con guion verde ("— Atiendo en español…")
+     · Micro-CTA "Ver cómo trabajo ↓" con underline verde
    ============================================================ */
 .bio {
-  background: var(--color-surface);
+  /* Mismo background que la sección servicios (body): el verde abismo
+     oscuro deja que el rombo verde y la foto resalten sobre el fondo. */
+  background: var(--color-bg);
   border-top: 1px solid var(--color-text-muted);
   border-bottom: 1px solid var(--color-text-muted);
+  position: relative;
 }
 
+/* ---------- Foto + rombo decorativo ---------- */
 .bio-photo {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.6rem;
+  position: relative;
+  /* El rombo se posiciona absolutamente relativo a .bio-photo */
+}
+
+.bio-photo__diamond {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 252px;
+  height: 252px;
+  /* Verde Tierra del token --color-surface para que el rombo se
+     funda con la estética de tarjetas/bloques en lugar del verde
+     brillante del acento (más sutil, como en la referencia). */
+  background: #103035;
+  opacity: 1;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border-radius: 12px;
+  z-index: 0;
 }
 
 .bio-photo__img {
   display: block;
-  width: 280px;
-  height: 280px;
+  width: 320px;
+  height: 320px;
   max-width: 100%;
   object-fit: cover;
   border-radius: 12px;
-  border: 2px solid var(--color-accent-tint);
+  border: none;
   box-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.32),
+    0 16px 40px rgba(0, 0, 0, 0.42),
     0 0 0 1px var(--color-shadow-soft);
   /* Asomar arriba del contenedor: la cabeza se 'sale' del recuadro
      para darle más presencia y dejar ver mejor las marcas de agua
      decorativas como textura de fondo. */
-  transform: translateY(-8%);
+  transform: translateY(-12%);
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 720px) {
+  .bio-photo__diamond {
+    width: 364px;
+    height: 364px;
+  }
+
   .bio-photo__img {
-    width: 320px;
-    height: 320px;
-    /* Desktop: 15% de asomar, equivalente a ~48px por encima */
-    transform: translateY(-15%);
+    width: 440px;
+    height: 440px;
+    /* Desktop: 18% de asomar, equivalente a ~80px por encima */
+    transform: translateY(-18%);
   }
 }
 
+/* ---------- Texto ---------- */
 .bio-text {
   /* Cap de lectura cómoda: 65ch evita líneas demasiado largas
      ahora que .bio-grid ocupa el ancho completo del .container. */
@@ -68,24 +99,77 @@
 
 .bio-title {
   color: var(--color-text);
-  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
   font-weight: 700;
   letter-spacing: -0.01em;
-  margin: 0 0 1rem;
-  line-height: 1.2;
+  margin: 0 0 1.25rem;
+  line-height: 1.15;
 }
 
 .bio-lead {
   color: var(--color-text);
-  font-size: 1rem;
-  line-height: 1.65;
-  margin: 0 0 1rem;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  margin: 0 0 1.25rem;
   opacity: 0.92;
 }
 
 .bio-lead strong {
   color: var(--color-accent);
   font-weight: 600;
+}
+
+/* ---------- Separador con guion verde ---------- */
+.bio-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-text);
+  font-size: 0.95rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.bio-divider__dash {
+  display: inline-block;
+  width: 24px;
+  height: 2px;
+  background: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.bio-divider__text {
+  color: var(--color-text);
+  opacity: 0.88;
+}
+
+.bio-divider__sep {
+  color: var(--color-text-muted);
+  margin: 0 0.15rem;
+}
+
+/* ---------- Micro-CTA "Ver cómo trabajo" ---------- */
+.bio-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  padding: 0.4rem 0;
+  border-bottom: 2px solid var(--color-accent);
+  margin-top: 1rem;
+  transition: opacity 0.18s ease;
+}
+
+.bio-cta:hover {
+  opacity: 0.8;
+}
+
+.bio-cta__arrow {
+  display: inline-block;
+  font-size: 1.05rem;
+  line-height: 1;
 }
 
 .bio-sign {

@@ -77,10 +77,10 @@ section {
     display: block;
   }
 
-  /* Bio · foto a la izquierda (33%), texto a la derecha (67%) */
+  /* Bio · foto a la izquierda (~42%), texto a la derecha (~58%) */
   .bio-grid {
     grid-template-columns: 0.85fr 1.15fr;
-    gap: 4rem;
+    gap: 5rem;
   }
 
   /* Servicios · responsive natural, 3 columnas cuando entren 3 */
