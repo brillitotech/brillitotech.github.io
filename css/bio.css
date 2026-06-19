@@ -37,11 +37,10 @@
   left: 50%;
   width: 252px;
   height: 252px;
-  /* Verde Tierra del token --color-surface para que el rombo se
-     funda con la estética de tarjetas/bloques en lugar del verde
-     brillante del acento (más sutil, como en la referencia). */
-  background: #103035;
-  opacity: 1;
+  /* Verde Clorofila del accent con opacity baja: el rombo se ve pero
+     no brilla tanto, dejando que la foto sea la protagonista. */
+  background: var(--color-accent);
+  opacity: 0.55;
   transform: translate(-50%, -50%) rotate(45deg);
   border-radius: 12px;
   z-index: 0;
