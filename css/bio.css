@@ -35,10 +35,12 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 252px;
-  height: 252px;
+  width: 200px;
+  height: 200px;
   /* Verde Clorofila del accent con opacity baja: el rombo se ve pero
-     no brilla tanto, dejando que la foto sea la protagonista. */
+     no brilla tanto, dejando que la foto sea la protagonista.
+     Tamaño más chico que la foto (440px) para que solo asome por las
+     4 puntas y NO por los lados (eso creaba la ilusión de "borde"). */
   background: var(--color-accent);
   opacity: 0.55;
   transform: translate(-50%, -50%) rotate(45deg);
@@ -67,8 +69,8 @@
 
 @media (min-width: 720px) {
   .bio-photo__diamond {
-    width: 364px;
-    height: 364px;
+    width: 300px;
+    height: 300px;
   }
 
   .bio-photo__img {
