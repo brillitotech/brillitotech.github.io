@@ -16,9 +16,37 @@
   /* Mismo background que la sección servicios (body): el verde abismo
      oscuro deja que el rombo verde y la foto resalten sobre el fondo. */
   background: var(--color-bg);
-  border-top: 1px solid var(--color-text-muted);
-  border-bottom: 1px solid var(--color-text-muted);
   position: relative;
+}
+
+/* Líneas verdes largas difuminadas que reemplazan los bordes de
+   sección. ::before = arriba (división hero ↔ bio), ::after = abajo
+   (división bio ↔ servicios). Verde clorofila centrado, transparente
+   en los extremos, para que se vea como separador elegante y no como
+   una línea dura. */
+.bio::before,
+.bio::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--color-accent) 50%,
+    transparent 100%
+  );
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.bio::before {
+  top: 0;
+}
+
+.bio::after {
+  bottom: 0;
 }
 
 /* ---------- Foto + rombo decorativo ---------- */
@@ -83,33 +111,6 @@
      ahora que .bio-grid ocupa el ancho completo del .container. */
   max-width: 65ch;
   position: relative;
-}
-
-/* Líneas verdes largas con difuminado hacia los lados.
-   ::before encima del título, ::after debajo del micro-CTA.
-   Son puramente decorativas: aria-hidden en el HTML (span auxiliar). */
-.bio-text::before,
-.bio-text::after {
-  content: "";
-  display: block;
-  height: 1px;
-  width: 100%;
-  max-width: 65ch;
-  background: linear-gradient(
-    to right,
-    transparent 0%,
-    var(--color-accent) 50%,
-    transparent 100%
-  );
-  opacity: 0.5;
-}
-
-.bio-text::before {
-  margin: 0 0 2rem;
-}
-
-.bio-text::after {
-  margin: 1.75rem 0 0;
 }
 
 .bio-eyebrow {
