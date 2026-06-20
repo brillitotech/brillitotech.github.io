@@ -47,7 +47,7 @@
      · .bg-decor__col--right → 3 marcas apiladas a la derecha
    z-index: -1 → queda detrás del contenido.
    pointer-events: none → no captura clicks.
-   Color por currentColor (themes.css lo controla).
+   Color por currentColor (definido en el atributo stroke del <symbol>).
    ============================================================ */
 .bg-decor__col {
   position: absolute;

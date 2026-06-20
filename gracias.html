@@ -10,20 +10,18 @@
   <title>¡Gracias! · Brillitotech</title>
 
   <!--
-    Mismo stack de CSS que index.html: hereda paleta, tipografía y el
-    toggle de tema Sol/Luna sin duplicar reglas. Si en el futuro hay
-    un ajuste de marca, se hace una sola vez en tokens.css.
+    Mismo stack de CSS base que index.html: hereda paleta y tipografía
+    sin duplicar reglas. Si en el futuro hay un ajuste de marca, se
+    hace una sola vez en tokens.css.
   -->
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/themes.css">
 
   <!--
     Estilos mínimos, locales a esta página. Solo lo que NO se puede
     resolver con la arquitectura existente sin inventar una clase
-    de un solo uso en components.css.
+    de un solo uso.
   -->
   <style>
     .thanks-wrap {
@@ -72,9 +70,6 @@
 </head>
 
 <body>
-
-  <!-- Toggle de tema (mismo patrón que index.html, sin JS). -->
-  <input type="checkbox" id="theme-input" aria-label="Alternar entre modo oscuro y claro">
 
   <!--
     Marca de agua decorativa reutilizada (mismo <symbol> que el sitio

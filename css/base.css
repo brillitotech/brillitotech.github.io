@@ -2,8 +2,8 @@
    BASE
    ------------------------------------------------------------
    Reset minimalista, tipografía, comportamiento por defecto
-   de elementos estructurales. No tiene selectores específicos
-   de componentes — eso vive en components.css.
+   de elementos estructurales. Los selectores específicos de
+   cada sección viven en sections.css, bio.css y modal.css.
    ============================================================ */
 
 /* ---------- Reset ---------- */

@@ -309,20 +309,34 @@
   margin-right: 0.4rem;
 }
 
-.card__deliverable {
-  color: var(--color-text);
-  font-size: 0.85rem;
-  line-height: 1.5;
-  margin: 0;
-  padding: 0.65rem 0.85rem;
-  background: var(--color-accent-tint);
-  border-left: 2px solid var(--color-accent);
-  border-radius: 4px;
+/* ---------- #servicios · reduce 30% padding-bottom para----------
+   conectar mejor con #testimonios. Mobile: 4.5rem → 3.15rem.
+   Desktop (override en breakpoint 720px): 6rem → 4.2rem. */
+#servicios {
+  padding-bottom: 3.15rem;
 }
 
-.card__deliverable strong {
-  color: var(--color-accent);
-  font-weight: 700;
+/* ---------- #testimonios · línea verde difuminada abajo ----------
+   Mismo patrón que .bio::after. Cierra la sección entre
+   Acompañamiento estratégico y #contacto con el mismo lenguaje
+   visual que las separaciones hero↔bio y bio↔servicios. */
+#testimonios {
+  position: relative;
+}
+
+#testimonios::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(to right,
+      transparent 0%,
+      var(--color-accent) 50%,
+      transparent 100%);
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 /* ============================================================
@@ -530,38 +544,6 @@
   margin-bottom: 0;
 }
 
-/* ---------- Testimonios grid · mobile-first 1 col, desktop 2 col ---------- */
-/* Wrapper de los 2 sub-.subsection (Resultados + Acompañamiento) dentro
-   de #testimonios. Mobile: vertical. Desktop ≥720px: 2 columnas iguales
-   con gap consistente con .bio-grid (5rem). align-items: start evita
-   que las cards se estiren para igualar alturas (Resultados siempre es
-   más alta por la auditoría). */
-.testimonios-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
-}
-
-.testimonios-grid > .subsection {
-  margin-bottom: 4rem;
-}
-
-.testimonios-grid > .subsection:last-child {
-  margin-bottom: 0;
-}
-
-@media (min-width: 720px) {
-  .testimonios-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 5rem;
-    align-items: start;
-  }
-
-  .testimonios-grid > .subsection {
-    margin-bottom: 0;
-  }
-}
-
 .subsection-title {
   color: var(--color-text);
   font-size: clamp(1.15rem, 2.5vw, 1.4rem);
@@ -658,6 +640,11 @@
 @media (min-width: 720px) {
   .subsection {
     margin-bottom: 5rem;
+  }
+
+  /* #servicios · override desktop: 6rem → 4.2rem (reducción 30%) */
+  #servicios {
+    padding-bottom: 4.2rem;
   }
 }
 
