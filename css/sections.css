@@ -467,54 +467,147 @@
 
 /* ============================================================
    6 · CIERRE / CTA FINAL
+   ------------------------------------------------------------
+   La sección final de la landing. Tiene tratamiento visual
+   propio para que se lea como "momento de decisión" y no como
+   un bloque más:
+     · Fondo con tinte accent superior (radial gradient sutil).
+     · Borde superior técnico que la separa de la sección previa.
+     · Padding vertical mayor que el resto (cierra con aire).
+     · Tipografía con escala de cierre (no de subsección).
    ============================================================ */
 .closing {
   text-align: center;
   position: relative;
+  padding: 5rem 0 6rem;
+  margin-top: 2rem;
+  isolation: isolate; /* contiene el z-index del ::before sin escapar */
+}
+
+/* Fondo decorativo: borde superior técnico + tinte radial accent.
+   Vive en ::before para que el contenedor <section> mantenga su
+   background limpio (mejor lectura para screen readers y zoom 200%,
+   donde los pseudo-elementos decorativos suelen ocultarse). */
+.closing::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center top,
+      var(--color-accent-tint) 0%,
+      transparent 60%);
+  border-top: 1px solid var(--color-text-muted);
+}
+
+@media (min-width: 720px) {
+  .closing {
+    padding: 7rem 0 8rem;
+  }
 }
 
 .closing-title {
   color: var(--color-text);
-  font-size: clamp(1.4rem, 3.5vw, 2rem);
+  font-size: clamp(1.5rem, 3.6vw, 2.1rem);
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   max-width: 720px;
-  margin: 0 auto 0.75rem;
+  margin: 0 auto 1.25rem;
   line-height: 1.25;
+}
+
+.closing-title__hl {
+  color: var(--color-accent);
+  display: block;
+  margin-top: 0.5rem;
 }
 
 .closing-sub {
   color: var(--color-text);
   opacity: 0.75;
-  font-size: 1rem;
-  line-height: 1.5;
-  max-width: 36rem;
-  margin: 0 auto 2rem;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  max-width: 32rem;
+  margin: 0 auto 2.5rem;
 }
 
 .closing-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.25rem;
   justify-content: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+/* Botón primary con +10% de escala respecto al base.
+   El CTA principal debe pesar más que el ghost, no solo en color. */
+.closing-actions .btn--primary {
+  padding: 1.1rem 2rem;
+  font-size: 1.0625rem;
+  min-height: 52px;
 }
 
 .closing-trust {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.25rem 1.75rem;
+  gap: 1rem 2rem;
   justify-content: center;
-  font-size: 0.85rem;
+  align-items: center;
+  font-size: 0.875rem;
   color: var(--color-text);
-  opacity: 0.7;
-  margin: 0;
+  opacity: 0.78;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--color-text-muted);
+  max-width: 38rem;
 }
 
-.closing-trust span {
+.closing-trust__item {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
+}
+
+.closing-trust__icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+
+/* ---------- Mobile <480px · stack vertical + ancho completo ---------- */
+@media (max-width: 480px) {
+  .closing {
+    padding: 4rem 0 5rem;
+  }
+
+  .closing-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .closing-actions {
+    flex-direction: column;
+    gap: 0.875rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .closing-actions .btn {
+    width: 100%;
+  }
+
+  .closing-actions .btn--primary {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    min-height: 50px;
+  }
+
+  .closing-trust {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem 1rem;
+  }
 }
 
 /* ============================================================
@@ -563,35 +656,153 @@
   margin: 0 auto 2rem;
 }
 
-.flow-diagram {
+/* ============================================================
+   INFOGRAFÍA MARCO FREELANCE · 6 hexágonos + 2 banners
+   ------------------------------------------------------------
+   Reemplaza al .flow-diagram de 3 nodos rectangulares. La
+   geometría hexagonal alude a 'ingeniería sostenible' (no es
+   el cuadrado plano de las cards de servicios) y los banners
+   refuerzan el mensaje 'hitos · cero ataduras · todo es tuyo'.
+   Sin dependencias externas: SVG inline + filtros SVG.
+   ============================================================ */
+
+/* ---------- SVG contenedor ---------- */
+.flow-hexagram {
   display: block;
   width: 100%;
-  max-width: 720px;
+  max-width: 1100px;
   height: auto;
   margin: 0 auto;
-  color: var(--color-text-muted);
+  color: var(--color-accent);
 }
 
-.flow-diagram .flow-title {
+/* Línea de progreso horizontal (verde clorofila con dash sutil).
+   Filtro de glow quitado: el navegador lo pintaba casi invisible
+   sobre el verde abismo. La línea sola con buen contraste lee mejor. */
+.flow-hexagram__line {
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 8;
+  opacity: 0.85;
+}
+
+/* Flecha final que sale del hex 5 hacia "tuyo" */
+.flow-hexagram__arrow-out {
+  stroke: currentColor;
+  stroke-width: 2;
+  opacity: 0.85;
+}
+
+/* ---------- Hexágono · bordes + relleno ---------- */
+.flow-hex__shape {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  transition: fill 0.3s ease, stroke-width 0.3s ease;
+}
+
+.flow-hex__fill {
+  fill: var(--color-surface);
+  stroke: none;
+  opacity: 0.85;
+}
+
+/* Hexágono destacado (último = producción) */
+.flow-hex-node--last .flow-hex__shape {
+  stroke: var(--color-accent);
+  stroke-width: 2.5;
+}
+
+.flow-hex-node--last .flow-hex__fill {
+  fill: var(--color-accent-tint);
+  opacity: 1;
+}
+
+/* ---------- Tipografía dentro del hexágono ---------- */
+.flow-hex__num {
+  fill: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.flow-hex__title {
   fill: var(--color-text);
   font-family: var(--font-mono);
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
 }
 
-.flow-diagram .flow-num {
+.flow-hex__desc {
+  fill: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  opacity: 0.78;
+}
+
+.flow-hex__deliv {
   fill: var(--color-accent);
   font-family: var(--font-mono);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  opacity: 0.95;
 }
 
-.flow-diagram .flow-desc {
-  fill: var(--color-text-muted);
+/* ---------- Banners de garantía ---------- */
+.marco-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.65rem 1rem;
+  margin: 0 auto;
+  max-width: 1100px;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    90deg,
+    var(--color-accent-tint) 0%,
+    var(--color-accent-glow) 50%,
+    var(--color-accent-tint) 100%
+  );
+  box-shadow: 0 0 18px var(--color-accent-glow);
+}
+
+.marco-banner--top {
+  margin-bottom: 1.25rem;
+}
+
+.marco-banner--bottom {
+  margin-top: 1.25rem;
+}
+
+.marco-banner__text {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.marco-banner__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+
+.marco-banner__icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 /* ============================================================
@@ -648,13 +859,52 @@
   }
 }
 
-@media (max-width: 480px) {
-  .flow-diagram .flow-title {
-    font-size: 13px;
+@media (max-width: 720px) {
+  /* En mobile el viewBox se reduce horizontalmente y los textos
+     pueden volverse ilegibles. Subimos fuentes compensando el
+     factor de escala sin forzar aspect-ratio. */
+  .flow-hexagram {
+    max-width: 100%;
   }
 
-  .flow-diagram .flow-desc {
-    font-size: 9px;
+  .flow-hex__title {
+    font-size: 18px;
+  }
+
+  .flow-hex__num {
+    font-size: 24px;
+  }
+
+  .flow-hex__deliv {
+    font-size: 15px;
+  }
+
+  .marco-banner__text {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+@media (max-width: 480px) {
+  .flow-hex__title {
+    font-size: 14px;
+  }
+
+  .flow-hex__num {
+    font-size: 20px;
+  }
+
+  .flow-hex__deliv {
+    font-size: 11px;
+  }
+
+  .marco-banner__text {
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+  }
+
+  .marco-banner {
+    padding: 0.55rem 0.7rem;
   }
 }
 
