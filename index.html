@@ -377,11 +377,13 @@
           </div>
 
           <!--
-            viewBox 1200x340: alto ajustado al contenido real (hexágonos
-            centrados en y=170, deliv verde termina ~y=310). Mantiene
-            la simetría con el banner superior sin generar aire extra.
+            viewBox 1200x540: da espacio entre los entregables verdes
+            y el banner inferior. En desktop, el .marco-banner--bottom
+            usa margin-top negativo para subir y emparejar con el
+            banner superior. En mobile, el aire extra se aprovecha
+            para que los textos verdes no se monten entre sí.
           -->
-          <svg class="flow-hexagram" viewBox="0 0 1200 340" xmlns="http://www.w3.org/2000/svg" role="img"
+          <svg class="flow-hexagram" viewBox="0 0 1200 540" xmlns="http://www.w3.org/2000/svg" role="img"
             aria-label="Flujo freelance en seis fases: 0 Diagnóstico inicial, 1 Descubrimiento y arquitectura, 2 Cotización y acuerdo de hitos, 3 Prueba de concepto, 4 Desarrollo del MVP, 5 Despliegue en producción.">
 
             <!-- Definiciones: glow suave + marcador de flecha hexagonal -->

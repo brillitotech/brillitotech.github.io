@@ -776,7 +776,7 @@
 }
 
 .marco-banner--bottom {
-  margin-top: 1.25rem;
+  margin-top: -10.5rem;
 }
 
 .marco-banner__text {
@@ -877,6 +877,13 @@
 
   .flow-hex__deliv {
     font-size: 15px;
+  }
+
+  /* En mobile el aire extra del viewBox 1200x540 SÍ lo necesitamos
+     para que los entregables verdes no se monten. Restablecemos
+     el margin-top normal. */
+  .marco-banner--bottom {
+    margin-top: 1.25rem;
   }
 
   .marco-banner__text {
