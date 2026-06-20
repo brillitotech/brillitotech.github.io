@@ -129,7 +129,7 @@
   transform: translateY(-50%);
   width: clamp(420px, 55vw, 900px);
   height: clamp(420px, 70vw, 900px);
-  max-height: 900px;
+  max-height: 550px;
   z-index: 0;
   pointer-events: none;
   opacity: 1;
@@ -530,6 +530,38 @@
   margin-bottom: 0;
 }
 
+/* ---------- Testimonios grid · mobile-first 1 col, desktop 2 col ---------- */
+/* Wrapper de los 2 sub-.subsection (Resultados + Acompañamiento) dentro
+   de #testimonios. Mobile: vertical. Desktop ≥720px: 2 columnas iguales
+   con gap consistente con .bio-grid (5rem). align-items: start evita
+   que las cards se estiren para igualar alturas (Resultados siempre es
+   más alta por la auditoría). */
+.testimonios-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.testimonios-grid > .subsection {
+  margin-bottom: 4rem;
+}
+
+.testimonios-grid > .subsection:last-child {
+  margin-bottom: 0;
+}
+
+@media (min-width: 720px) {
+  .testimonios-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: start;
+  }
+
+  .testimonios-grid > .subsection {
+    margin-bottom: 0;
+  }
+}
+
 .subsection-title {
   color: var(--color-text);
   font-size: clamp(1.15rem, 2.5vw, 1.4rem);
@@ -622,61 +654,10 @@
   font-weight: 600;
 }
 
-/* Bloque logo + cite alineados horizontalmente (desktop) / vertical (mobile) */
-.resultado-card__meta {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0.25rem 0 0;
-}
-
-.resultado-card__logo {
-  width: 64px;
-  height: 64px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-text-muted);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.45rem;
-}
-
-.resultado-card__logo img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-.resultado-card__cite {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  margin: 0;
-}
-
-.resultado-card__cite strong {
-  color: var(--color-text);
-  font-weight: 700;
-  font-size: 0.95rem;
-}
-
-.resultado-card__cite span {
-  color: var(--color-text-muted);
-  font-size: 0.82rem;
-}
-
-/* ---------- Breakpoint · ajustes de aire y meta horizontal ---------- */
+/* ---------- Breakpoint · aire entre sub-secciones ---------- */
 @media (min-width: 720px) {
   .subsection {
     margin-bottom: 5rem;
-  }
-
-  .resultado-card__meta {
-    flex-direction: row;
-    justify-content: center;
-    gap: 1rem;
   }
 }
 
@@ -688,4 +669,142 @@
   .flow-diagram .flow-desc {
     font-size: 9px;
   }
+}
+
+/* ============================================================
+   10 · BLOQUES NUEVOS · variantes en resultado-card y nota humana
+   ------------------------------------------------------------
+   .resultado-card__rol         → quote lateral con borde accent
+                                   para distinguir "qué dijo Delphy"
+                                   de "qué construí yo".
+   .impact__note                → bajada humana en italic muted
+                                   debajo del número técnico.
+   .acompanamiento-card         → card aliada estratégica, misma
+                                   base visual que .resultado-card
+                                   pero con logo más grande y
+                                   jerarquía de rol claro.
+   ============================================================ */
+
+/* ---------- Quote lateral "Construí" / "Mensaje definido por" ---------- */
+.resultado-card__rol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  text-align: left;
+  padding: 0.85rem 1rem;
+  background: var(--color-accent-tint);
+  border-left: 2px solid var(--color-accent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.resultado-card__rol-label {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.resultado-card__rol-text {
+  color: var(--color-text);
+  opacity: 0.88;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ---------- Bajada humana en la auditoría ---------- */
+.impact__note {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-style: italic;
+  line-height: 1.4;
+  display: block;
+  margin: 0.15rem 0 0;
+}
+
+/* ---------- Bloque Acompañamiento estratégico ---------- */
+/* Sin caja ni fondo: cierre tipográfico de la conversación después
+   de la card de Resultados. El .container padre ya da los márgenes
+   laterales (clamp 1.25rem–3rem) y el gap vertical entre sub-secciones. */
+.acompanamiento-card {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.acompanamiento-card__logo {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 0.25rem;
+}
+
+.acompanamiento-card__logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.acompanamiento-card__logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.acompanamiento-card__name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+}
+
+.acompanamiento-card__name strong {
+  color: var(--color-text);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.acompanamiento-card__name span {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.acompanamiento-card__rol {
+  color: var(--color-text);
+  opacity: 0.85;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0.25rem 0 0;
+  max-width: 32rem;
+}
+
+.acompanamiento-card__puente {
+  color: var(--color-text);
+  opacity: 0.78;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin: 0.75rem auto 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-text-muted);
+  max-width: 32rem;
+}
+
+.acompanamiento-card__link {
+  color: var(--color-accent);
+  font-weight: 600;
+  font-style: normal;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.acompanamiento-card__link:hover,
+.acompanamiento-card__link:focus-visible {
+  border-bottom-color: var(--color-accent);
 }

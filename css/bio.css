@@ -31,12 +31,10 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(
-    to right,
-    transparent 0%,
-    var(--color-accent) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(to right,
+      transparent 0%,
+      var(--color-accent) 50%,
+      transparent 100%);
   opacity: 0.55;
   pointer-events: none;
 }
@@ -63,8 +61,8 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 200px;
-  height: 200px;
+  width: 220px;
+  height: 220px;
   /* Verde Clorofila del accent con opacity baja: el rombo se ve pero
      no brilla tanto, dejando que la foto sea la protagonista.
      Tamaño más chico que la foto (440px) para que solo asome por las
@@ -78,15 +76,15 @@
 
 .bio-photo__img {
   display: block;
-  width: 320px;
-  height: 320px;
+  width: 340px;
+  height: 340px;
   max-width: 100%;
   object-fit: cover;
   border-radius: 12px;
   border: none;
   /* Sin box-shadow: la referencia no tiene sombra rectangular.
      Solo el rombo verde detrás marca la profundidad. */
-  transform: translateY(-12%);
+  transform: translateY(-20%);
   position: relative;
   z-index: 1;
 }
@@ -100,8 +98,8 @@
   .bio-photo__img {
     width: 440px;
     height: 440px;
-    /* Desktop: 18% de asomar, equivalente a ~80px por encima */
-    transform: translateY(-18%);
+    /* Desktop: 25% de asomar, equivalente a ~80px por encima */
+    transform: translateY(-30%);
   }
 }
 
