@@ -265,7 +265,7 @@
     <!-- 4 · SERVICIOS -->
     <section id="servicios">
       <div class="container">
-        <h2 class="services-title">Servicios — Trabajemos juntos</h2>
+        <h2 class="services-title">Trabajemos juntos</h2>
         <p class="services-sub">
           Cada servicio lo puedes contratar por separado. Si encajamos, trabajamos por hitos cortos
           con pagos por hito y cero ataduras: al terminar, todo es tuyo.
@@ -383,7 +383,14 @@
             banner superior. En mobile, el aire extra se aprovecha
             para que los textos verdes no se monten entre sí.
           -->
-          <svg class="flow-hexagram" viewBox="0 0 1200 540" xmlns="http://www.w3.org/2000/svg" role="img"
+          <!--
+            viewBox 1200x620: aumenta la altura para dar más aire
+            vertical entre los hexágonos y los entregables verdes
+            inferiores. En mobile (cuando el SVG escala a ~360px de
+            ancho) cada px del viewBox equivale a ~0.3px reales,
+            por eso este padding interno se nota mucho.
+          -->
+          <svg class="flow-hexagram" viewBox="0 0 1200 620" xmlns="http://www.w3.org/2000/svg" role="img"
             aria-label="Flujo freelance en seis fases: 0 Diagnóstico inicial, 1 Descubrimiento y arquitectura, 2 Cotización y acuerdo de hitos, 3 Prueba de concepto, 4 Desarrollo del MVP, 5 Despliegue en producción.">
 
             <!-- Definiciones: glow suave + marcador de flecha hexagonal -->

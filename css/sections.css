@@ -121,26 +121,36 @@
   margin-bottom: 0;
 }
 
-/* Hero · ilustración flotante (patrón decorativo) */
+/* Hero · ilustración flotante (patrón decorativo)
+   --------------------------------------------------------
+   Solo visible en ≥720px: en mobile ocupa toda la pantalla
+   y tapaba el texto del H1, H2 y CTAs. El hero mobile
+   queda limpio, solo tipografía sobre fondo. */
 .hero-illustration-float {
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: clamp(420px, 55vw, 900px);
-  height: clamp(420px, 70vw, 900px);
-  max-height: 550px;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 1;
-  display: block;
-  overflow: hidden;
+  display: none;
+}
+
+@media (min-width: 720px) {
+  .hero-illustration-float {
+    display: block;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: clamp(380px, 42vw, 640px);
+    height: auto;
+    max-height: 460px;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.85;
+    overflow: hidden;
+  }
 }
 
 .hero-illustration {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: cover;
   object-position: center;
   filter: drop-shadow(0 16px 40px rgba(13, 27, 30, 0.25));
@@ -199,21 +209,22 @@
    ============================================================ */
 .services-title {
   color: var(--color-text);
-  font-size: clamp(1.4rem, 3.5vw, 1.9rem);
-  margin-bottom: 0.75rem;
+  font-size: clamp(1.75rem, 4vw, 2.4rem);
+  margin-bottom: 0.85rem;
   text-align: center;
   font-weight: 700;
   letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
 .services-sub {
   color: var(--color-text);
-  opacity: 0.75;
-  font-size: 0.98rem;
-  line-height: 1.55;
+  opacity: 0.78;
+  font-size: 1.0625rem;
+  line-height: 1.6;
   text-align: center;
-  max-width: 36rem;
-  margin: 0 auto 2.5rem;
+  max-width: 38rem;
+  margin: 0 auto 2.75rem;
 }
 
 /* CTA unificado de la sección servicios.
@@ -881,9 +892,9 @@
 
   /* En mobile el aire extra del viewBox 1200x540 SÍ lo necesitamos
      para que los entregables verdes no se monten. Restablecemos
-     el margin-top normal. */
+     el margin-top con más aire del que tenía antes. */
   .marco-banner--bottom {
-    margin-top: 1.25rem;
+    margin-top: 2.5rem;
   }
 
   .marco-banner__text {
@@ -893,6 +904,9 @@
 }
 
 @media (max-width: 480px) {
+  /* En mobile <480 el viewBox 1200x540 reduce a ~360px y los
+     entregables verdes se montan. Bajamos el deliv y agregamos
+     padding interno al SVG vía wrapper. */
   .flow-hex__title {
     font-size: 14px;
   }
@@ -912,6 +926,17 @@
 
   .marco-banner {
     padding: 0.55rem 0.7rem;
+  }
+
+  .marco-banner--bottom {
+    margin-top: 3rem;
+  }
+
+  /* Asegurar que el contenedor padre del SVG tenga aire lateral
+     para que el viewBox respire y los textos no se corten. */
+  .flow-hexagram {
+    padding: 0 0.5rem;
+    box-sizing: border-box;
   }
 }
 
