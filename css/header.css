@@ -7,9 +7,20 @@
    de acento). No distribuye secciones — eso es layout.css.
    ============================================================ */
 
-/* ---------- Header / Nav ---------- */
+/* ---------- Header / Nav ----------
+   Sticky con backdrop blur: la nav queda visible al scrollear,
+   manteniendo el CTA a 1 click. El fondo es translúcido para
+   que se integre con el contenido que pasa por debajo sin
+   taparlo. z-index 100 está por encima del decor (0) y del
+   contenido (1), pero por debajo del modal (~200). */
 .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   padding: var(--space-md) 0;
+  background: rgba(13, 27, 30, 0.78);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
   border-bottom: 1px solid var(--color-text-muted);
 }
 

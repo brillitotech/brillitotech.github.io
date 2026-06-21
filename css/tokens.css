@@ -13,7 +13,7 @@
   --color-bg:           #0D1B1E;   /* Verde Abismo · fondo principal */
   --color-surface:      #103035;   /* Verde Tierra · tarjetas/bloques */
   --color-text:         #F9F9F9;   /* Blanco Nube · texto principal */
-  --color-text-muted:   #8E9794;   /* Gris Técnico · bordes, textos secundarios */
+  --color-text-muted:   #A8B3B0;   /* Gris Técnico · bordes, textos secundarios (~5.4:1 sobre bg) */
   --color-accent:       #2ECC71;   /* Verde Clorofila · CTAs, acentos (≤20%) */
   --color-shadow:       rgba(13, 27, 30, 0.4);
   --color-shadow-soft:  rgba(13, 27, 30, 0.18);
