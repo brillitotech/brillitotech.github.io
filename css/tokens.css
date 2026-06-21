@@ -46,4 +46,18 @@
   --icon-size-md:  20px;  /* hero props check, contenido inline */
   --icon-size-lg:  36px;  /* cards de servicio (con fondo tint) */
   --icon-stroke:   1.75;  /* coherente con los SVGs inline del sitio */
+
+  /* ---------- Variantes Cyberpunk · Modal de Diagnóstico ----------
+     Estética intencionalmente distinta al resto del sitio
+     (modo técnico / operativo). Verde neón saturado, fondo
+     casi negro, texto azulado. Mantener coherencia con la
+     identidad 'modo consola' del formulario. Si en el futuro
+     se decide alinear con el sistema principal, basta con
+     apuntar estas variantes a los tokens base. */
+  --color-accent-cyber:   #00FF66;  /* Verde Neón · CTAs y acentos del modal */
+  --color-bg-cyber:       #0A0E17;  /* Negro Profundo · fondo del modal */
+  --color-text-cyber:     #E1EBF5;  /* Blanco Azulado · texto principal del modal */
+  --color-text-cyber-mut: #5A6E85;  /* Gris Azulado · textos secundarios del modal */
+  --color-glow-cyber:     rgba(0, 255, 102, 0.18);  /* Glow neón del modal */
+  --font-mono-cyber:      Consolas, Monaco, "Courier New", monospace;  /* Stack monoespaciado explícito */
 }
