@@ -630,13 +630,74 @@
 
 /* ============================================================
    7 · FOOTER
+   ------------------------------------------------------------
+   Grid 3 columnas en desktop: copy | links | tag.
+   Stack vertical centrado en mobile para no comprimir nada.
+   Mantiene la sutileza del original (opacity 0.65) sin saturar.
    ============================================================ */
 .site-footer {
-  padding: 1.5rem 0;
-  text-align: center;
-  font-size: 0.8rem;
-  opacity: 0.6;
+  padding: 2rem 0;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  opacity: 0.7;
   border-top: 1px solid var(--color-text-muted);
+}
+
+.site-footer__grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.site-footer__copy,
+.site-footer__tag {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.site-footer__tag {
+  opacity: 0.65;
+  font-style: italic;
+}
+
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.site-footer__links a {
+  color: var(--color-text);
+  text-decoration: none;
+  opacity: 0.85;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.site-footer__links a:hover {
+  color: var(--color-accent);
+  opacity: 1;
+}
+
+@media (min-width: 720px) {
+  .site-footer__grid {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    gap: 1.5rem;
+  }
+
+  .site-footer__links {
+    justify-content: center;
+    flex: 1;
+  }
 }
 
 /* ============================================================
