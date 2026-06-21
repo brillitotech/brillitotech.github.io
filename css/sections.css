@@ -134,16 +134,15 @@
   .hero-illustration-float {
     display: block;
     position: absolute;
-    top: 50%;
+    /* top:0 + bottom:0 = wrapper cubre toda la altura del hero.
+       La imagen interior (object-fit:cover) recorta mostrando
+       el centro, lo que tapla las marcas decorativas arriba y
+       abajo sin necesidad de agrandar el wrapper. */
+    top: 0;
+    bottom: 0;
     right: 0;
-    transform: translateY(-50%);
-    /* Subido +40% vs versión conservadora inicial: 380→532,
-       42vw→59vw, 640→896. La imagen es el fondo decorativo,
-       no protagonista — opacity 0.85 evita que compita con
-       el texto pero recupera presencia visual. */
-    width: clamp(532px, 59vw, 896px);
-    height: auto;
-    max-height: 620px;
+    width: clamp(650px, 65vw, 950px);
+    height: 100%;
     z-index: 0;
     pointer-events: none;
     opacity: 0.85;
@@ -155,9 +154,11 @@
   display: block;
   width: 100%;
   height: 100%;
-  ;
   object-fit: cover;
-  object-position: center;
+  /* object-position desplaza el foco hacia arriba: la parte
+     superior del SVG cubre la marca del decor arriba a la
+     derecha y la parte inferior tapa el rombo blanco. */
+  object-position: 60% 30%;
   filter: drop-shadow(0 16px 40px rgba(13, 27, 30, 0.25));
 }
 
