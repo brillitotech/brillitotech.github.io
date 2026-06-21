@@ -69,3 +69,40 @@ input[type="checkbox"] {
   white-space: nowrap;
   border: 0;
 }
+
+/* ---------- Scroll-reveal · animación de entrada ----------
+   Usa Scroll-driven Animations API (animation-timeline: view()).
+   Sin JS, sin librerías, GPU-accelerated. Soporte nativo en
+   Chrome 115+ / Edge 115+ / Safari 17.4+ / Firefox 134+.
+   Fallback: opacity 1 + transform none (estado final visible).
+
+   Cada sección entra con fade + slide-up sutil cuando el 30%
+   superior entra al viewport. La animación termina al 70%
+   para que no se sienta lenta. */
+@supports (animation-timeline: view()) {
+  section[id] {
+    animation: fade-up linear both;
+    animation-timeline: view();
+    animation-range: entry 30% cover 70%;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respeto por prefers-reduced-motion: usuarios con
+   sensibilidad al movimiento no ven la animación. */
+@media (prefers-reduced-motion: reduce) {
+  section[id] {
+    animation: none !important;
+  }
+}

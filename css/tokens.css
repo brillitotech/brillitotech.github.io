@@ -38,4 +38,12 @@
   --space-md:    1.25rem;
   --space-lg:    1.75rem;
   --space-xl:    2.5rem;
+
+  /* ---------- Iconos ----------
+     Sistema unificado en 3 tamaños + 1 stroke consistente.
+     Antes había 4 tamaños distintos (16, 18, 20, 36) sin token. */
+  --icon-size-sm:  18px;  /* trust row, banner garantía */
+  --icon-size-md:  20px;  /* hero props check, contenido inline */
+  --icon-size-lg:  36px;  /* cards de servicio (con fondo tint) */
+  --icon-stroke:   1.75;  /* coherente con los SVGs inline del sitio */
 }
