@@ -137,9 +137,13 @@
     top: 50%;
     right: 0;
     transform: translateY(-50%);
-    width: clamp(380px, 42vw, 640px);
+    /* Subido +40% vs versión conservadora inicial: 380→532,
+       42vw→59vw, 640→896. La imagen es el fondo decorativo,
+       no protagonista — opacity 0.85 evita que compita con
+       el texto pero recupera presencia visual. */
+    width: clamp(532px, 59vw, 896px);
     height: auto;
-    max-height: 460px;
+    max-height: 620px;
     z-index: 0;
     pointer-events: none;
     opacity: 0.85;
@@ -150,7 +154,8 @@
 .hero-illustration {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  ;
   object-fit: cover;
   object-position: center;
   filter: drop-shadow(0 16px 40px rgba(13, 27, 30, 0.25));
@@ -492,7 +497,8 @@
   position: relative;
   padding: 5rem 0 6rem;
   margin-top: 2rem;
-  isolation: isolate; /* contiene el z-index del ::before sin escapar */
+  isolation: isolate;
+  /* contiene el z-index del ::before sin escapar */
 }
 
 /* Fondo decorativo: borde superior técnico + tinte radial accent.
@@ -773,12 +779,10 @@
   max-width: 1100px;
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-md);
-  background: linear-gradient(
-    90deg,
-    var(--color-accent-tint) 0%,
-    var(--color-accent-glow) 50%,
-    var(--color-accent-tint) 100%
-  );
+  background: linear-gradient(90deg,
+      var(--color-accent-tint) 0%,
+      var(--color-accent-glow) 50%,
+      var(--color-accent-tint) 100%);
   box-shadow: 0 0 18px var(--color-accent-glow);
 }
 
@@ -871,6 +875,7 @@
 }
 
 @media (max-width: 720px) {
+
   /* En mobile el viewBox se reduce horizontalmente y los textos
      pueden volverse ilegibles. Subimos fuentes compensando el
      factor de escala sin forzar aspect-ratio. */
@@ -904,6 +909,7 @@
 }
 
 @media (max-width: 480px) {
+
   /* En mobile <480 el viewBox 1200x540 reduce a ~360px y los
      entregables verdes se montan. Bajamos el deliv y agregamos
      padding interno al SVG vía wrapper. */
