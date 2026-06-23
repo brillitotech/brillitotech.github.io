@@ -70,10 +70,18 @@ input[type="checkbox"] {
   border: 0;
 }
 
-/* NOTA: scroll-reveal con animation-timeline: view() fue
-   evaluado pero descartado — el efecto hacía que las secciones
-   se vieran semitransparentes durante el scroll (opacity ~0.5
-   en el centro del viewport), rompiendo la legibilidad del
-   sitio. Si en el futuro se quiere re-intentar, evaluar con
-   prefers-reduced-motion obligatorio y range que NO cubra
-   el viewport completo (solo el entry, sin 'cover'). */
+/* Accesibilidad · respeta la preferencia del sistema operativo
+   para reducir movimiento. Neutraliza los 3 keyframes 'pulse'
+   del sitio (hero-eyebrow, hero-availability, modal-overlay-logo)
+   y todas las transiciones para usuarios con sensibilidad
+   vestibular o que desactivaron animaciones a nivel SO. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

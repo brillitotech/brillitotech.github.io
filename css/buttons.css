@@ -32,6 +32,15 @@
   transform: translateY(-1px);
 }
 
+/* Focus visible · accesibilidad WCAG 2.4.7
+   Anillo verde accent con offset para que sea visible sin
+   importar el fondo del botón (primary sólido o ghost transparente). */
+.btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
 .btn--primary {
   background: var(--color-accent);
   color: var(--color-bg);

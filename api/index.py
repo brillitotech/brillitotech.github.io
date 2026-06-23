@@ -86,13 +86,13 @@ WIRE_TO_CANONICAL = {
 # EXACTO. Sin el ejemplo, Gemini responde conversacionalmente ("¡Excelente!
 # Como Arquitecto de Soluciones Cloud...") en vez del Markdown estricto.
 #
-# Reglas reforzadas en este commit:
-# - "completar las 3 secciones": antes Gemini cortaba en la sección 1
-#   porque el one-shot sugería un output corto.
+# Reglas activas del prompt que requieren refuerzo explícito
+# (sin él, Gemini las ignora o las suaviza):
+# - "completar las 3 secciones": el one-shot sugería un output corto
+#   y Gemini tendía a cortar en la sección 1.
 # - "cifras como [estimación sin auditoría]": el brief del proyecto
-#   prohíbe fabricar números de rendimiento. En vez de eliminar los
-#   rangos, los marcamos honestamente para que el lead los entienda
-#   como orientativos.
+#   prohíbe fabricar números de rendimiento. Marcamos los rangos
+#   honestamente para que el lead los lea como orientativos.
 SYSTEM_PROMPT_TEMPLATE = """\
 Eres un Arquitecto de Soluciones Cloud. Tu salida es EXCLUSIVAMENTE Markdown
 técnico. NO incluyas saludos, NO incluyas introducciones narrativas, NO
@@ -118,7 +118,8 @@ validación con datos reales.
 
 ## 2. ARQUITECTURA DE LA SOLUCIÓN
 <2-3 párrafos breves explicando el enfoque>
-
+IMPORTANTE: la propuesta arquitectonica debe estar encaminada a la optimizacion
+de recursos y reduccion de CO2 asi que esta debe estar pensanda en esa condicion.
 ```mermaid
 flowchart LR
   A[Origen del dato] --> B[Webhook o Agente ligero]
@@ -131,7 +132,7 @@ flowchart LR
 - <herramienta 2>: <justificación de 1 línea>
 - <herramienta 3>: <justificación de 1 línea>
 - <herramienta 4>: <justificación de 1 línea>
-
+IMPORTANTE: recomienda stack con su version free y la mejor version costo efectiva
 Sé crítico. Si el proceso no se justifica automatizar con IA, dilo
 claramente en DIAGNÓSTICO y propón una optimización de base.
 

@@ -2,8 +2,9 @@
    MODAL · DIAGNÓSTICO (Cyberpunk / Verde Neón)
    ------------------------------------------------------------
    Visibilidad controlada por #diagnostico-toggle (checkbox
-   hack). Visibilidad 100% CSS vía :has() — mismo patrón que
-   el toggle de tema.
+   pattern). Visibilidad 100% CSS vía :has() — mismo patrón que
+   el toggle de tema. Permite abrir/cerrar el modal sin JS,
+   alineado con la regla eco-eficiente del sitio.
 
    Estética intencionalmente distinta al resto de la página
    (modo técnico / operativo). Usa los tokens con sufijo
@@ -199,8 +200,9 @@ html:has(#diagnostico-toggle:checked) .modal {
   color: var(--color-text-cyber);
 }
 
-/* Counter de caracteres · solo decorativo, queda en "0/300"
-   hasta que se integre JS para actualizarlo en tiempo real. */
+/* Counter de caracteres · actualizado en tiempo real por el
+   listener JS inline en index.html. Mantiene sincronizado
+   aria-valuenow para lectores de pantalla. */
 .modal__counter {
   position: absolute;
   bottom: 0.45rem;

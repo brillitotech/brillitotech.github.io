@@ -190,6 +190,14 @@
   opacity: 0.8;
 }
 
+/* Focus visible · accesibilidad WCAG 2.4.7 */
+.bio-cta:focus-visible {
+  opacity: 0.8;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
 .bio-cta__arrow {
   display: inline-block;
   font-size: 1.05rem;

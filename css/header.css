@@ -51,6 +51,14 @@
   color: var(--color-accent);
 }
 
+/* Focus visible · accesibilidad WCAG 2.4.7 (keyboard nav) */
+.nav-links a:focus-visible {
+  color: var(--color-accent);
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
 .logo {
   display: inline-flex;
   align-items: center;
@@ -62,6 +70,14 @@
 
 .logo:hover {
   opacity: 0.85;
+}
+
+/* Focus visible · accesibilidad WCAG 2.4.7 */
+.logo:focus-visible {
+  opacity: 0.85;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 .logo__mark {

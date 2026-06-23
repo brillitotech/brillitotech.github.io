@@ -7,7 +7,55 @@
   <meta name="description"
     content="Briggitte Tatiana — Ingeniera de software senior experta en alta eficiencia. Reduzco costos operativos y huella de carbono digital en Latam con infraestructura estática y micro-agentes de IA.">
   <meta name="theme-color" content="#0D1B1E">
+  <link rel="canonical" href="https://brillitotech.github.io/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://brillitotech.github.io/">
+  <meta property="og:title" content="Briggitte Tatiana — Alta Eficiencia para tu Software">
+  <meta property="og:description"
+    content="Ingeniera de software freelance en Latam. Reduzco costos operativos y CO₂ digital con micro-agentes de IA e infraestructura edge. Sin ataduras.">
+  <meta property="og:image" content="https://brillitotech.github.io/assets/hero-illustration.webp">
+  <meta property="og:locale" content="es_LATAM">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://brillitotech.github.io/">
+  <meta name="twitter:title" content="Briggitte Tatiana — Alta Eficiencia para tu Software">
+  <meta name="twitter:description"
+    content="Ingeniera de software freelance. Reduzco costos operativos y CO₂ digital con micro-agentes de IA e infraestructura edge en Latam.">
+  <meta name="twitter:image" content="https://brillitotech.github.io/assets/hero-illustration.webp">
   <title>Briggitte Tatiana — Alta Eficiencia para tu Software</title>
+
+  <!-- JSON-LD · datos estructurados para rich results en Google -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "name": "Briggitte Tatiana — Brillitotech",
+      "description": "Ingeniera de software senior freelance. Reduzco costos operativos y huella de carbono digital en Latam con infraestructura estática y micro-agentes de IA.",
+      "url": "https://brillitotech.github.io",
+      "image": "https://brillitotech.github.io/assets/sobre_mi.webp",
+      "areaServed": { "@type": "Place", "name": "Latinoamérica" },
+      "serviceType": ["Micro-agentes de IA", "Infraestructura edge", "Consultoría estratégica"],
+      "knowsAbout": ["Arquitectura cloud", "Desarrollo sostenible", "IA ligera"],
+      "inLanguage": "es",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "liwiaisitech@gmail.com",
+        "contactOption": "WhatsApp",
+        "url": "https://wa.me/573006666230"
+      }
+    }
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Briggitte Tatiana",
+      "jobTitle": "Ingeniera de Software Senior",
+      "description": "Arquitecta cloud freelance especializada en alta eficiencia y desarrollo sostenible para equipos en Latam.",
+      "url": "https://brillitotech.github.io",
+      "image": "https://brillitotech.github.io/assets/sobre_mi.webp",
+      "sameAs": ["https://www.linkedin.com/in/brillitotec/"]
+    }
+  </script>
 
   <!--
     ============================================================
@@ -345,8 +393,8 @@
          Reemplazo del antiguo bloque de testimonios. Misma id
          (#testimonios) para no romper anchors del nav y del menú.
          Dos sub-secciones dentro de una sección unificada:
-           1. Cómo trabajo    → flujo SVG de 3 pasos
-           2. Resultados      → caso real auditado (Gaia/Delphy/Pacha)
+           1. Cómo trabajo    → flujo SVG de 6 hexágonos (Fase 0–5)
+           2. Resultados      → caso real auditado (Gaia)
          Sin testimonios fabricados. Sin métricas inventadas. Sin JS. -->
     <section id="testimonios">
       <div class="container">
@@ -420,9 +468,6 @@
               <text class="flow-hex__num" y="-8" text-anchor="middle">0</text>
               <text class="flow-hex__title" y="22" text-anchor="middle">DIAGNÓSTICO</text>
               <text class="flow-hex__deliv" y="125" text-anchor="middle">Decisión de avanzar</text>
-            </g>
-
-            <!-- Hexágono 1 · DESCUBRIMIENTO -->
             </g>
 
             <!-- Hexágono 1 · DESCUBRIMIENTO -->
@@ -525,7 +570,7 @@
               <span class="resultado-card__rol-label">Construí</span>
               <p class="resultado-card__rol-text">
                 la capa técnica coherente con el mensaje de sostenibilidad:
-                sin frameworks, sin JavaScript en el cliente, hosting verde greenheeks.
+                sin frameworks, sin JavaScript en el cliente, hosting verde GreenGeeks.
               </p>
             </div>
 
@@ -619,8 +664,8 @@
         </h2>
         <p class="closing-sub">Una llamada breve, un mapa claro de tu situación, y la decisión queda en tus manos.</p>
         <div class="closing-actions">
-          <!-- Reemplazar href con tu URL real de Calendly o WhatsApp -->
-          <a href="#" class="btn btn--primary">
+          <a href="https://calendar.app.google/waVhCpxqebUEP3vc9" target="_blank" rel="noopener"
+            class="btn btn--primary">
             Quiero hablar con Briggitte
             <span class="btn__arrow" aria-hidden="true">→</span>
           </a>
@@ -744,7 +789,9 @@
           <textarea id="d-proceso" name="proceso" rows="4" maxlength="300"
             placeholder="Ej. Conciliar manualmente las facturas en Excel que nos envían los proveedores por correo..."
             required></textarea>
-          <span class="modal__counter" aria-live="polite">0/300</span>
+          <span class="modal__counter" role="status" aria-live="polite"
+            aria-valuenow="0" aria-valuemin="0" aria-valuemax="300"
+            aria-label="Caracteres usados del mensaje">0/300</span>
         </div>
 
         <div class="modal__field">
@@ -775,10 +822,13 @@
     Inline (~400 bytes) porque solo se usa acá y mantenerlo inline
     ahorra 1 request HTTP en la página principal (regla eco-eficiente).
     No llama preventDefault: el form nativo sigue su flujo. El overlay
-    se muestra hasta que el 302 navegue a gracias.html. El setTimeout
-    de 90s es un backstop: si el backend falla con 5xx, el navegador
-    se queda en index.html mostrando JSON crudo (bug preexistente
-    fuera de scope) — el timeout evita que el overlay quede colgado.
+    se muestra hasta que el 302 navegue a gracias.html.
+
+    LIMITACIÓN CONOCIDA: si el backend falla con 5xx, el navegador se
+    queda en index.html mostrando JSON crudo (no se hace redirect).
+    El setTimeout de 90s es un backstop para evitar que el overlay
+    quede colgado. Aceptado por ahora — refactor mayor pendiente si
+    el volumen de errores lo justifica.
     ============================================================
   -->
   <script>
@@ -790,6 +840,22 @@
         overlay.hidden = false;
         setTimeout(function () { overlay.hidden = true; }, 90000);
       });
+    })();
+
+    /* Counter del textarea 'proceso' — actualiza caracteres en
+       tiempo real y sincroniza aria-valuenow para screen readers. */
+    (function () {
+      var textarea = document.getElementById('d-proceso');
+      var counter = document.querySelector('.modal__counter');
+      if (!textarea || !counter) return;
+      var max = parseInt(textarea.getAttribute('maxlength'), 10) || 300;
+      var update = function () {
+        var len = textarea.value.length;
+        counter.textContent = len + '/' + max;
+        counter.setAttribute('aria-valuenow', String(len));
+      };
+      textarea.addEventListener('input', update);
+      update();
     })();
   </script>
 

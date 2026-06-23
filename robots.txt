@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://brillitotech.github.io/sitemap.xml
