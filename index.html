@@ -848,6 +848,20 @@
 
         <button type="submit" class="modal__submit">Quiero mi diagnóstico</button>
       </form>
+
+      <!--
+        Hint visual de scroll: chevron pulsando en el borde inferior.
+        Se oculta via JS cuando el usuario ya scrolleó hasta el fondo
+        (clase .modal__scroll-hint--hidden en el panel).
+        aria-hidden porque es puramente decorativo (el scroll ya
+        funciona sin él; este solo es affordance visual).
+      -->
+      <div class="modal__scroll-hint" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
     </div>
   </div>
 
@@ -875,6 +889,29 @@
         overlay.hidden = false;
         setTimeout(function () { overlay.hidden = true; }, 90000);
       });
+    })();
+
+    /* Scroll-hint · toggle del chevron del borde inferior.
+       Cuando el panel tiene contenido scrolleable Y el usuario NO ha
+       llegado al fondo, el chevron pulsa indicando "hay más abajo".
+       Al scrollear al fondo (o si NO hay overflow), se oculta.
+       Sin libs, ~250 bytes inline. */
+    (function () {
+      var panel = document.querySelector('.modal__panel');
+      if (!panel) return;
+      var update = function () {
+        var atBottom = panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 4;
+        var hasOverflow = panel.scrollHeight > panel.clientHeight + 4;
+        if (atBottom || !hasOverflow) {
+          panel.classList.add('modal__panel--scrolled-bottom');
+        } else {
+          panel.classList.remove('modal__panel--scrolled-bottom');
+        }
+      };
+      panel.addEventListener('scroll', update, { passive: true });
+      // Estado inicial (en caso de que el modal se abra con poco contenido
+      // y NO haya overflow).
+      update();
     })();
 
     /* Counter del textarea 'proceso' — actualiza caracteres en
