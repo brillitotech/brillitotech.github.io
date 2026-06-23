@@ -1,0 +1,158 @@
+/* sections-como-trabajo.css · Cómo trabajo (titles compartidos + diagram + barra de impacto) */
+/* Mantiene id="testimonios" para no romper anchors del nav.
+   Dos sub-secciones dentro de una sección unificada:
+     .subsection                       → wrapper de cada sub-sección
+     .subsection-title / .subsection-sub → tipografía H3 + bajada
+
+     .flow-diagram                     → SVG inline del flujo de 3 pasos
+     .flow-node / .flow-num / .flow-title / .flow-desc
+
+     .resultado-card                   → card del caso real auditado
+     .resultado-card__headline / .body / .meta / .logo / .cite
+   ============================================================ */
+
+/* Títulos de sección compartidos (también los usa #contacto) */
+.section-title {
+  color: var(--color-text);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: center;
+  margin-bottom: 0.6rem;
+}
+
+.section-sub {
+  color: var(--color-text);
+  opacity: 0.7;
+  font-size: 0.95rem;
+  text-align: center;
+  margin: 0 0 2.5rem;
+}
+
+/* ============================================================
+   5 · BARRA DE IMPACTO · la auditoría convertida en trofeo
+   ------------------------------------------------------------
+   Bloque dentro del .resultado-card que muestra la auditoría
+   técnica del proyecto con barras de progreso. Es tu prueba
+   social más fuerte: código, números, hechos.
+   ============================================================ */
+.impact {
+  margin-top: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-text-muted);
+  text-align: left;
+}
+
+.impact__title {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin: 0 0 0.85rem;
+  font-weight: 500;
+}
+
+.impact__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.impact__list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "label value"
+    "bar   bar";
+  gap: 0.25rem 0.5rem;
+  align-items: center;
+}
+
+.impact__label {
+  grid-area: label;
+  font-size: 0.78rem;
+  color: var(--color-text);
+  opacity: 0.85;
+}
+
+.impact__value {
+  grid-area: value;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.impact__bar {
+  grid-area: bar;
+  height: 4px;
+  background: var(--color-bg);
+  border-radius: 2px;
+  overflow: hidden;
+  display: block;
+}
+
+.impact__fill {
+  display: block;
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.impact__bar--perfect .impact__fill {
+  background: linear-gradient(90deg, var(--color-accent), #1AFF77);
+}
+
+.impact__source {
+  margin: 0.85rem 0 0;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.impact__source a {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+/* ============================================================
+   8 · CÓMO TRABAJO · diagrama SVG inline de 3 pasos
+   ------------------------------------------------------------
+   Wrapper + tipografía de la sub-sección y estilos del SVG.
+   El viewBox fijo (800×180) más max-width: 100% en CSS hace que
+   el SVG escale fluido en mobile y desktop sin perder proporción.
+   ============================================================ */
+
+.subsection {
+  margin-bottom: 4rem;
+}
+
+.subsection:last-child {
+  margin-bottom: 0;
+}
+
+.subsection-title {
+  color: var(--color-text);
+  font-size: clamp(1.15rem, 2.5vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  text-align: center;
+  margin: 0 0 0.5rem;
+}
+
+.subsection-sub {
+  color: var(--color-text);
+  opacity: 0.72;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  text-align: center;
+  max-width: 36rem;
+  margin: 0 auto 2rem;
+}

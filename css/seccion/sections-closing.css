@@ -1,0 +1,135 @@
+/* sections-closing.css · CTA final con trust signals (sección #contacto) */
+.closing {
+  text-align: center;
+  position: relative;
+  padding: 5rem 0 6rem;
+  margin-top: 2rem;
+  isolation: isolate;
+  /* contiene el z-index del ::before sin escapar */
+}
+
+/* Fondo decorativo: borde superior técnico + tinte radial accent.
+   Vive en ::before para que el contenedor <section> mantenga su
+   background limpio (mejor lectura para screen readers y zoom 200%,
+   donde los pseudo-elementos decorativos suelen ocultarse). */
+.closing::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center top,
+      var(--color-accent-tint) 0%,
+      transparent 60%);
+  border-top: 1px solid var(--color-text-muted);
+}
+
+@media (min-width: 720px) {
+  .closing {
+    padding: 7rem 0 8rem;
+  }
+}
+
+.closing-title {
+  color: var(--color-text);
+  font-size: clamp(1.5rem, 3.6vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: 0;
+  max-width: 720px;
+  margin: 0 auto 1.25rem;
+  line-height: 1.25;
+}
+
+.closing-title__hl {
+  color: var(--color-accent);
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.closing-sub {
+  color: var(--color-text);
+  opacity: 0.75;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  max-width: 32rem;
+  margin: 0 auto 2.5rem;
+}
+
+.closing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+/* Botón primary con +10% de escala respecto al base.
+   El CTA principal debe pesar más que el ghost, no solo en color. */
+.closing-actions .btn--primary {
+  padding: 1.1rem 2rem;
+  font-size: 1.0625rem;
+  min-height: 52px;
+}
+
+.closing-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  opacity: 0.78;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--color-text-muted);
+  max-width: 38rem;
+}
+
+.closing-trust__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.closing-trust__icon {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+
+/* ---------- Mobile <480px · stack vertical + ancho completo ---------- */
+@media (max-width: 480px) {
+  .closing {
+    padding: 4rem 0 5rem;
+  }
+
+  .closing-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .closing-actions {
+    flex-direction: column;
+    gap: 0.875rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .closing-actions .btn {
+    width: 100%;
+  }
+
+  .closing-actions .btn--primary {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    min-height: 50px;
+  }
+
+  .closing-trust {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem 1rem;
+  }
+}

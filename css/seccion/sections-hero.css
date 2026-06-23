@@ -1,0 +1,181 @@
+/* sections-hero.css · Hero (eyebrow, h1, sub, props, CTA, illustration, availability) */
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 1.25rem;
+  font-weight: 500;
+}
+
+.hero-eyebrow__dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-accent-tint);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px var(--color-accent-tint);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 5.5vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.hero-sub {
+  font-size: clamp(1.05rem, 2vw, 1.2rem);
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--color-text);
+  opacity: 0.85;
+  margin-bottom: 1.75rem;
+  max-width: 36rem;
+}
+
+.hero-props {
+  list-style: none;
+  margin: 0 0 2rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.hero-props li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.92rem;
+  color: var(--color-text);
+  opacity: 0.92;
+  line-height: 1.5;
+}
+
+.hero-props__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.hero-cta {
+  margin-bottom: 0;
+}
+
+/* Hero · ilustración flotante (patrón decorativo)
+   --------------------------------------------------------
+   Solo visible en ≥720px: en mobile ocupa toda la pantalla
+   y tapaba el texto del H1, H2 y CTAs. El hero mobile
+   queda limpio, solo tipografía sobre fondo. */
+.hero-illustration-float {
+  display: none;
+}
+
+@media (min-width: 720px) {
+  .hero-illustration-float {
+    display: block;
+    position: absolute;
+    /* top:0 + bottom:0 = wrapper cubre toda la altura del hero.
+       La imagen interior (object-fit:cover) recorta mostrando
+       el centro, lo que tapla las marcas decorativas arriba y
+       abajo sin necesidad de agrandar el wrapper. */
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: clamp(650px, 65vw, 950px);
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.85;
+    overflow: hidden;
+  }
+}
+
+.hero-illustration {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* object-position desplaza el foco hacia arriba: la parte
+     superior del SVG cubre la marca del decor arriba a la
+     derecha y la parte inferior tapa el rombo blanco. */
+  object-position: 60% 30%;
+  filter: drop-shadow(0 16px 40px rgba(13, 27, 30, 0.25));
+}
+
+/* Texto del hero siempre por encima de la imagen */
+.hero-text {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-availability {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  opacity: 0.75;
+  padding: 0.45rem 0.85rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-text-muted);
+  border-radius: 999px;
+  position: absolute;
+  bottom: 2rem;
+  right: clamp(1rem, 4vw, 4rem);
+  z-index: 2;
+  /* por encima de la ilustración flotante (z-index 0) */
+}
+
+.hero-availability__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2ECC71;
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.25);
+  animation: pulse-availability 2s ease-in-out infinite;
+}
+
+@keyframes pulse-availability {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.25);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(46, 204, 113, 0);
+  }
+}

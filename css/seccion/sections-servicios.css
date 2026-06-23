@@ -1,0 +1,170 @@
+/* sections-servicios.css · Servicios (título, subtítulo, CTA) + cards reutilizables */
+.services-title {
+  color: var(--color-text);
+  font-size: clamp(1.75rem, 4vw, 2.4rem);
+  margin-bottom: 0.85rem;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.services-sub {
+  color: var(--color-text);
+  opacity: 0.78;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  text-align: center;
+  max-width: 38rem;
+  margin: 0 auto 2.75rem;
+}
+
+/* CTA unificado de la sección servicios.
+   Wrapper centrado bajo la grilla; el .btn--primary adentro
+   hereda su display: inline-flex. Un solo botón evita que 3
+   CTAs compitan entre sí y le quita jerarquía al hero. */
+.services-cta {
+  text-align: center;
+  margin-top: 2.5rem;
+}
+
+/* ============================================================
+   3 · CARDS · tarjeta reutilizable de servicios
+   ============================================================ */
+.card {
+  background: var(--color-surface);
+  padding: 2rem 1.75rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-text-muted);
+  box-shadow: 0 2px 8px var(--color-shadow);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.card:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 4px 16px var(--color-accent-glow);
+  transform: translateY(-2px);
+}
+
+.card h3 {
+  color: var(--color-text);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+/* Icono SVG · hereda color del contenedor, color verde clorofila */
+.card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+  border-radius: 8px;
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.card-icon svg {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+}
+
+/* Variantes de icono · todas comparten la base, cambian solo el
+   fondo tintado para que las 3 cards sean distinguibles al ojo. */
+.card-icon--bolt,
+.card-icon--leaf,
+.card-icon--scope {
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+}
+
+/* Texto de las cards · tres tipos diferenciados */
+.card__problem {
+  color: var(--color-text);
+  opacity: 0.8;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.card__solution {
+  color: var(--color-text);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-text-muted);
+  border-top-style: dashed;
+  border-top-width: 1px;
+  opacity: 0.95;
+}
+
+.card__arrow {
+  color: var(--color-accent);
+  font-weight: 700;
+  margin-right: 0.4rem;
+}
+
+/* CTA secundario por card · enlace contextual a WhatsApp con
+   mensaje pre-fijado específico del servicio. Aparece debajo de
+   .card__solution con la misma voz visual del sitio (verde accent,
+   sin subrayado por defecto, hover refuerza color). */
+.card__whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  align-self: flex-start;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  background: var(--color-accent-tint);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.card__whatsapp:hover,
+.card__whatsapp:focus-visible {
+  background: var(--color-accent);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ---------- #servicios · reduce 30% padding-bottom para----------
+   conectar mejor con #testimonios. Mobile: 4.5rem → 3.15rem.
+   Desktop (override en breakpoint 720px): 6rem → 4.2rem. */
+#servicios {
+  padding-bottom: 3.15rem;
+}
+
+/* ---------- #testimonios · línea verde difuminada abajo ----------
+   Mismo patrón que .bio::after. Cierra la sección entre
+   Acompañamiento estratégico y #contacto con el mismo lenguaje
+   visual que las separaciones hero↔bio y bio↔servicios. */
+#testimonios {
+  position: relative;
+}
+
+#testimonios::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(to right,
+      transparent 0%,
+      var(--color-accent) 50%,
+      transparent 100%);
+  opacity: 0.55;
+  pointer-events: none;
+}
