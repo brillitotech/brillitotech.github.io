@@ -18,6 +18,42 @@
   color: var(--color-accent);
 }
 
+/* SVG mobile (≤720px) · layout 3+3 zigzag.
+   Oculto por defecto en desktop. En mobile REEMPLAZA al SVG desktop
+   de 1 fila de 6 hexs (que se vuelve ilegible por escala del viewBox
+   1200×620 → cada hex queda en ~50px y el texto no se lee).
+   El nuevo SVG tiene viewBox 500×720 (más cuadrado), 3 hexs arriba
+   + 3 abajo, conectados por una flecha zigzag vertical. */
+.flow-hexagram-mobile {
+  display: none;
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  margin: 0 auto;
+  color: var(--color-accent);
+}
+
+/* Línea de progreso horizontal del SVG mobile (verde clorofila con dash sutil).
+   Hereda los estilos de .flow-hexagram__line en desktop; en mobile
+   tenemos 2 líneas separadas (una por fila). */
+.flow-hexagram-mobile .flow-hexagram__line {
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 8;
+  opacity: 0.85;
+}
+
+.flow-hexagram-mobile .flow-hexagram__arrow-out {
+  stroke: currentColor;
+  stroke-width: 2;
+  opacity: 0.85;
+}
+
+/* El zigzag usa path en lugar de line, pero hereda estilo base */
+.flow-hexagram-mobile .flow-hexagram__zigzag {
+  stroke: currentColor;
+}
+
 /* Línea de progreso horizontal (verde clorofila con dash sutil).
    Filtro de glow quitado: el navegador lo pintaba casi invisible
    sobre el verde abismo. La línea sola con buen contraste lee mejor. */
@@ -201,23 +237,30 @@
 
 @media (max-width: 720px) {
 
-  /* En mobile el viewBox se reduce horizontalmente y los textos
-     pueden volverse ilegibles. Subimos fuentes compensando el
-     factor de escala sin forzar aspect-ratio. */
+  /* Toggle mobile/desktop:
+     - Ocultamos el SVG desktop (6 hexs en línea horizontal)
+     - Mostramos el SVG mobile (3 hexs arriba + 3 abajo, zigzag) */
   .flow-hexagram {
+    display: none;
+  }
+
+  .flow-hexagram-mobile {
+    display: block;
     max-width: 100%;
   }
 
+  /* Tipografía del SVG mobile · más pequeña que desktop porque cada
+     hex ahora ocupa más proporción del viewBox 500×720. */
   .flow-hex__title {
-    font-size: 18px;
+    font-size: 14px;
   }
 
   .flow-hex__num {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .flow-hex__deliv {
-    font-size: 15px;
+    font-size: 12px;
   }
 
   /* En mobile el aire extra del viewBox 1200x540 SÍ lo necesitamos

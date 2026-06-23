@@ -543,6 +543,99 @@
             <line class="flow-hexagram__arrow-out" x1="1148" y1="170" x2="1182" y2="170" marker-end="url(#hex-arrow)" />
           </svg>
 
+          <!--
+            SVG MOBILE (≤720px) · Layout 3+3 zigzag.
+            3 hexs arriba (0, 1, 2) + 3 hexs abajo (3, 4, 5) conectados
+            por flechas verticales zig-zag. ViewBox más cuadrado (500x720)
+            para que cada hex ocupe ~150px de ancho real en mobile y
+            los textos se lean.
+            Display:none en desktop via CSS; el SVG desktop de arriba
+            sigue siendo el principal en ≥720px.
+          -->
+          <svg class="flow-hexagram-mobile" viewBox="0 0 500 720" xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label="Flujo freelance en seis fases en móvil: 0 Diagnóstico, 1 Descubrimiento, 2 Cotización, 3 Prueba de concepto, 4 MVP, 5 Producción.">
+
+            <!-- Definiciones reutilizadas: marker de flecha -->
+            <defs>
+              <marker id="hex-arrow-mobile" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+                orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+              </marker>
+            </defs>
+
+            <!-- Fila 1 · HEXS 0, 1, 2 (arriba) -->
+            <!-- Línea horizontal punteada fila 1 -->
+            <line class="flow-hexagram__line" x1="80" y1="100" x2="420" y2="100" />
+
+            <!-- Hex 0 · DIAGNÓSTICO (arriba-izquierda) -->
+            <g class="flow-hex-node" transform="translate(80,100)">
+              <polygon class="flow-hex__shape" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" />
+              <polygon class="flow-hex__fill" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" />
+              <text class="flow-hex__num" y="-6" text-anchor="middle">0</text>
+              <text class="flow-hex__title" y="18" text-anchor="middle">DIAGNÓSTICO</text>
+              <text class="flow-hex__deliv" y="105" text-anchor="middle">Decisión de avanzar</text>
+            </g>
+
+            <!-- Hex 1 · DESCUBRIMIENTO (arriba-centro) -->
+            <g class="flow-hex-node" transform="translate(250,100)">
+              <polygon class="flow-hex__shape" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" />
+              <polygon class="flow-hex__fill" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" />
+              <text class="flow-hex__num" y="-6" text-anchor="middle">1</text>
+              <text class="flow-hex__title" y="18" text-anchor="middle">DESCUBRIMIENTO</text>
+              <text class="flow-hex__deliv" y="105" text-anchor="middle">PRD claro y alineado</text>
+            </g>
+
+            <!-- Hex 2 · COTIZACIÓN (arriba-derecha) -->
+            <g class="flow-hex-node" transform="translate(420,100)">
+              <polygon class="flow-hex__shape" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" />
+              <polygon class="flow-hex__fill" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" />
+              <text class="flow-hex__num" y="-6" text-anchor="middle">2</text>
+              <text class="flow-hex__title" y="18" text-anchor="middle">COTIZACIÓN</text>
+              <text class="flow-hex__deliv" y="105" text-anchor="middle">Propuesta económica</text>
+            </g>
+
+            <!-- Flecha zigzag · hex 2 (arriba-derecha, x=420) → hex 3 (abajo-izquierda, x=80) -->
+            <path class="flow-hexagram__zigzag" d="M 420,160 L 420,260 L 80,260 L 80,320"
+              fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 8" opacity="0.85"
+              marker-end="url(#hex-arrow-mobile)" />
+
+            <!-- Fila 2 · HEXS 3, 4, 5 (abajo) -->
+            <!-- Línea horizontal punteada fila 2 -->
+            <line class="flow-hexagram__line" x1="80" y1="430" x2="420" y2="430" />
+
+            <!-- Hex 3 · PoC (abajo-izquierda) -->
+            <g class="flow-hex-node" transform="translate(80,430)">
+              <polygon class="flow-hex__shape" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" />
+              <polygon class="flow-hex__fill" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" />
+              <text class="flow-hex__num" y="-6" text-anchor="middle">3</text>
+              <text class="flow-hex__title" y="18" text-anchor="middle">PoC</text>
+              <text class="flow-hex__deliv" y="105" text-anchor="middle">Prototipo funcional</text>
+            </g>
+
+            <!-- Hex 4 · MVP (abajo-centro) -->
+            <g class="flow-hex-node" transform="translate(250,430)">
+              <polygon class="flow-hex__shape" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" />
+              <polygon class="flow-hex__fill" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" />
+              <text class="flow-hex__num" y="-6" text-anchor="middle">4</text>
+              <text class="flow-hex__title" y="18" text-anchor="middle">MVP</text>
+              <text class="flow-hex__deliv" y="105" text-anchor="middle">Producto mínimo viable</text>
+            </g>
+
+            <!-- Hex 5 · PRODUCCIÓN (abajo-derecha, destacado) -->
+            <g class="flow-hex-node flow-hex-node--last" transform="translate(420,430)">
+              <polygon class="flow-hex__shape" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" />
+              <polygon class="flow-hex__fill" points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" />
+              <text class="flow-hex__num" y="-6" text-anchor="middle">5</text>
+              <text class="flow-hex__title" y="18" text-anchor="middle">PRODUCCIÓN</text>
+              <text class="flow-hex__deliv" y="105" text-anchor="middle">Proyecto en vivo, tuyo</text>
+            </g>
+
+            <!-- Flecha final · sale del hex 5 hacia "tuyo" -->
+            <line class="flow-hexagram__arrow-out" x1="475" y1="430" x2="490" y2="430"
+              marker-end="url(#hex-arrow-mobile)" />
+          </svg>
+
           <!-- Banner inferior · recordatorio del 'todo es tuyo' -->
           <div class="marco-banner marco-banner--bottom" aria-hidden="false">
             <span class="marco-banner__icon" aria-hidden="true">
