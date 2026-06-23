@@ -240,6 +240,13 @@
   .flow-hexagram-mobile {
     display: block;
     max-width: 100%;
+    /* Simetría con banner-top:
+       viewBox 500x720 reserva ~120 unidades de aire al fondo después
+       del hex 5 (deliv-5 en y=535). Sin compensación, el gap entre
+       hex 5 y banner-bot es ~147px, vs ~47px entre banner-top y hex 0.
+       El margin-bottom negativo cierra esa diferencia sin tocar el
+       viewBox (mantiene los hexágonos intactos). */
+    margin-bottom: -155px;
   }
 
   /* Tipografía del SVG mobile · más pequeña que desktop porque cada
@@ -256,11 +263,12 @@
     font-size: 12px;
   }
 
-  /* En mobile el aire extra del viewBox 1200x540 SÍ lo necesitamos
-     para que los entregables verdes no se monten. Restablecemos
-     el margin-top con más aire del que tenía antes. */
+  /* Simetría con el banner superior:
+     - Banner top tiene margin-bottom: 1.25rem (gap ~20px al SVG)
+     - Banner bottom necesita gap equivalente al final del SVG
+     margin-top: 0 (no 2.5rem) para igualar el gap arriba. */
   .marco-banner--bottom {
-    margin-top: 2.5rem;
+    margin-top: 0;
   }
 
   .marco-banner__text {
