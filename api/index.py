@@ -28,6 +28,7 @@ import json
 import os
 import re
 import urllib.parse
+import zlib
 from http.server import BaseHTTPRequestHandler
 
 import google.generativeai as genai
@@ -60,6 +61,11 @@ DEBUG_ERRORS = os.environ.get("DEBUG_ERRORS", "").lower() in ("1", "true", "yes"
 # secretos por sí mismo — solo lo que el servidor iba a loguear.
 DEBUG_HEADER_NAME = "X-Debug"
 DEBUG_HEADER_VALUE = "1"
+
+# Email de contacto que aparece en el CTA final del reporte ("respondé
+# este correo o escribí directamente a <email>"). Se sustituye del
+# placeholder literal que emite Gemini en el Markdown.
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "liwaisitech@gmail.com")
 
 # Catálogo exacto de campos que exige el brief.
 REQUIRED_FIELDS = (
@@ -413,14 +419,18 @@ def _build_mermaid_html(code: str) -> str:
        el de las clases. Inline es la única forma de que se vea bien en
        Gmail, Outlook, Apple Mail y compañía.
     """
-    # mermaid.live usa pako (zlib) + base64url del JSON. Hacemos una versión
-    # simplificada: base64-url-safe del JSON, sin compresión. La página
-    # acepta ambos formatos en su estado "loadFromJSON".
+    # mermaid.live usa pako (deflate puro + base64url) en su fragmento #pako:.
+    # pako.deflate emite deflate raw (sin header zlib ni checksum): por eso
+    # hacemos zlib.compress(data)[2:-4] — descarta el header de 2 bytes y el
+    # checksum Adler-32 de 4 bytes, dejando solo el deflate stream que pako
+    # espera. Sin este paso, mermaid.live abre con su diagrama de ejemplo
+    # genérico en lugar del código que pasamos.
     payload = json.dumps(
         {"code": code, "mermaid": {"theme": "default"}},
         ensure_ascii=False,
-    )
-    encoded = base64.urlsafe_b64encode(payload.encode("utf-8")).decode("ascii").rstrip("=")
+    ).encode("utf-8")
+    deflated = zlib.compress(payload)[2:-4]
+    encoded = base64.urlsafe_b64encode(deflated).decode("ascii").rstrip("=")
     mermaid_url = f"https://mermaid.live/edit#pako:{encoded}"
 
     # Escapeamos el código del diagrama para que sea seguro de meter en
@@ -527,6 +537,11 @@ def markdown_to_html(md: str) -> str:
     """
     if not md:
         return ""
+
+    # Sustituir el placeholder literal del email de contacto ANTES del
+    # render. Gemini reproduce verbatim "[URL/email de contacto]" del
+    # prompt si no se lo damos ya resuelto.
+    md = md.replace("[URL/email de contacto]", CONTACT_EMAIL)
 
     # Pasada 1: extraer bloques Mermaid.
     preprocessed, mermaid_blocks = _replace_mermaid_in_markdown(md)
