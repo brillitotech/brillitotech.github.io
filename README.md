@@ -123,7 +123,7 @@ El formulario del modal (`index.html` → sección 5) envía los 6 campos al end
 | `RESEND_API_KEY` | ✅ | — | API key de Resend |
 | `OWNER_NOTIFICATION_EMAIL` | recomendada | — | Email que recibe copia de cada lead (lead-notification) |
 | `EMAIL_FROM` | opcional | `Brillitotech <no-reply@brillitotech.com>` | Remitente visible de los correos |
-| `SUCCESS_REDIRECT_URL` | opcional | `https://brillitotech.com/gracias.html` | URL del 302 en éxito (form HTML). **Cambia este valor si tu dominio de deploy es distinto.** |
+| `SUCCESS_REDIRECT_URL` | opcional | `https://brillitotech-servicios.liwaisi.tech/gracias.html` | URL del 302 en éxito (form HTML). **Cambia este valor si tu dominio de deploy es distinto.** |
 
 ---
 
@@ -169,7 +169,7 @@ curl -i -X POST http://localhost:8000/api \
 
 **Esperado** (con API keys configuradas en el deploy):
 - `HTTP/1.1 302 Found`
-- `Location: https://brillitotech.com/gracias.html` (o la `SUCCESS_REDIRECT_URL` configurada)
+- `Location: https://brillitotech-servicios.liwaisi.tech/gracias.html` (o la `SUCCESS_REDIRECT_URL` configurada)
 
 **Esperado** (cliente que pide JSON):
 ```bash
@@ -190,7 +190,7 @@ El deploy es **automático vía Vercel**: `git push` a `main` → Vercel compila
 
 1. **Importar el repo en Vercel** (https://vercel.com/new).
 2. **Environment Variables**: configurar `GEMINI_API_KEY`, `RESEND_API_KEY`, `OWNER_NOTIFICATION_EMAIL` en Project Settings → Environment Variables (Production, Preview y Development).
-3. **Dominio custom** (opcional): si no es `brillitotech.com`, setear `SUCCESS_REDIRECT_URL` apuntando a la URL real de `gracias.html` en el deploy de Vercel (ej. `https://brillitotech-github-io.vercel.app/gracias.html`).
+3. **Dominio custom** (opcional): si no es `brillitotech-servicios.liwaisi.tech`, setear `SUCCESS_REDIRECT_URL` apuntando a la URL real de `gracias.html` en el deploy del servicio (ej. `https://otro-dominio.com/gracias.html`).
 4. **Deploy**.
 
 > **Nota importante**: el backend `/api` NO funciona en GitHub Pages. Si en algún momento movés el frontend a GitHub Pages, el formulario quedará inerte. La decisión de deploy debe ser Vercel (o cualquier plataforma que soporte Python serverless en `/api`).

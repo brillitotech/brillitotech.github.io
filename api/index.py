@@ -797,7 +797,7 @@ def send_email(to_email: str, subject: str, markdown_body: str, html_body: str) 
 # se devuelve 200 con cuerpo JSON para integraciones programáticas.
 SUCCESS_REDIRECT_URL = os.environ.get(
     "SUCCESS_REDIRECT_URL",
-    "https://services-ia.vercel.app/gracias.html",
+    "https://brillitotech-servicios.liwaisi.tech/gracias.html",
 )
 
 
