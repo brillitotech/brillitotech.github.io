@@ -33,6 +33,16 @@ html:has(#diagnostico-toggle:checked) .modal {
   transition: opacity 0.18s linear, visibility 0s linear 0s;
 }
 
+/* Cuando el modal está abierto, el body queda con scroll bloqueado
+   en mobile. Sin esto, al hacer scroll dentro del modal hasta el
+   fondo, iOS Safari activa el rubber-band en el body y "tira" del
+   modal hacia abajo, ocultando el botón submit al soltar. */
+html:has(#diagnostico-toggle:checked) {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: pan-x pan-y;
+}
+
 /* Backdrop oscuro semitransparente. Es un <label> que cierra
    el modal al hacer clic. Cubre toda la pantalla y queda
    DETRÁS del panel (z-index menor). */
@@ -53,7 +63,11 @@ html:has(#diagnostico-toggle:checked) .modal {
 
    mask-image reforzado: gradiente más alto (60px) que se desvanece
    sobre el color del panel, dejando VER el contenido abajo con
-   opacidad reducida. Complementa al .modal__scroll-hint (chevron). */
+   opacidad reducida. Complementa al .modal__scroll-hint (chevron).
+
+   overscroll-behavior: none (no contain) en mobile: bloquea el
+   "rubber band" de iOS Safari que hace rebotar el scroll cuando
+   llegás al fondo, ocultando el botón submit. */
 .modal__panel {
   position: relative;
   z-index: 1;
@@ -62,7 +76,7 @@ html:has(#diagnostico-toggle:checked) .modal {
   max-height: calc(100vh - 2rem);
   max-height: calc(100dvh - 2rem);
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
   background: var(--color-bg-cyber);
   color: var(--color-text-cyber);
