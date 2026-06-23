@@ -44,6 +44,28 @@
   opacity: 1;
 }
 
+/* Claim cuantitativo del footer (Website Carbon, verificado 23 Jun 2026).
+   Mobile: ocupa su propia línea debajo de los links.
+   Desktop: se alinea a la derecha del grid, separado del bloque de contacto. */
+.site-footer__carbon {
+  margin: 0;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  text-align: center;
+}
+
+.site-footer__carbon a {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-color: var(--color-text-muted);
+  text-underline-offset: 2px;
+}
+
+.site-footer__carbon a:hover {
+  color: var(--color-accent);
+  text-decoration-color: var(--color-accent);
+}
+
 @media (min-width: 720px) {
   .site-footer__grid {
     flex-direction: row;
@@ -56,5 +78,10 @@
   .site-footer__links {
     justify-content: center;
     flex: 1;
+  }
+
+  .site-footer__carbon {
+    text-align: right;
+    white-space: nowrap;
   }
 }
