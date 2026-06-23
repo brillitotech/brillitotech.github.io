@@ -12,9 +12,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(10, 14, 23, 0.92);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  background: rgb(10, 14, 23);
+  /* backdrop-filter removido: en position:fixed sobre elementos con
+     mask-image, causaba que el background se renderizara casi
+     transparente. El blur del modal__backdrop (modal-core.css:31)
+     ya da la sensación de profundidad. Background sólido (no rgba)
+     para garantizar opacidad completa sobre el form. */
   border-radius: var(--radius-md);
   animation: overlay-fade-in 180ms ease-out;
 }
