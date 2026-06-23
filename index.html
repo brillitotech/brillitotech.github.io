@@ -854,28 +854,30 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <label for="diagnostico-toggle" class="modal__backdrop" aria-label="Cerrar modal"></label>
 
+    <!--
+      ============================================================
+      OVERLAY · "Generando diagnóstico"
+      ------------------------------------------------------------
+      Es un hijo directo de .modal (no de .modal__panel) para que
+      position:fixed cubra el viewport completo independientemente
+      del scroll interno del panel. Se muestra al hacer submit (vía
+      JS) y desaparece cuando el navegador navega a /gracias.html.
+      El atributo `hidden` lo arranca oculto: si JS está desactivado,
+      el form nativo sigue funcionando exactamente como antes (mejora
+      progresiva). `aria-live="polite"` anuncia el cambio a SR.
+      ============================================================
+    -->
+    <div class="modal__overlay" id="diagnostico-overlay" hidden role="status" aria-live="polite">
+      <div class="modal__overlay-inner">
+        <img src="assets/brillito-logo-modal.webp" alt="" class="modal__overlay-logo" width="96" height="120"
+          aria-hidden="true">
+        <p class="modal__overlay-eyebrow">// Generando tu diagnóstico</p>
+        <p class="modal__overlay-text">Espera un momento…</p>
+      </div>
+    </div>
+
     <div class="modal__panel" role="document">
       <label for="diagnostico-toggle" class="modal__close" aria-label="Cerrar" title="Cerrar">×</label>
-
-      <!--
-        ============================================================
-        OVERLAY · "Generando diagnóstico"
-        ------------------------------------------------------------
-        Se muestra al hacer submit (vía JS) y desaparece cuando el
-        navegador navega a /gracias.html. El atributo `hidden` lo
-        arranca oculto: si JS está desactivado, el form nativo
-        sigue funcionando exactamente como antes (mejora progresiva).
-        `aria-live="polite"` anuncia el cambio a lectores de pantalla.
-        ============================================================
-      -->
-      <div class="modal__overlay" id="diagnostico-overlay" hidden role="status" aria-live="polite">
-        <div class="modal__overlay-inner">
-          <img src="assets/brillito-logo-modal.webp" alt="" class="modal__overlay-logo" width="96" height="120"
-            aria-hidden="true">
-          <p class="modal__overlay-eyebrow">// Generando tu diagnóstico</p>
-          <p class="modal__overlay-text">Espera un momento…</p>
-        </div>
-      </div>
 
       <header class="modal__header">
         <p class="modal__eyebrow">// Diagnóstico Express</p>

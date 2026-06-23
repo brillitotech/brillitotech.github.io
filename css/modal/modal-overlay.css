@@ -1,8 +1,14 @@
 /* modal-overlay.css · Overlay "Generando diagnóstico" + animaciones */
+/* Los offsets de 1rem en desktop (top/right/bottom/left) coinciden
+   con el padding de .modal en modal-core.css:9 — esa es la fuente
+   de verdad para el spacing del modal. */
 .modal__overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 1100;
   display: flex;
   align-items: center;
   justify-content: center;
