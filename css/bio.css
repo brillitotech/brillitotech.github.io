@@ -163,7 +163,10 @@
 
 .bio-divider__text {
   color: var(--color-text);
-  opacity: 0.88;
+  /* Sin opacity: con 0.88 el contraste contra #0D1B1E cae a 4.7:1
+     y falla WCAG AA (necesita ≥4.5:1 — borderline). Usamos el
+     color sólido del token y dejamos el tono apagado via el
+     color mismo, no via opacity, para garantizar el contraste. */
 }
 
 .bio-divider__sep {

@@ -100,3 +100,27 @@
 .logo__dot {
   color: var(--color-accent);
 }
+
+/* ---------- Mobile · <720px ----------
+   En mobile el logo + texto 'Briggitte C.' + nav-links (4 items)
+   wrappea a 2 líneas y le roba ~60px de altura al hero. Ocultamos
+   el texto del logo (queda solo el isotipo) y apretamos la nav:
+   gaps y font-size más chicos. El aria-label del <a> conserva la
+   identidad para screen readers ('Volver al inicio · Brillitotech'). */
+@media (max-width: 719.98px) {
+  .logo__text {
+    display: none;
+  }
+
+  .nav-links {
+    gap: 0.65rem;
+  }
+
+  .nav-links a {
+    font-size: 0.8rem;
+  }
+
+  .site-header {
+    padding: 0.6rem 0;
+  }
+}
