@@ -93,10 +93,12 @@ WIRE_TO_CANONICAL = {
 # - "cifras como [estimación sin auditoría]": el brief del proyecto
 #   prohíbe fabricar números de rendimiento. Marcamos los rangos
 #   honestamente para que el lead los lea como orientativos.
-# - "REGLA OPERATIVA DE TAMAÑO": instruye a Gemini a usar hasta ~3,500
-#   tokens (alineado con max_output_tokens=3500 del GenerationConfig)
+# - "REGLA OPERATIVA DE TAMAÑO": instruye a Gemini a usar hasta ~5,000
+#   tokens (alineado con max_output_tokens=5500 del GenerationConfig)
 #   sin recortar secciones por economía. Cobertura contra truncamiento
-#   del correo.
+#   del correo. Antes (125de86) decía ~3,500 con techo 3,500 y Gemini
+#   cortaba mid-sección 1 ("**Ries"); el prompt v2 con 5 secciones + 2
+#   Mermaids completos necesita holgura real.
 # - "índice de acoplamiento operativo" + "dos diagramas Mermaid": son
 #   las señales de seniority del reporte. Sin esta directriz explícita,
 #   Gemini vuelve al "efecto plantilla" (nodos genéricos, un solo flujo).
@@ -112,7 +114,7 @@ REGLA CRÍTICA DE EXHAUSTIVIDAD: Tu respuesta DEBE incluir las CINCO secciones c
 (1, 2, 3, 4 y 5) en orden estricto. NO cierres el reporte hasta completar la sección 5. \
 Está PROHIBIDO terminar con frases como "este es el reporte" o "espero que sea útil".
 
-REGLA OPERATIVA DE TAMAÑO: El output puede extenderse hasta ~3,500 tokens. \
+REGLA OPERATIVA DE TAMAÑO: El output puede extenderse hasta ~5,000 tokens. \
 NO recortes secciones por economía. Si una tabla o un diagrama requiere más espacio, \
 úsalo. La prioridad es REPORTE COMPLETO > brevedad.
 
@@ -348,11 +350,14 @@ def generate_blueprint(payload: dict) -> str:
         prompt,
         generation_config=genai.types.GenerationConfig(
             temperature=0.15,   # bajado a 0.15: más determinístico, mejor
-                                # adherencia al formato completo de 3
+                                # adherencia al formato completo de 5
                                 # secciones (antes cortaba en sección 1)
-            max_output_tokens=3500,   # subido de 2048: las 3 secciones +
-                                       # el bloque Mermaid + el stack no
-                                       # entraban en 2048 tokens
+            max_output_tokens=5500,   # subido de 3500: el prompt v2 (125de86)
+                                       # añadió sección 5 + 2 diagramas Mermaid
+                                       # completos; las 5 secciones + 2 bloques
+                                       # Mermaid + heurística + CTA rondan los
+                                       # 4,200-4,800 tokens. El techo anterior
+                                       # cortaba mid-sección 1 ("**Ries").
         ),
     )
     return (response.text or "").strip()
