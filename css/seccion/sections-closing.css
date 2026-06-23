@@ -1,0 +1,139 @@
+/* ---------------------------------------------------------------------------
+ * sections-closing.css
+ *
+ * Cubre: landing > closing (CTA final con trust signals + quote lateral).
+ * Origen: css/sections.css (líneas 1053-1186 del monolith).
+ * Ref:   sdd/sections-css-split/explore → by_subsection.closing
+ *
+ * Incluye: .closing*, .closing-trust*, .resultado-card__rol.
+ * Dependencias cross-file: .btn--primary (buttons.css), .container (layout.css).
+ * ------------------------------------------------------------------------- */
+
+/* ---------- Quote lateral "Construí" / "Mensaje definido por" ---------- */
+.resultado-card__rol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  text-align: left;
+  padding: 0.85rem 1rem;
+  background: var(--color-accent-tint);
+  border-left: 2px solid var(--color-accent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.resultado-card__rol-label {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.resultado-card__rol-text {
+  color: var(--color-text);
+  opacity: 0.88;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* CTA puente post-resultado · H2 auditoría UX/UI.
+   Wrapper del .btn--ghost que aparece debajo del bloque de
+   impacto. Lo separamos del .impact con margin-top generoso
+   para que funcione como cierre conversacional del card. */
+.resultado-card__cta {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-text-muted);
+  border-top-style: dashed;
+  text-align: left;
+}
+
+/* ---------- Bajada humana en la auditoría ---------- */
+.impact__note {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-style: italic;
+  line-height: 1.4;
+  display: block;
+  margin: 0.15rem 0 0;
+}
+
+/* ---------- Bloque Acompañamiento estratégico ---------- */
+/* Sin caja ni fondo: cierre tipográfico de la conversación después
+   de la card de Resultados. El .container padre ya da los márgenes
+   laterales (clamp 1.25rem–3rem) y el gap vertical entre sub-secciones. */
+.acompanamiento-card {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.acompanamiento-card__logo {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 0.25rem;
+}
+
+.acompanamiento-card__logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.acompanamiento-card__name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+}
+
+.acompanamiento-card__name strong {
+  color: var(--color-text);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.acompanamiento-card__name span {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.acompanamiento-card__rol {
+  color: var(--color-text);
+  opacity: 0.85;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0.25rem 0 0;
+  max-width: 32rem;
+}
+
+.acompanamiento-card__puente {
+  color: var(--color-text);
+  opacity: 0.78;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin: 0.75rem auto 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-text-muted);
+  max-width: 32rem;
+}
+
+.acompanamiento-card__link {
+  color: var(--color-accent);
+  font-weight: 600;
+  font-style: normal;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.acompanamiento-card__link:hover,
+.acompanamiento-card__link:focus-visible {
+  border-bottom-color: var(--color-accent);
