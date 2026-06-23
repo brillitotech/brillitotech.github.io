@@ -56,14 +56,16 @@ html:has(#diagnostico-toggle:checked) {
     0 0 32px var(--color-glow-cyber);
   mask-image: linear-gradient(to bottom,
     black 0,
-    black calc(100% - 60px),
-    rgba(0, 0, 0, 0.4) calc(100% - 30px),
-    rgba(0, 0, 0, 0.1) 100%);
+    black calc(100% - 24px),
+    rgba(0, 0, 0, 0.6) calc(100% - 16px),
+    rgba(0, 0, 0, 0.2) calc(100% - 8px),
+    rgba(0, 0, 0, 0.05) 100%);
   -webkit-mask-image: linear-gradient(to bottom,
     black 0,
-    black calc(100% - 60px),
-    rgba(0, 0, 0, 0.4) calc(100% - 30px),
-    rgba(0, 0, 0, 0.1) 100%);
+    black calc(100% - 24px),
+    rgba(0, 0, 0, 0.6) calc(100% - 16px),
+    rgba(0, 0, 0, 0.2) calc(100% - 8px),
+    rgba(0, 0, 0, 0.05) 100%);
 }
 
 .modal__scroll-hint {
