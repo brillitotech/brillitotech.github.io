@@ -173,33 +173,45 @@ NO uses nombres de nodos genéricos como "Origen" o "Destino"; reemplázalos por
 los nombres de las herramientas actuales del cliente y las acciones específicas \
 de su proceso manual.
 
+REGLA CRÍTICA DE SINTAXIS MERMAID: los labels de nodo DEBEN ser sintaxis \
+Mermaid 100% válida o el link "Ver diagrama interactivo" falla con Parse error. \
+Reglas OBLIGATORIAS: \
+1) NO uses emojis dentro de los labels (⚠️ 📧 ⚡ ✅ 💻 🚀). Si querés marcar \
+   estado, usá palabras: "WARNING:", "OK:", "BOTELLA:", etc. \
+2) Si un label contiene paréntesis, dos puntos, slashes, o cualquier \
+   caracter que no sea [A-Za-z0-9 _áéíóúñÁÉÍÓÚÑ-], rodeá TODO el label con \
+   comillas dobles: A["Generar PRD con Gemini/Claude"] en vez de \
+   A[Generar PRD con Gemini/Claude]. \
+3) Los IDs de nodo (A, B, C...) NO pueden tener palabras largas con \
+   caracteres especiales. Mantener siempre A, B, C... cortos.
+
 Diagrama 1 — título "Estado actual (manual con fugas)":
 - Tipo: flowchart TD
 - Cada nodo representa una acción manual o traspaso entre herramientas
-- Marca con ⚠️ los cuellos de botella y puntos de error humano
-- Incluye al final un nodo terminal llamado "Reproceso y pérdida de datos"
+- Marca con la palabra "WARNING" los cuellos de botella y puntos de error humano
+- Incluye al final un nodo terminal llamado "Reproceso y perdida de datos"
 
 Diagrama 2 — título "Estado propuesto (serverless, consumo cero en reposo)":
 - Mismo flujo, pero con eventos asíncronos y cómputo bajo demanda
-- Cada nodo DEBE incluir entre corchetes la métrica de ahorro estimada, ej:
-  B[Captura automática ⚡ -8h/semana]
-- Incluye al final un nodo terminal llamado "Validación + alerta temprana"
+- Cada nodo DEBE incluir entre comillas dobles la métrica de ahorro estimada, ej:
+  B["Captura automatica - 8h/semana"]
+- Incluye al final un nodo terminal llamado "Validacion y alerta temprana - OK"
 
 Estructura esperada (adapta los textos al caso real del cliente):
 ```mermaid
 %% Estado actual (manual con fugas)
 flowchart TD
-  A[Cliente envía pedido por email 📧] --> B[Operador copia a Excel manualmente ⚠️]
-  B --> C[Operador reenvía a contabilidad ⚠️]
-  C --> D[Contabilidad carga en sistema ⚠️]
-  D --> E[Reproceso y pérdida de datos ⚠️]
+  A["Cliente envia pedido por email"] --> B["Operador copia a Excel manualmente - WARNING"]
+  B --> C["Operador reenvia a contabilidad - WARNING"]
+  C --> D["Contabilidad carga en sistema - WARNING"]
+  D --> E["Reproceso y perdida de datos - WARNING"]
 
 %% Estado propuesto (serverless)
 flowchart TD
-  A[Cliente envía pedido por email 📧] --> B[Trigger asíncrono ⚡ -8h/semana]
-  B --> C[Función serverless valida y enruta ⚡ -5h/semana]
-  C --> D[Base de datos ligera con auditoría ⚡ -3h/semana]
-  D --> E[Validación + alerta temprana ✅]
+  A["Cliente envia pedido por email"] --> B["Trigger asincrono - 8h/semana"]
+  B --> C["Funcion serverless valida y enruta - 5h/semana"]
+  C --> D["Base de datos ligera con auditoria - 3h/semana"]
+  D --> E["Validacion y alerta temprana - OK"]
 ```
 
 ## 3. COMPLEJIDAD DEL STACK RECOMENDADO
@@ -394,6 +406,96 @@ _MERMAID_BLOCK_RE = re.compile(
     re.DOTALL,
 )
 
+# Safety net: aunque el prompt prohíbe emojis en los labels, Gemini a veces
+# los emite igual. Mermaid 10+ falla con "Parse error" si el label contiene
+# estos emojis + paréntesis/slashes. Antes de enviar el código a mermaid.live,
+# los removemos. Cubre los emojis que Gemini usa más frecuentemente en
+# diagramas de arquitectura.
+_MERMAID_EMOJI_PATTERN = re.compile(
+    "["
+    "\U0001F4E9"  # 📧 envelope with arrow
+    "\U0001F4A1"  # 💡 light bulb
+    "\U0001F4BB"  # 💻 laptop
+    "\U0001F680"  # 🚀 rocket
+    "✅"      # ✅ check mark
+    "⚠"      # ⚠ warning (sin FE0F)
+    "⚠️"  # ⚠️ warning con selector
+    "⚡"      # ⚡ high voltage (sin FE0F)
+    "⚡️"  # ⚡️ high voltage con selector
+    "]"
+)
+
+
+def _sanitize_mermaid_code(code: str) -> str:
+    """
+    Limpia el código Mermaid para que sea parseable por mermaid.live.
+
+    1. Remueve emojis problemáticos que rompen el parser Mermaid 10+
+       cuando aparecen dentro de labels con corchetes o paréntesis.
+    2. Re-quoting de labels que contienen paréntesis, slashes, o dos
+       puntos — Mermaid exige que esos labels estén entre comillas
+       dobles, sino tira "Expecting SQE, DOUBLECIRCLEEND, PE...".
+
+    Esto es un safety net — el prompt YA prohíbe emojis y exige quoting,
+    pero Gemini a veces los emite igual. Mejor sanitizar que tener un
+    link roto.
+    """
+    code = _MERMAID_EMOJI_PATTERN.sub("", code)
+
+    # Re-quoting de labels con parser manual que balancea corchetes y
+    # paréntesis. Recorremos caracter por caracter identificando el
+    # patrón `NODE_ID[<contenido>]` o `NODE_ID(<contenido>)`.
+    out: list[str] = []
+    i = 0
+    while i < len(code):
+        # Detectar inicio de label: un identificador corto (1-3 chars
+        # alfabéticos, típico de Mermaid: A, B, AA, edge, etc.) seguido
+        # de [ o (.
+        m = re.match(r'\b([A-Za-z][A-Za-z0-9]{0,2})([\[\(])', code[i:])
+        if not m:
+            out.append(code[i])
+            i += 1
+            continue
+
+        node_id = m.group(1)
+        open_char = m.group(2)
+        close_char = ']' if open_char == '[' else ')'
+        start = i + m.start(2) + 1  # posición después del [ o (
+        # Encontrar el cierre balanceando anidamiento
+        depth = 1
+        j = start
+        while j < len(code) and depth > 0:
+            c = code[j]
+            if c == open_char:
+                depth += 1
+            elif c == close_char:
+                depth -= 1
+                if depth == 0:
+                    break
+            j += 1
+        if depth != 0 or j >= len(code):
+            # No se pudo balancear — emitir como está y avanzar
+            out.append(code[i])
+            i += 1
+            continue
+
+        label_inner = code[start:j]
+        # Si ya está quoted con comillas dobles, dejar tal cual
+        if label_inner.startswith('"') and label_inner.endswith('"'):
+            out.append(code[i:j + 1])
+        # Si tiene caracteres problemáticos, re-quotear
+        # preservando los brackets/paréntesis originales (para no
+        # cambiar la forma del nodo en Mermaid).
+        elif re.search(r'[()/&,:|<>\[\]]', label_inner):
+            escaped = label_inner.replace("\\", "\\\\").replace('"', '\\"')
+            out.append(f'{node_id}{open_char}"{escaped}"{close_char}')
+        else:
+            out.append(code[i:j + 1])
+        i = j + 1
+
+    return "".join(out).strip()
+
+
 # Placeholder único que se inserta en el Markdown antes de pasarlo al
 # renderer. Usamos un token que NO puede aparecer naturalmente en Markdown
 # válido (los marcadores de posición de html span son seguros) para que
@@ -419,18 +521,23 @@ def _build_mermaid_html(code: str) -> str:
        el de las clases. Inline es la única forma de que se vea bien en
        Gmail, Outlook, Apple Mail y compañía.
     """
-    # mermaid.live usa pako (deflate puro + base64url) en su fragmento #pako:.
-    # pako.deflate emite deflate raw (sin header zlib ni checksum): por eso
-    # hacemos zlib.compress(data)[2:-4] — descarta el header de 2 bytes y el
-    # checksum Adler-32 de 4 bytes, dejando solo el deflate stream que pako
-    # espera. Sin este paso, mermaid.live abre con su diagrama de ejemplo
-    # genérico en lugar del código que pasamos.
+    # Safety net: sanitizar emojis problemáticos antes de armar el URL.
+    # Aunque el prompt prohíbe emojis, Gemini a veces los emite igual y
+    # rompen el parser de mermaid.live.
+    code = _sanitize_mermaid_code(code)
+
+    # mermaid.live usa pako.deflate (formato zlib CON header + checksum) +
+    # base64url en su fragmento #pako:. Internamente, el editor llama a
+    # pako.inflate (no inflateRaw) sobre los bytes decodificados, por eso
+    # necesitamos el zlib-format COMPLETO — sin slicing. Si quitamos el
+    # header (zlib.compress(data)[2:-4]), el browser tira "incorrect header
+    # check" en consola y abre el diagrama de error genérico.
     payload = json.dumps(
         {"code": code, "mermaid": {"theme": "default"}},
         ensure_ascii=False,
     ).encode("utf-8")
-    deflated = zlib.compress(payload)[2:-4]
-    encoded = base64.urlsafe_b64encode(deflated).decode("ascii").rstrip("=")
+    compressed = zlib.compress(payload)
+    encoded = base64.urlsafe_b64encode(compressed).decode("ascii").rstrip("=")
     mermaid_url = f"https://mermaid.live/edit#pako:{encoded}"
 
     # Escapeamos el código del diagrama para que sea seguro de meter en
