@@ -723,7 +723,18 @@ def error_response(
     public_message: str,
     exc: BaseException | None = None,
 ) -> None:
-    """Escribe una respuesta 5xx uniforme, con campo debug opcional."""
+    """Escribe una respuesta 5xx uniforme, con campo debug opcional.
+
+    Si el cliente NO pidió JSON explícitamente (Accept: application/json
+    o X-Requested-With), redirige a gracias.html?error=<status> para que
+    el navegador muestre la página de gracias en su variante de error
+    en vez de JSON crudo en el body. Integra con clientes JS vía fetch
+    que sí esperan JSON (devolvemos 5xx + JSON como antes).
+    """
+    if not wants_json_response(handler):
+        base, _, _ = SUCCESS_REDIRECT_URL.partition("/gracias.html")
+        write_redirect(handler, f"{base}/gracias.html?error={status}")
+        return
     body: dict = {"status": "error", "message": public_message}
     if exc is not None and is_debug_request(handler):
         body["debug"] = repr(exc)

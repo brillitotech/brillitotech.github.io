@@ -824,11 +824,10 @@
     No llama preventDefault: el form nativo sigue su flujo. El overlay
     se muestra hasta que el 302 navegue a gracias.html.
 
-    LIMITACIÓN CONOCIDA: si el backend falla con 5xx, el navegador se
-    queda en index.html mostrando JSON crudo (no se hace redirect).
-    El setTimeout de 90s es un backstop para evitar que el overlay
-    quede colgado. Aceptado por ahora — refactor mayor pendiente si
-    el volumen de errores lo justifica.
+    En caso de error 5xx, el backend ahora redirige a
+    gracias.html?error=<status> en vez de devolver JSON crudo. El
+    setTimeout de 90s sigue siendo un backstop defensivo por si
+    la red se cuelga sin redirigir.
     ============================================================
   -->
   <script>

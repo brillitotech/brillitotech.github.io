@@ -78,6 +78,15 @@
       flex-wrap: wrap;
       gap: var(--space-sm);
     }
+
+    /* Variante de error · se muestra cuando el backend redirige aquí
+       con ?error=1 (o cualquier 5xx). Mismo componente, copy distinto. */
+    .thanks-card--error {
+      border-left-color: #e74c3c;
+    }
+    .thanks-card--error .thanks-card__eyebrow {
+      color: #e74c3c;
+    }
   </style>
 </head>
 
@@ -104,22 +113,22 @@
   </svg>
 
   <main class="thanks-wrap" role="main">
-    <article class="thanks-card" role="status" aria-live="polite">
-      <p class="thanks-card__eyebrow">// Diagnóstico Express · enviado</p>
-      <h1 class="thanks-card__title">Recibimos tu solicitud. Tu plano técnico va en camino.</h1>
-      <p class="thanks-card__body">
+    <article class="thanks-card" id="thanks-card" role="status" aria-live="polite">
+      <p class="thanks-card__eyebrow" id="thanks-eyebrow">// Diagnóstico Express · enviado</p>
+      <h1 class="thanks-card__title" id="thanks-title">Recibimos tu solicitud. Tu plano técnico va en camino.</h1>
+      <p class="thanks-card__body" id="thanks-body-1">
         Estamos procesando tu diagnóstico con nuestro motor de IA. En los
         próximos minutos recibirás en tu correo corporativo el plano con el
         diagnóstico financiero, la arquitectura propuesta en Mermaid y el
         stack recomendado para tu proceso.
       </p>
-      <p class="thanks-card__body">
+      <p class="thanks-card__body" id="thanks-body-2">
         Si en 10 minutos no ves el correo, revisa la carpeta de promociones
         o spam, o escríbenos a
         <a href="mailto:liwiaisitech@gmail.com" style="color: var(--color-accent);">liwiaisitech@gmail.com"</a>.
       </p>
 
-      <div class="thanks-card__actions">
+      <div class="thanks-card__actions" id="thanks-actions">
         <a href="/" class="btn btn--primary">Volver al inicio</a>
         <a href="/#servicios" class="btn btn--ghost">Ver servicios</a>
       </div>
@@ -131,6 +140,36 @@
       © 2026 Briggitte Tatiana · Brillitotech — Alta eficiencia digital para tu negocio.
     </div>
   </footer>
+
+  <!--
+    Variante de error · si el backend redirige con ?error=<status>,
+    mostramos un mensaje amigable con WhatsApp como canal de
+    recuperación. Sin JS la página se ve como éxito (default seguro).
+  -->
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var errorCode = params.get('error');
+      if (!errorCode) return;
+
+      var card = document.getElementById('thanks-card');
+      var eyebrow = document.getElementById('thanks-eyebrow');
+      var title = document.getElementById('thanks-title');
+      var body1 = document.getElementById('thanks-body-1');
+      var body2 = document.getElementById('thanks-body-2');
+      var actions = document.getElementById('thanks-actions');
+      if (!card || !title || !actions) return;
+
+      card.classList.add('thanks-card--error');
+      eyebrow.textContent = '// Diagnóstico Express · error del servidor';
+      title.textContent = 'No pudimos procesar tu solicitud ahora mismo.';
+      body1.textContent = 'Tuvimos un problema técnico al generar tu plano. Tu mensaje NO se perdió — escríbenos por WhatsApp con tu nombre y empresa y te respondemos a la brevedad.';
+      body2.textContent = 'Si preferís, podés volver a intentar enviar el formulario en unos minutos.';
+      actions.innerHTML =
+        '<a href="https://wa.me/573006666230?text=Hola%2C%20envi%C3%A9%20el%20formulario%20de%20diagn%C3%B3stico%20pero%20el%20servidor%20devolvi%C3%B3%20un%20error%20' + encodeURIComponent(errorCode) + '" target="_blank" rel="noopener" class="btn btn--primary">Escribirme por WhatsApp</a>' +
+        '<a href="/" class="btn btn--ghost">Volver al inicio</a>';
+    })();
+  </script>
 
 </body>
 
