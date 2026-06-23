@@ -102,7 +102,7 @@ html:has(#diagnostico-toggle:checked) {
 
 /* Hint de scroll · chevron pulsando abajo a la derecha.
    Solo visible cuando el panel tiene contenido scrolleable Y el
-   usuario no ha llegado al fondo. JS agrega .modal__scroll-hint--hidden
+   usuario no ha llegado al fondo. JS agrega .modal__panel--scrolled-bottom
    al panel cuando scrollTop + clientHeight >= scrollHeight. */
 .modal__scroll-hint {
   position: sticky;
@@ -421,22 +421,6 @@ html:has(#diagnostico-toggle:checked) {
 
 /* En móvil el panel pasa a height: 100vh → el overlay
    ya cubre todo por el inset:0, no necesita overrides. */
-
-/* Texto de apoyo debajo del CTA del hero — siempre visible,
-   persuade a hacer clic antes de abrir el modal.
-   Color claro para legibilidad sobre el background del hero. */
-.hero-cta__help {
-  color: rgba(249, 249, 249, 0.78);
-  font-size: 0.8rem;
-  line-height: 1.5;
-  margin: 0.75rem 0 0;
-  max-width: 32rem;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
-}
-
-.hero-cta__help strong {
-  color: #F9F9F9;
-}
 
 /* ---------- Responsive · móvil ---------- */
 @media (max-width: 720px) {
