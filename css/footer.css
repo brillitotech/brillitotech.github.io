@@ -15,16 +15,10 @@
   text-align: center;
 }
 
-.site-footer__copy,
-.site-footer__tag {
+.site-footer__copy {
   margin: 0;
   font-size: 0.8rem;
   opacity: 0.85;
-}
-
-.site-footer__tag {
-  opacity: 0.65;
-  font-style: italic;
 }
 
 .site-footer__links {
