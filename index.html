@@ -857,6 +857,64 @@
       textarea.addEventListener('input', update);
       update();
     })();
+
+    /* Modal · focus trap + management (WCAG 2.1.2 / 2.4.3 / 2.4.11)
+       El modal se abre/cierra via checkbox (#diagnostico-toggle) —
+       patrón CSS-only. El JS solo gestiona el foco:
+         · Al abrir: foco al primer campo del form.
+         · Al cerrar: foco vuelve al trigger que abrió el modal.
+         · Tab / Shift+Tab quedan atrapados dentro del modal.
+         · ESC cierra el modal. */
+    (function () {
+      var toggle = document.getElementById('diagnostico-toggle');
+      var modal = document.querySelector('.modal');
+      if (!toggle || !modal) return;
+
+      var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      var lastTrigger = null;
+
+      var getFocusable = function () {
+        return Array.prototype.slice.call(modal.querySelectorAll(FOCUSABLE));
+      };
+
+      var trapFocus = function (e) {
+        if (!toggle.checked) return;
+        if (e.key !== 'Tab') return;
+        var items = getFocusable();
+        if (items.length === 0) return;
+        var first = items[0];
+        var last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      };
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && toggle.checked) {
+          toggle.checked = false;
+          toggle.dispatchEvent(new Event('change'));
+        } else {
+          trapFocus(e);
+        }
+      });
+
+      // Cuando cambia el estado del checkbox: abrir o cerrar modal.
+      toggle.addEventListener('change', function () {
+        if (toggle.checked) {
+          lastTrigger = document.activeElement;
+          // Mover foco al primer campo del form al abrir.
+          var firstField = modal.querySelector('input, textarea, select');
+          if (firstField) firstField.focus();
+        } else if (lastTrigger && typeof lastTrigger.focus === 'function') {
+          // Devolver foco al trigger que abrió el modal al cerrar.
+          lastTrigger.focus();
+        }
+      });
+    })();
   </script>
 
 </body>
