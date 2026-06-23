@@ -294,14 +294,28 @@ def is_valid_email(value: str) -> bool:
 def validate_payload(payload: dict) -> tuple[bool, str]:
     """
     Verifica presencia de los 6 campos obligatorios y formato del email.
-    Devuelve (ok, mensaje_de_error). El mensaje es seguro para devolver al cliente.
+    Devuelve (ok, mensaje_de_error). El mensaje es seguro para devolver al cliente
+    y está escrito en segunda persona (tuteo neutro Latam) para que el lead lo
+    lea como guía, no como rechazo técnico.
     """
+    # Mapeo canónico → etiqueta humana. Usamos la etiqueta del campo en el HTML
+    # (lo que el usuario vio) en vez del nombre interno del backend.
+    HUMAN_LABELS = {
+        "nombre": "tu nombre",
+        "empresa": "el nombre de tu empresa",
+        "email": "tu correo",
+        "proceso_manual": "el proceso que querés automatizar",
+        "herramientas": "las herramientas que usan",
+        "volumen_mensual": "el volumen mensual",
+    }
     missing = [f for f in REQUIRED_FIELDS if not (payload.get(f) or "").strip()]
     if missing:
-        return False, f"Campos requeridos faltantes: {', '.join(missing)}"
+        # 'Faltan datos por completar: tu nombre, tu correo.' (legible, sin jerga)
+        labels = [HUMAN_LABELS[f] for f in missing]
+        return False, f"Faltan datos por completar: {', '.join(labels)}."
 
     if not is_valid_email(payload["email"]):
-        return False, "El campo email no tiene un formato válido."
+        return False, "El correo que escribiste no parece válido. Revisá que tenga un '@' y un dominio."
 
     return True, ""
 
@@ -900,7 +914,7 @@ class handler(BaseHTTPRequestHandler):
                 error_response(
                     self,
                     500,
-                    "El modelo no devolvió contenido.",
+                    "No pudimos generar el plano ahora. Intentá de nuevo en unos minutos.",
                 )
                 return
 
@@ -959,5 +973,5 @@ class handler(BaseHTTPRequestHandler):
             write_json(
                 self,
                 500,
-                {"status": "error", "message": "Error inesperado procesando la solicitud."},
+                {"status": "error", "message": "Algo se rompió de nuestro lado. Escribinos por WhatsApp y lo resolvemos."},
             )
