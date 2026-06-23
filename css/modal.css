@@ -213,6 +213,17 @@ html:has(#diagnostico-toggle:checked) .modal {
   font-family: inherit;
 }
 
+/* Helper text · guía visible debajo del textarea (d-proceso).
+   MEDIUM auditoría UX/UI: mejora la calidad de respuesta del usuario
+   listando qué info concreta ayuda al diagnóstico. Color muted para
+   no competir con el label, conectado con aria-describedby al input. */
+.modal__help {
+  margin: 0.35rem 0 0;
+  color: var(--color-text-cyber-mut);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
 /* ---------- Botón submit ---------- */
 .modal__submit {
   margin-top: 0.5rem;
