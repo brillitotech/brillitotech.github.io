@@ -1,0 +1,151 @@
+/* modal-core.css · Toggle + backdrop + panel + close + header + a11y */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.18s linear, visibility 0s linear 0.18s;
+}
+
+html:has(#diagnostico-toggle:checked) .modal {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.18s linear, visibility 0s linear 0s;
+}
+
+html:has(#diagnostico-toggle:checked) {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: pan-x pan-y;
+}
+
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 8, 15, 0.78);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  cursor: pointer;
+  z-index: 0;
+}
+
+.modal__panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-bg-cyber);
+  color: var(--color-text-cyber);
+  font-family: var(--font-mono-cyber);
+  border: 1px solid var(--color-accent-cyber);
+  border-radius: var(--radius-md);
+  padding: 2rem 1.75rem 1.75rem;
+  box-shadow:
+    0 0 0 1px var(--color-glow-cyber),
+    0 12px 48px rgba(0, 0, 0, 0.55),
+    0 0 32px var(--color-glow-cyber);
+  mask-image: linear-gradient(to bottom,
+    black 0,
+    black calc(100% - 60px),
+    rgba(0, 0, 0, 0.4) calc(100% - 30px),
+    rgba(0, 0, 0, 0.1) 100%);
+  -webkit-mask-image: linear-gradient(to bottom,
+    black 0,
+    black calc(100% - 60px),
+    rgba(0, 0, 0, 0.4) calc(100% - 30px),
+    rgba(0, 0, 0, 0.1) 100%);
+}
+
+.modal__scroll-hint {
+  position: sticky;
+  bottom: 0.25rem;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 0.5rem;
+  pointer-events: none;
+  z-index: 2;
+  animation: scroll-hint-bounce 1.6s ease-in-out infinite;
+}
+
+.modal__scroll-hint svg {
+  width: 22px;
+  height: 22px;
+  color: var(--color-accent-cyber);
+  filter: drop-shadow(0 0 6px var(--color-glow-cyber));
+  opacity: 0.95;
+}
+
+.modal__panel--scrolled-bottom .modal__scroll-hint {
+  display: none;
+}
+
+@keyframes scroll-hint-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(4px); opacity: 1; }
+}
+
+.modal__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.85rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--color-text-cyber-mut);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color 0.12s ease, background-color 0.12s ease;
+}
+
+.modal__close:hover {
+  color: var(--color-accent-cyber);
+  background-color: var(--color-glow-cyber);
+}
+
+.modal__header {
+  margin-bottom: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.modal__eyebrow {
+  color: var(--color-accent-cyber);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  opacity: 0.85;
+}
+
+.modal__title {
+  color: var(--color-text-cyber);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 0.5rem;
+}
+
+.modal__sub {
+  color: var(--color-text-cyber-mut);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.modal__close:focus-visible {
+  outline: 2px solid #00FF66;
+  outline-offset: 2px;
+}

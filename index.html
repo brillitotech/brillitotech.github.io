@@ -74,7 +74,10 @@
     sections-closing.css   CTA final + trust signals
     footer.css      Pie de página
     bio.css         Sobre mí (foto + texto + copy)
-    modal.css       Modal diagnóstico cyberpunk
+    modal/modal-core.css       Modal: toggle + backdrop + panel + close + header + a11y
+    modal/modal-form.css       Modal: form completo (field + inputs + counter + submit)
+    modal/modal-overlay.css    Modal: overlay "Generando diagnóstico" + animaciones
+    modal/modal-responsive.css Modal: responsive mobile (@media max-width: 720px)
 
     Orden de carga: importa. tokens primero (todo depende de él).
     ============================================================
@@ -85,7 +88,10 @@
   <link rel="stylesheet" href="css/header.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/buttons.css">
-  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/modal/modal-core.css">
+  <link rel="stylesheet" href="css/modal/modal-form.css">
+  <link rel="stylesheet" href="css/modal/modal-overlay.css">
+  <link rel="stylesheet" href="css/modal/modal-responsive.css">
   <link rel="stylesheet" href="css/bio.css">
   <link rel="stylesheet" href="css/seccion/sections-hero.css">
   <link rel="stylesheet" href="css/seccion/sections-servicios.css">
@@ -552,8 +558,7 @@
             Display:none en desktop via CSS; el SVG desktop de arriba
             sigue siendo el principal en ≥720px.
           -->
-          <svg class="flow-hexagram-mobile" viewBox="0 0 500 720" xmlns="http://www.w3.org/2000/svg"
-            role="img"
+          <svg class="flow-hexagram-mobile" viewBox="0 0 500 720" xmlns="http://www.w3.org/2000/svg" role="img"
             aria-label="Flujo freelance en seis fases en móvil: 0 Diagnóstico, 1 Descubrimiento, 2 Cotización, 3 Prueba de concepto, 4 MVP, 5 Producción.">
 
             <!-- Definiciones reutilizadas: marker de flecha -->
@@ -596,8 +601,8 @@
             </g>
 
             <!-- Flecha zigzag · hex 2 (arriba-derecha, x=420) → hex 3 (abajo-izquierda, x=80) -->
-            <path class="flow-hexagram__zigzag" d="M 420,160 L 420,260 L 80,260 L 80,320"
-              fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 8" opacity="0.85"
+            <path class="flow-hexagram__zigzag" d="M 420,160 L 420,260 L 80,260 L 80,320" fill="none"
+              stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 8" opacity="0.85"
               marker-end="url(#hex-arrow-mobile)" />
 
             <!-- Fila 2 · HEXS 3, 4, 5 (abajo) -->
@@ -921,7 +926,7 @@
             placeholder="Ej. Conciliar manualmente las facturas en Excel que nos envían los proveedores por correo..."
             aria-describedby="d-proceso-help" required></textarea>
           <p class="modal__help" id="d-proceso-help">
-            Cuanto más concreto, mejor el diagnóstico: nombre del proceso, herramientas que intervienen, frecuencia y
+            Cuanto más concreto, mejor: nombre del proceso, herramientas que intervienen, frecuencia y
             tiempo estimado que le dedicás.
           </p>
           <span class="modal__counter" role="status" aria-live="polite" aria-valuenow="0" aria-valuemin="0"
@@ -955,8 +960,8 @@
         funciona sin él; este solo es affordance visual).
       -->
       <div class="modal__scroll-hint" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round">
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </div>

@@ -1,0 +1,74 @@
+/* modal-overlay.css · Overlay "Generando diagnóstico" + animaciones */
+.modal__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 14, 23, 0.92);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border-radius: var(--radius-md);
+  animation: overlay-fade-in 180ms ease-out;
+}
+
+.modal__overlay[hidden] {
+  display: none;
+}
+
+.modal__overlay-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--color-text-cyber);
+}
+
+.modal__overlay-logo {
+  width: 96px;
+  height: 120px;
+  animation: overlay-logo-pulse 1.6s ease-in-out infinite;
+}
+
+.modal__overlay-eyebrow {
+  margin: 0;
+  font-family: var(--font-mono-cyber);
+  font-size: 0.75rem;
+  color: var(--color-accent-cyber);
+  letter-spacing: 0.05em;
+  text-transform: lowercase;
+}
+
+.modal__overlay-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-text-cyber);
+  font-weight: 500;
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlay-logo-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.06);
+    opacity: 0.8;
+  }
+}
