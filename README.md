@@ -109,8 +109,8 @@ El formulario del modal (`index.html` → sección 5) envía los 6 campos al end
 
 1. Parseo del body + normalización wire→canónico.
 2. Validación de presencia y formato de los 6 campos.
-3. `gemini-2.5-flash` con prompt de sistema de "Arquitecto de Soluciones Cloud" → reporte en Markdown con diagnóstico financiero, diagrama Mermaid y stack recomendado.
-4. Conversión del Markdown a HTML mínimo (sin librerías externas, regex puro).
+3. `gemini-2.5-flash` con prompt de sistema de "Arquitecto de Soluciones Cloud" → reporte en Markdown con diagnóstico financiero, stack recomendado en 3 capas y próximos pasos. **Sin bloques Mermaid**: la propuesta se entrega en prosa + bullets, que se renderiza limpio en Gmail, Outlook y Apple Mail sin necesidad de servicios externos.
+4. Conversión del Markdown a HTML con `python-markdown` (extensiones: `fenced_code`, `tables`, `sane_lists`, `nl2br`).
 5. `Resend` API → email al cliente con `text/plain` (Markdown) + `text/html`; segundo destinatario `OWNER_NOTIFICATION_EMAIL` para notificación de lead.
 
 ---

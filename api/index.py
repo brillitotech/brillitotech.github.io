@@ -23,12 +23,10 @@ Optimización de huella de carbono digital:
   del navegador y, por tanto, invocaciones duplicadas de la función).
 """
 
-import base64
 import json
 import os
 import re
 import urllib.parse
-import zlib
 from http.server import BaseHTTPRequestHandler
 
 import google.generativeai as genai
@@ -161,58 +159,37 @@ ESTRUCTURA OBLIGATORIA DEL REPORTE:
 - Riesgo crítico oculto: <Identifica 1 riesgo de pérdida de datos, error humano o \
   cuello de botella escalable en una línea>
 
-## 2. ARQUITECTURA DE EFICIENCIA DIGITAL
-<1 párrafo corto que explique cómo una arquitectura desacoplada, asíncrona y \
-serverless elimina el desperdicio operativo y reduce el costo de ejecución a \
-prácticamente cero en reposo.>
+## 2. ARQUITECTURA DE EFICIENCIA DIGITAL — STACK RECOMENDADO EN 3 CAPAS
+<1 párrafo corto (3-5 líneas) que explique cómo una arquitectura desacoplada, \
+asíncrona y serverless elimina el desperdicio operativo y reduce el costo de \
+ejecución a prácticamente cero en reposo. Mencioná explícitamente el stack \
+actual del cliente para anclar la propuesta.>
 
-REGLA AVANZADA DE DIAGRAMA: Genera DOS diagramas Mermaid en paralelo, dentro \
-del mismo bloque de código ```mermaid``` separados por un comentario %%.
+A continuación, describí el stack recomendado organizado en exactamente 3 capas. \
+Para cada capa incluí: nombre, responsabilidad, herramientas sugeridas (serverless \
+o edge siempre que sea posible), y métrica de ahorro estimada en horas/mes \
+o USD/mes, marcada con [estimación sin auditoría].
 
-NO uses nombres de nodos genéricos como "Origen" o "Destino"; reemplázalos por \
-los nombres de las herramientas actuales del cliente y las acciones específicas \
-de su proceso manual.
+**Capa 1 — Captura y eventos**: \
+<qué dispara el proceso sin intervención humana; webhook, API, email-parser, \
+formulario serverless, etc.> \
+Ahorro estimado: <Xh/mes o X USD/mes> [estimación sin auditoría]
 
-REGLA CRÍTICA DE SINTAXIS MERMAID: los labels de nodo DEBEN ser sintaxis \
-Mermaid 100% válida o el link "Ver diagrama interactivo" falla con Parse error. \
-Reglas OBLIGATORIAS: \
-1) NO uses emojis dentro de los labels (⚠️ 📧 ⚡ ✅ 💻 🚀). Si querés marcar \
-   estado, usá palabras: "WARNING:", "OK:", "BOTELLA:", etc. \
-2) Si un label contiene paréntesis, dos puntos, slashes, o cualquier \
-   caracter que no sea [A-Za-z0-9 _áéíóúñÁÉÍÓÚÑ-], rodeá TODO el label con \
-   comillas dobles: A["Generar PRD con Gemini/Claude"] en vez de \
-   A[Generar PRD con Gemini/Claude]. \
-3) Los IDs de nodo (A, B, C...) NO pueden tener palabras largas con \
-   caracteres especiales. Mantener siempre A, B, C... cortos.
+**Capa 2 — Procesamiento y orquestación**: \
+<funciones serverless que validan, transforman y enrutan bajo demanda; \
+colas asíncronas; reglas de negocio.> \
+Ahorro estimado: <Xh/mes o X USD/mes> [estimación sin auditoría]
 
-Diagrama 1 — título "Estado actual (manual con fugas)":
-- Tipo: flowchart TD
-- Cada nodo representa una acción manual o traspaso entre herramientas
-- Marca con la palabra "WARNING" los cuellos de botella y puntos de error humano
-- Incluye al final un nodo terminal llamado "Reproceso y perdida de datos"
+**Capa 3 — Persistencia ligera y notificación**: \
+<base de datos serverless con auditoría automática; notificaciones push \
+o email transaccional; sin servidor que mantener.> \
+Ahorro estimado: <Xh/mes o X USD/mes> [estimación sin auditoría>
 
-Diagrama 2 — título "Estado propuesto (serverless, consumo cero en reposo)":
-- Mismo flujo, pero con eventos asíncronos y cómputo bajo demanda
-- Cada nodo DEBE incluir entre comillas dobles la métrica de ahorro estimada, ej:
-  B["Captura automatica - 8h/semana"]
-- Incluye al final un nodo terminal llamado "Validacion y alerta temprana - OK"
-
-Estructura esperada (adapta los textos al caso real del cliente):
-```mermaid
-%% Estado actual (manual con fugas)
-flowchart TD
-  A["Cliente envia pedido por email"] --> B["Operador copia a Excel manualmente - WARNING"]
-  B --> C["Operador reenvia a contabilidad - WARNING"]
-  C --> D["Contabilidad carga en sistema - WARNING"]
-  D --> E["Reproceso y perdida de datos - WARNING"]
-
-%% Estado propuesto (serverless)
-flowchart TD
-  A["Cliente envia pedido por email"] --> B["Trigger asincrono - 8h/semana"]
-  B --> C["Funcion serverless valida y enruta - 5h/semana"]
-  C --> D["Base de datos ligera con auditoria - 3h/semana"]
-  D --> E["Validacion y alerta temprana - OK"]
-```
+Cerrá la sección con UNA línea de síntesis que vincule las 3 capas con el \
+ahorro total estimado de la sección 1. NO uses bloques de código Mermaid, \
+diagramas ASCII complejos, ni tablas con sintaxis especial. Solo prosa \
+narrativa + bullets simples. La prioridad es que el email se renderice \
+limpio en Gmail, Outlook y Apple Mail.
 
 ## 3. COMPLEJIDAD DEL STACK RECOMENDADO
 * Componentes sugeridos: <Menciona las capas necesarias: ej. Orquestación, \
@@ -391,233 +368,11 @@ def generate_blueprint(payload: dict) -> str:
 # en disco pero en runtime el cold-start no la paga porque Vercel cachea
 # el wheel de Python entre invocaciones del mismo runtime.
 #
-# Bloques ```mermaid```: el cliente de correo NO renderiza Mermaid, así
-# que los entregamos como un CTA visual con link a https://mermaid.live
-# (que sí renderiza Mermaid en el navegador) más un <details> colapsable
-# con el código fuente por si el lead lo quiere copiar a otra herramienta.
-# mermaid.live acepta el código del diagrama en el fragmento URL con el
-# esquema `pako:<base64-de-json-con-codigo>`, así que el link abre el
-# editor con el diagrama YA cargado, sin que el lead tenga que copy-paste.
-
-# Regex que captura el bloque completo ```mermaid ... ``` (lazy match del
-# cuerpo para no comerse más de un bloque si hubiera varios).
-_MERMAID_BLOCK_RE = re.compile(
-    r"```mermaid\s*\n(.*?)\n```",
-    re.DOTALL,
-)
-
-# Safety net: aunque el prompt prohíbe emojis en los labels, Gemini a veces
-# los emite igual. Mermaid 10+ falla con "Parse error" si el label contiene
-# estos emojis + paréntesis/slashes. Antes de enviar el código a mermaid.live,
-# los removemos. Cubre los emojis que Gemini usa más frecuentemente en
-# diagramas de arquitectura.
-_MERMAID_EMOJI_PATTERN = re.compile(
-    "["
-    "\U0001F4E9"  # 📧 envelope with arrow
-    "\U0001F4A1"  # 💡 light bulb
-    "\U0001F4BB"  # 💻 laptop
-    "\U0001F680"  # 🚀 rocket
-    "✅"      # ✅ check mark
-    "⚠"      # ⚠ warning (sin FE0F)
-    "⚠️"  # ⚠️ warning con selector
-    "⚡"      # ⚡ high voltage (sin FE0F)
-    "⚡️"  # ⚡️ high voltage con selector
-    "]"
-)
-
-
-def _sanitize_mermaid_code(code: str) -> str:
-    """
-    Limpia el código Mermaid para que sea parseable por mermaid.live.
-
-    1. Remueve emojis problemáticos que rompen el parser Mermaid 10+
-       cuando aparecen dentro de labels con corchetes o paréntesis.
-    2. Re-quoting de labels que contienen paréntesis, slashes, o dos
-       puntos — Mermaid exige que esos labels estén entre comillas
-       dobles, sino tira "Expecting SQE, DOUBLECIRCLEEND, PE...".
-
-    Esto es un safety net — el prompt YA prohíbe emojis y exige quoting,
-    pero Gemini a veces los emite igual. Mejor sanitizar que tener un
-    link roto.
-    """
-    code = _MERMAID_EMOJI_PATTERN.sub("", code)
-
-    # Re-quoting de labels con parser manual que balancea corchetes y
-    # paréntesis. Recorremos caracter por caracter identificando el
-    # patrón `NODE_ID[<contenido>]` o `NODE_ID(<contenido>)`.
-    out: list[str] = []
-    i = 0
-    while i < len(code):
-        # Detectar inicio de label: un identificador corto (1-3 chars
-        # alfabéticos, típico de Mermaid: A, B, AA, edge, etc.) seguido
-        # de [ o (.
-        m = re.match(r'\b([A-Za-z][A-Za-z0-9]{0,2})([\[\(])', code[i:])
-        if not m:
-            out.append(code[i])
-            i += 1
-            continue
-
-        node_id = m.group(1)
-        open_char = m.group(2)
-        close_char = ']' if open_char == '[' else ')'
-        start = i + m.start(2) + 1  # posición después del [ o (
-        # Encontrar el cierre balanceando anidamiento
-        depth = 1
-        j = start
-        while j < len(code) and depth > 0:
-            c = code[j]
-            if c == open_char:
-                depth += 1
-            elif c == close_char:
-                depth -= 1
-                if depth == 0:
-                    break
-            j += 1
-        if depth != 0 or j >= len(code):
-            # No se pudo balancear — emitir como está y avanzar
-            out.append(code[i])
-            i += 1
-            continue
-
-        label_inner = code[start:j]
-        # Si ya está quoted con comillas dobles, dejar tal cual
-        if label_inner.startswith('"') and label_inner.endswith('"'):
-            out.append(code[i:j + 1])
-        # Si tiene caracteres problemáticos, re-quotear
-        # preservando los brackets/paréntesis originales (para no
-        # cambiar la forma del nodo en Mermaid).
-        elif re.search(r'[()/&,:|<>\[\]]', label_inner):
-            escaped = label_inner.replace("\\", "\\\\").replace('"', '\\"')
-            out.append(f'{node_id}{open_char}"{escaped}"{close_char}')
-        else:
-            out.append(code[i:j + 1])
-        i = j + 1
-
-    return "".join(out).strip()
-
-
-# Placeholder único que se inserta en el Markdown antes de pasarlo al
-# renderer. Usamos un token que NO puede aparecer naturalmente en Markdown
-# válido (los marcadores de posición de html span son seguros) para que
-# la sustitución posterior sea inequívoca.
-_MERMAID_PLACEHOLDER = "\x00MERMAID_BLOCK_{i}\x00"
-
-
-def _build_mermaid_html(code: str) -> str:
-    """
-    Construye el bloque HTML que reemplaza al ```mermaid``` en el correo.
-
-    Estrategia:
-    1. Encodeamos el código Mermaid en base64 de un JSON {"code": "...",
-       "mermaid": {"theme": "default"}} que es el formato que acepta
-       mermaid.live en su fragmento #pako:.
-    2. Generamos un link directo al editor de mermaid.live con el diagrama
-       YA cargado (no necesita copy-paste del lead).
-    3. Mostramos el código fuente en un <details> colapsable para que el
-       lead pueda copiarlo si prefiere otra herramienta (Notion, Confluence,
-       un repo, etc.).
-    4. Todos los estilos son INLINE porque los clientes de correo (Gmail
-       especialmente) descartan el CSS del <head> y muchas veces también
-       el de las clases. Inline es la única forma de que se vea bien en
-       Gmail, Outlook, Apple Mail y compañía.
-    """
-    # Safety net: sanitizar emojis problemáticos antes de armar el URL.
-    # Aunque el prompt prohíbe emojis, Gemini a veces los emite igual y
-    # rompen el parser de mermaid.live.
-    code = _sanitize_mermaid_code(code)
-
-    # mermaid.live usa pako.deflate (formato zlib CON header + checksum) +
-    # base64url en su fragmento #pako:. Internamente, el editor llama a
-    # pako.inflate (no inflateRaw) sobre los bytes decodificados, por eso
-    # necesitamos el zlib-format COMPLETO — sin slicing. Si quitamos el
-    # header (zlib.compress(data)[2:-4]), el browser tira "incorrect header
-    # check" en consola y abre el diagrama de error genérico.
-    payload = json.dumps(
-        {"code": code, "mermaid": {"theme": "default"}},
-        ensure_ascii=False,
-    ).encode("utf-8")
-    compressed = zlib.compress(payload)
-    encoded = base64.urlsafe_b64encode(compressed).decode("ascii").rstrip("=")
-    mermaid_url = f"https://mermaid.live/edit#pako:{encoded}"
-
-    # Escapeamos el código del diagrama para que sea seguro de meter en
-    # un <pre> dentro de HTML (sólo escapamos los 3 caracteres que rompen HTML).
-    safe_code = (
-        code.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-    )
-
-    return (
-        '<div style="margin: 24px 0; padding: 20px; '
-        'border: 1px solid #5A6B7A; border-radius: 8px; '
-        'background-color: #1A2332; text-align: center;">'
-        '<p style="margin: 0 0 12px 0; color: #E8EDF2; '
-        'font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', '
-        'Roboto, sans-serif; font-size: 16px; font-weight: 600;">'
-        '📊 Diagrama de arquitectura'
-        '</p>'
-        '<a href="' + mermaid_url + '" '
-        'style="display: inline-block; padding: 10px 24px; '
-        'background-color: #4A90D9; color: #FFFFFF; '
-        'text-decoration: none; border-radius: 6px; '
-        'font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', '
-        'Roboto, sans-serif; font-size: 14px; font-weight: 600;">'
-        'Ver diagrama interactivo →'
-        '</a>'
-        '<details style="margin-top: 16px; text-align: left;">'
-        '<summary style="cursor: pointer; color: #A8B5C2; '
-        'font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', '
-        'Roboto, sans-serif; font-size: 13px;">'
-        'Ver código del diagrama'
-        '</summary>'
-        '<pre style="margin-top: 8px; padding: 12px; '
-        'background-color: #0F1620; color: #E8EDF2; '
-        'border-radius: 4px; overflow-x: auto; '
-        'font-family: \'SF Mono\', Monaco, Consolas, monospace; '
-        'font-size: 12px; line-height: 1.4;">'
-        + safe_code +
-        '</pre>'
-        '</details>'
-        '</div>'
-    )
-
-
-def _replace_mermaid_in_markdown(md: str) -> tuple[str, list[str]]:
-    """
-    Extrae los bloques ```mermaid``` del Markdown, los reemplaza por
-    placeholders opacos (que NO se ven afectados por el render de
-    python-markdown) y devuelve el Markdown modificado + la lista de
-    códigos extraídos en orden.
-
-    El placeholder usa caracteres de control (\x00) que no pueden aparecer
-    en Markdown válido, garantizando que la sustitución posterior sea
-    inequívoca.
-    """
-    blocks: list[str] = []
-    counter = [0]  # lista para closure mutable desde el callback de sub
-
-    def _swap(match: re.Match) -> str:
-        code = match.group(1)
-        blocks.append(code)
-        placeholder = _MERMAID_PLACEHOLDER.format(i=counter[0])
-        counter[0] += 1
-        return placeholder
-
-    modified = _MERMAID_BLOCK_RE.sub(_swap, md)
-    return modified, blocks
-
-
-def _substitute_mermaid_in_html(html: str, blocks: list[str]) -> str:
-    """
-    Recorre el HTML renderizado y reemplaza cada placeholder por el bloque
-    HTML generado con el link a mermaid.live y el <details> con el código.
-    """
-    result = html
-    for i, code in enumerate(blocks):
-        placeholder = _MERMAID_PLACEHOLDER.format(i=i)
-        result = result.replace(placeholder, _build_mermaid_html(code))
-    return result
+# Bloques ```mermaid```: ya no se usan. El prompt v3 reemplaza la sección
+# "Arquitectura" por "Stack recomendado en 3 capas" en prosa pura + bullets,
+# que se renderiza limpio en cualquier cliente de correo. Si Gemini emite
+# un bloque ```mermaid``` igual, python-markdown lo renderiza como
+# <pre><code> (no rompe nada, solo se ve como código fuente).
 
 
 _MD_RENDERER = _markdown_lib.Markdown(
@@ -635,12 +390,8 @@ def markdown_to_html(md: str) -> str:
     """
     Convierte Markdown a HTML usando python-markdown.
 
-    Pipeline de 2 pasadas para los bloques ```mermaid```:
-    1. Extraemos los bloques Mermaid del Markdown y los sustituimos por
-       placeholders opacos (caracteres de control que python-markdown
-       no toca).
-    2. Después del render, sustituimos los placeholders en el HTML
-       resultante por el bloque HTML del CTA a mermaid.live.
+    Pipeline de una sola pasada: sustituimos el placeholder del email de
+    contacto y renderizamos. No hay extracción de bloques especiales.
     """
     if not md:
         return ""
@@ -650,15 +401,9 @@ def markdown_to_html(md: str) -> str:
     # prompt si no se lo damos ya resuelto.
     md = md.replace("[URL/email de contacto]", CONTACT_EMAIL)
 
-    # Pasada 1: extraer bloques Mermaid.
-    preprocessed, mermaid_blocks = _replace_mermaid_in_markdown(md)
-
     # El renderer mantiene estado interno entre llamadas (reset es obligatorio).
     _MD_RENDERER.reset()
-    rendered = _MD_RENDERER.convert(preprocessed)
-
-    # Pasada 2: insertar los bloques Mermaid como HTML literal.
-    return _substitute_mermaid_in_html(rendered, mermaid_blocks)
+    return _MD_RENDERER.convert(md)
 
 
 # ---------------------------------------------------------------------------
