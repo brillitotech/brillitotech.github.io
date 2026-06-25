@@ -125,9 +125,16 @@ Tu salida es EXCLUSIVAMENTE Markdown técnico de alto impacto comercial. \
 NO incluyas saludos, introducciones narrativas, ni frases conversacionales. \
 Arranca DIRECTAMENTE con el header de la sección que se te pide.
 
-REGLA CRÍTICA DE EXHAUSTIVIDAD: Tu respuesta DEBE cubrir SOLO la sección \
-indicada abajo. NO generes las otras secciones (las pido por separado). \
-NO cierres con frases como "este es el reporte" o "espero que sea útil".
+REGLA CRÍTICA DE EXHAUSTIVIDAD:
+- Cubrís SOLO la sección indicada abajo (las otras las pido por separado
+  en llamadas independientes). NO generes las otras secciones.
+- PERO la sección que cubrís DEBE estar COMPLETA según el scope explícito
+  que el sub-prompt de abajo define (cantidad de bullets, capas o
+  párrafos). NO produzcas una sola oración ni un resumen minimalista:
+  si el scope dice "4-5 bullets cortos", escribí los 4-5; si dice
+  "3 capas", escribí las 3 capas con sus bullets. Cada sección tiene
+  techo de tokens GENEROSO, no te quedes corto.
+- NO cierres con frases como "este es el reporte" o "espero que sea útil".
 
 ---
 CONTEXTO DE DISEÑO (Green Computing):
@@ -225,18 +232,33 @@ SECTION_PROMPTS = {
 {common_rules}
 
 ---
-ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN:
+ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN, PERO COMPLETA EN SU SCOPE:
 
 ## 1. IMPACTO FINANCIERO Y OPERATIVO
-- Horas/mes absorbidas por el proceso (estimación): <calcula un rango lógico \
-basado en el volumen mensual proporcionado> [estimación sin auditoría]
-- Fuga de capital mensual estimada: <Calcula el costo asumiendo un costo \
-operativo base de $10 USD/hora, aplica x1.3 si el proceso es propenso a \
-retrabajos> [estimación sin auditoría]
-- Proyección de desperdicio anual (Status Quo): <Multiplica el costo mensual \
-por 12> [estimación sin auditoría]
-- Riesgo crítico oculto: <Identifica 1 riesgo de pérdida de datos, error \
-humano o cuello de botella escalable en una línea>
+
+Esta sección DEBE tener EXACTAMENTE 4 bullets con cifras concretas (no
+paráfrasis, no resúmenes). Cada bullet debe terminar con el marcador
+"[estimación sin auditoría]". Después del cuarto bullet, agregá UNA línea
+de cierre con la conclusión numérica (cuánto se pierde al año si no se
+actúa). Extensión objetivo: 250–350 palabras.
+
+- **Horas/mes absorbidas por el proceso (estimación):** <calculá un
+  rango lógico basado en el volumen mensual proporcionado; explicá
+  brevemente el razonamiento> [estimación sin auditoría]
+- **Fuga de capital mensual estimada:** <Calculá el costo asumiendo un
+  costo operativo base de $10 USD/hora, aplicá x1.3 si el proceso es
+  propenso a retrabajos; mencioná el resultado en USD> [estimación
+  sin auditoría]
+- **Proyección de desperdicio anual (Status Quo):** <Multiplicá el
+  costo mensual por 12; redondeá y expresá el número en USD anuales>
+  [estimación sin auditoría]
+- **Riesgo crítico oculto:** <Identificá 1 riesgo concreto de pérdida
+  de datos, error humano o cuello de botella escalable, en una línea>
+  [estimación sin auditoría]
+
+Línea de cierre obligatoria (1 oración): "Al ritmo actual, el proceso
+le cuesta a la empresa aproximadamente <X> USD/año sin contar el
+riesgo oculto de <R>."
 
 ---
 Datos del cliente para procesar:
@@ -252,41 +274,54 @@ Datos del cliente para procesar:
 {common_rules}
 
 ---
-ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN:
+ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN, PERO COMPLETA EN SU SCOPE:
 
 ## 2. ARQUITECTURA DE EFICIENCIA DIGITAL — STACK RECOMENDADO EN 3 CAPAS
-<1 párrafo corto (3-5 líneas, MÁXIMO 80 palabras) que explique cómo una \
-arquitectura desacoplada elimina el desperdicio operativo y reduce el costo \
-de ejecución a prácticamente cero en reposo, glosando los términos técnicos \
-con impacto de negocio según la REGLA DE LENGUAJE. Mencioná explícitamente \
-el stack actual del cliente para anclar la propuesta.>
 
-A continuación, describí el stack recomendado organizado en exactamente 3 \
-capas. Para cada capa (≤ 120 palabras) incluí: nombre, responsabilidad, \
-herramientas del STACK DE REFERENCIA DEL PROVEEDOR (no otras), y métrica \
-de ahorro estimada en horas/mes o USD/mes, marcada con [estimación sin \
-auditoría]. Aplicá la REGLA DE LENGUAJE en cada bullet técnico.
+Esta sección DEBE tener: (a) un párrafo introductorio corto, (b) las
+TRES capas completas con su bullet de ahorro, y (c) una línea de
+síntesis final. NO produzcas solo el párrafo introductorio ni omitas
+ninguna capa. Extensión objetivo: 450–550 palabras.
 
-**Capa 1 — Captura y eventos**: \
-<qué dispara el proceso sin intervención humana; webhook, API, email-parser, \
-formulario serverless, etc.> \
-Ahorro estimado: <Xh/mes o X USD/mes> [estimación sin auditoría]
+Párrafo introductorio (3-5 líneas, MÁXIMO 80 palabras): explicá cómo
+una arquitectura desacoplada elimina el desperdicio operativo y reduce
+el costo de ejecución a prácticamente cero en reposo, glosando los
+términos técnicos con impacto de negocio según la REGLA DE LENGUAJE.
+Mencioná explícitamente el stack actual del cliente para anclar la
+propuesta.
 
-**Capa 2 — Procesamiento y orquestación**: \
-<funciones serverless que validan, transforman y enrutan bajo demanda; \
-colas asíncronas; reglas de negocio.> \
-Ahorro estimado: <Xh/mes o X USD/mes> [estimación sin auditoría]
+**Capa 1 — Captura y eventos** (60–120 palabras):
+- Nombre de la capa.
+- Responsabilidad: qué dispara el proceso sin intervención humana
+  (webhook, API, email-parser, formulario serverless, etc.).
+- Herramientas del STACK DE REFERENCIA DEL PROVEEDOR (NO otras).
+- Métrica de ahorro estimada en horas/mes o USD/mes, marcada con
+  [estimación sin auditoría].
 
-**Capa 3 — Persistencia ligera y notificación**: \
-<base de datos serverless con auditoría automática; notificaciones push \
-o email transaccional; sin servidor que mantener.> \
-Ahorro estimado: <Xh/mes o X USD/mes> [estimación sin auditoría>
+**Capa 2 — Procesamiento y orquestación** (60–120 palabras):
+- Nombre de la capa.
+- Responsabilidad: funciones serverless que validan, transforman y
+  enrutan bajo demanda; colas asíncronas; reglas de negocio.
+- Herramientas del STACK DE REFERENCIA DEL PROVEEDOR (NO otras).
+- Métrica de ahorro estimada en horas/mes o USD/mes [estimación sin
+  auditoría].
 
-Cerrá la sección con UNA línea de síntesis que vincule las 3 capas con el \
-ahorro total estimado de la sección 1. NO uses bloques de código Mermaid, \
-diagramas ASCII complejos, ni tablas con sintaxis especial. Solo prosa \
-narrativa + bullets simples. La prioridad es que el email se renderice \
-limpio en Gmail, Outlook y Apple Mail.
+**Capa 3 — Persistencia ligera y notificación** (60–120 palabras):
+- Nombre de la capa.
+- Responsabilidad: base de datos serverless con auditoría automática;
+  notificaciones push o email transaccional; sin servidor que mantener.
+- Herramientas del STACK DE REFERENCIA DEL PROVEEDOR (NO otras).
+- Métrica de ahorro estimada en horas/mes o USD/mes [estimación sin
+  auditoría].
+
+Línea de síntesis final (1 oración): "Las tres capas combinadas
+recuperan aproximadamente <X> USD/mes del desperdicio estimado en la
+sección 1."
+
+NO uses bloques de código Mermaid, diagramas ASCII complejos, ni
+tablas con sintaxis especial. Solo prosa narrativa + bullets simples.
+La prioridad es que el email se renderice limpio en Gmail, Outlook y
+Apple Mail.
 
 ---
 Datos del cliente para procesar:
@@ -302,14 +337,22 @@ Datos del cliente para procesar:
 {common_rules}
 
 ---
-ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN:
+ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN, PERO COMPLETA EN SU SCOPE:
 
 ## 3. COMPLEJIDAD DEL STACK RECOMENDADO
-* Componentes sugeridos: <Menciona las capas necesarias: ej. Orquestación, \
-Cómputo Serverless, Base de Datos ligera>
-* Viabilidad técnica: Explicar en 2 líneas por qué usar versiones de código \
-nativo u optimizado es superior a implementar plataformas "No-Code" pesadas \
-que elevan los costos de suscripción mensual y la huella de carbono digital.
+
+Esta sección DEBE tener EXACTAMENTE 2 párrafos (no solo uno). Cada
+párrafo: 3-5 líneas. Extensión objetivo: 130-160 palabras.
+
+- **Párrafo 1 — Componentes sugeridos:** mencioná las capas necesarias
+  (orquestación, cómputo serverless, base de datos ligera) y por qué
+  encajan con el stack actual del cliente. Referenciá brevemente las
+  herramientas mencionadas en la sección 2 para mantener coherencia.
+- **Párrafo 2 — Viabilidad técnica:** explicá en 2-3 líneas por qué
+  usar versiones de código nativo u optimizado es superior a
+  implementar plataformas "No-Code" pesadas que elevan los costos de
+  suscripción mensual y la huella de carbono digital. Aplicá la
+  REGLA DE LENGUAJE al mencionar conceptos técnicos.
 
 ---
 Datos del cliente para procesar:
@@ -325,20 +368,25 @@ Datos del cliente para procesar:
 {common_rules}
 
 ---
-ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN:
+ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN, PERO COMPLETA EN SU SCOPE:
 
 ## 4. BRECHA DE IMPLEMENTACIÓN Y RIESGOS OCULTOS
-Explica de forma directa que, aunque las herramientas base puedan tener \
-capas gratuitas, el riesgo de una mala implementación radica en los bucles \
-infinitos de ejecución, errores no controlados que disparan los costos de \
-la nube, fugas de seguridad de tokens y sistemas sobredimensionados que \
-generan emisiones digitales innecesarias.
 
-**Disparador hacia el siguiente paso:** Para activar esta arquitectura sin \
-incurrir en los riesgos mencionados, el camino más seguro es partir de un \
-Diagnóstico Técnico Pagado (alcance cerrado, entregable tangible) o una \
-Sesión de Calibración Gratuita de 30 minutos. Ambos caminos están \
-disponibles en la landing del proveedor.
+Esta sección DEBE tener 2-3 párrafos cortos (no solo uno). Extensión
+objetivo: 150-200 palabras.
+
+- **Párrafo 1 — El riesgo real:** explicá de forma directa que,
+  aunque las herramientas base puedan tener capas gratuitas, el riesgo
+  de una mala implementación radica en los bucles infinitos de
+  ejecución, errores no controlados que disparan los costos de la
+  nube, fugas de seguridad de tokens y sistemas sobredimensionados
+  que generan emisiones digitales innecesarias. Aplicá la REGLA DE
+  LENGUAJE para glosar conceptos técnicos con impacto de negocio.
+- **Párrafo 2 — Disparador hacia el siguiente paso:** cerrá con un
+  párrafo que presente el camino más seguro: partir de un Diagnóstico
+  Técnico Pagado (alcance cerrado, entregable tangible) o una Sesión
+  de Calibración Gratuita de 30 minutos. Ambos caminos están
+  disponibles en la landing del proveedor.
 
 ---
 Datos del cliente para procesar:
@@ -354,23 +402,29 @@ Datos del cliente para procesar:
 {common_rules}
 
 ---
-ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN:
+ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN, PERO COMPLETA EN SU SCOPE:
 
 ## 5. PUENTE HACIA LA ACCIÓN — PRÓXIMO PASO DE BAJO COMPROMISO
-- Costo de NO actuar durante los próximos 6 meses: <Multiplica la fuga \
-mensual por 6 y añade 1 línea sobre el riesgo acumulado de deuda técnica>
-- Camino recomendado: <Elige UNA de estas dos opciones según el caso:>
-    * Opción A — Sesión de Calibración Técnica de 30 minutos (sin costo, \
-sin compromiso): validamos estos números con tus datos reales, \
-identificamos el quick win de menor esfuerzo / mayor impacto y \
-decidimos juntos si tiene sentido avanzar.
-    * Opción B — Diagnóstico Técnico Pagado (alcance cerrado, entregable \
-tangible en 5 días hábiles): reporte profundo con arquitectura, \
-presupuesto y roadmap priorizado.
-- CTA directo (una sola línea, tono profesional, sin presión): \
-"Para agendar la sesión de calibración o solicitar el diagnóstico \
-pagado, respondé este correo o escribí directamente a \
-[URL/email de contacto]."
+
+Esta sección DEBE tener 3 elementos (no omitas ninguno). Extensión
+objetivo: 180-220 palabras.
+
+- **Costo de NO actuar durante los próximos 6 meses:** multiplicá la
+  fuga mensual por 6 y añadí 1 línea sobre el riesgo acumulado de
+  deuda técnica. Marcá con [estimación sin auditoría].
+- **Camino recomendado:** elegí UNA de estas dos opciones según el
+  caso (no las dos):
+    * **Opción A — Sesión de Calibración Técnica de 30 minutos**
+      (sin costo, sin compromiso): validamos estos números con tus
+      datos reales, identificamos el quick win de menor esfuerzo /
+      mayor impacto y decidimos juntos si tiene sentido avanzar.
+    * **Opción B — Diagnóstico Técnico Pagado** (alcance cerrado,
+      entregable tangible en 5 días hábiles): reporte profundo con
+      arquitectura, presupuesto y roadmap priorizado.
+- **CTA directo (una sola línea, tono profesional, sin presión):**
+  "Para agendar la sesión de calibración o solicitar el diagnóstico
+  pagado, respondé este correo o escribí directamente a
+  [URL/email de contacto]."
 
 ---
 Datos del cliente para procesar:
