@@ -120,7 +120,12 @@ WIRE_TO_CANONICAL = {
 #   3. Nuevo bloque "REGLA DE LENGUAJE — IMPACTO DE NEGOCIO, NO JERGA": cada
 #      mención de serverless/edge/RAG/FaaS/low-code/ETL/CDN/embeddings
 #      DEBE ir glosada con su traducción a ahorro de tiempo/plata/errores.
-#   4. max_output_tokens bajado de 5500 a 2800 para forzar concisión dura.
+#   4. max_output_tokens: bajado 5500→2800 (forzaba concisión) PERO causaba
+#      truncado mid-palabra porque Gemini 2.5 Flash expande prosa narrativa
+#      más de lo que el prompt declara. Subido a 3500 tras truncamiento en
+#      producción (correo cortado en '$2,...'). El budget del prompt sigue
+#      siendo ~2200 tokens; 3500 da ~50% de margen. Ver comentario en
+#      GenerationConfig para el historial completo.
 SYSTEM_PROMPT_TEMPLATE = """\
 Eres un Arquitecto de Soluciones Cloud Senior y consultor de eficiencia operativa. \
 Tu salida es EXCLUSIVAMENTE Markdown técnico de alto impacto comercial. \
@@ -426,15 +431,36 @@ def generate_blueprint(payload: dict) -> str:
             temperature=0.15,   # bajado a 0.15: más determinístico, mejor
                                 # adherencia al formato completo de 5
                                 # secciones (antes cortaba en sección 1)
-            max_output_tokens=2800,   # prompt v4: bajado de 5500 a 2800.
-                                       # Sin Mermaid y con budget por sección
-                                       # (≤ 1500 palabras / ~2200 tokens), el
-                                       # techo anterior permitía alucinaciones
-                                       # largas y recomendación de cloud
-                                       # comercial. 2800 fuerza concisión y
-                                       # respeta el budget del prompt.
+            max_output_tokens=3500,   # prompt v4: subido de 2800 a 3500
+                                       # tras truncamiento observado en
+                                       # producción (Gemini cortó mid-palabra
+                                       # en '$2,...' con 2800). El budget del
+                                       # prompt sigue siendo ~2200 tokens; 3500
+                                       # da ~50% de margen real para prosa
+                                       # narrativa expansiva de Gemini 2.5 Flash
+                                       # sin permitir el desborde original de
+                                       # 5500. Si vuelve a truncar, subir a
+                                       # 4000; si produce correos >1800 palabras,
+                                       # bajar a 3200 y endurecer el budget.
         ),
     )
+
+    # Deteccion de truncamiento: si Gemini cortó por max_output_tokens, el
+    # finish_reason viene como MAX_TOKENS. Logueamos para detectar el caso
+    # sin necesidad de leer el cuerpo del correo. No rompemos el envio: si
+    # truncó, igual mandamos lo que haya (mejor reporte incompleto que nada).
+    finish_reason = None
+    try:
+        finish_reason = str(response.candidates[0].finish_reason)
+    except (IndexError, AttributeError):
+        pass
+    if finish_reason and "MAX_TOKENS" in finish_reason:
+        print(
+            f"[generate_blueprint] WARN truncado por max_output_tokens: "
+            f"finish_reason={finish_reason}",
+            flush=True,
+        )
+
     return (response.text or "").strip()
 
 
