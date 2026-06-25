@@ -108,6 +108,19 @@ WIRE_TO_CANONICAL = {
 #   Gemini vuelve al "efecto plantilla" (nodos genéricos, un solo flujo).
 # - "puente hacia cotización" (sección 5): cierra el loop para que el
 #   lead lea un CTA accionable en vez de solo informarse y archivar.
+#
+# PROMPT v4 (commit post-390e691): con la eliminación del pipeline Mermaid
+# y la decisión de hablar a un dueño de PyME (no CTO), se invirtieron 3 cosas:
+#   1. "REGLA OPERATIVA DE TAMAÑO" reemplazada por "BUDGET DE LONGITUD" con
+#      techos por sección (sección 2 ≤ 550 palabras, total ≤ 1500).
+#   2. Nuevo bloque "STACK DE REFERENCIA DEL PROVEEDOR": prohíbe recomendar
+#      GCS/S3/Cloud Functions/Lambda/Vertex AI/Bedrock/Pub-Sub/SQS/Step
+#      Functions salvo que el cliente ya los pague. Ancla a Engram, SQLite
+#      FTS5, Obsidian/.md, Vercel Python runtime, n8n self-hosted, etc.
+#   3. Nuevo bloque "REGLA DE LENGUAJE — IMPACTO DE NEGOCIO, NO JERGA": cada
+#      mención de serverless/edge/RAG/FaaS/low-code/ETL/CDN/embeddings
+#      DEBE ir glosada con su traducción a ahorro de tiempo/plata/errores.
+#   4. max_output_tokens bajado de 5500 a 2800 para forzar concisión dura.
 SYSTEM_PROMPT_TEMPLATE = """\
 Eres un Arquitecto de Soluciones Cloud Senior y consultor de eficiencia operativa. \
 Tu salida es EXCLUSIVAMENTE Markdown técnico de alto impacto comercial. \
@@ -123,12 +136,76 @@ NO recortes secciones por economía. Si una tabla o un diagrama requiere más es
 úsalo. La prioridad es REPORTE COMPLETO > brevedad.
 
 ---
+BUDGET DE LONGITUD (límite duro, respetá esto en orden estricto):
+
+* Sección 1: ≤ 350 palabras (4-5 bullets cortos).
+* Sección 2: ≤ 550 palabras TOTAL — el párrafo introductorio ≤ 80 palabras,
+  cada capa ≤ 120 palabras, síntesis final ≤ 60 palabras.
+* Sección 3: ≤ 150 palabras (2 bullets).
+* Sección 4: ≤ 180 palabras.
+* Sección 5: ≤ 200 palabras (incluye CTA).
+
+TOTAL OBJETIVO: ~1400-1500 palabras (≈ 1800-2200 tokens). Si tenés que cortar,
+cortá primero los bullets redundantes de la sección 2, NUNCA las cifras de la
+sección 1 ni el CTA de la sección 5.
+
+---
 CONTEXTO DE DISEÑO (Green Computing):
 Todas las soluciones propuestas deben diseñarse bajo el paradigma Serverless o \
 Edge Computing, minimizando el consumo de cómputo innecesario, reduciendo costes \
 fijos a cero en reposo y mitigando drásticamente la huella de CO2 digital de la \
 operación. El cliente debe entender que ineficiencia de software es igual a \
 desperdicio de dinero en infraestructura.
+
+---
+STACK DE REFERENCIA DEL PROVEEDOR (priorizá esto o alternativas del mismo perfil):
+
+Las recomendaciones de la sección 2 DEBEN caer dentro de este perfil técnico.
+NO recomiendes Google Cloud Storage, AWS S3, Cloud Functions, Lambda, Vertex AI,
+Bedrock, Pub/Sub, SQS, Step Functions, CloudWatch, SNS ni servicios análogos de
+hiperescaladores comerciales, salvo que el cliente ya los use explícitamente
+en su stack actual.
+
+* Persistencia documental ligera: archivos Markdown (.md) en una wiki local
+  (Obsidian, Logseq, Dendron, o equivalente) + control de versiones Git.
+  Indexado y búsqueda opcional vía SQLite FTS5 sobre los .md.
+* Memoria persistente / RAG ligero: herramientas como Engram, mem.ai, o un
+  servicio MCP propio. NO recomiendes S3 / GCS / DynamoDB para esto.
+* Orquestación de procesos: funciones Python serverless (Vercel Python runtime,
+  Cloudflare Workers, Fly.io machines) o Edge Functions. NO AWS Step Functions.
+* LLMs: Gemini Flash, Claude Haiku, GPT-4o-mini, Llama local. NO Vertex AI
+  enterprise ni Bedrock salvo que el cliente ya pague por ellos.
+* Notificación: Resend, SendGrid free tier, SMTP básico, ntfy.sh.
+* Automatización de bajo código: n8n self-hosted, Windmill, Activepieces.
+  NO Zapier/Make enterprise salvo solicitud explícita.
+
+Si el stack actual del cliente es 100% Google Workspace / Microsoft 365, podés
+recomendar sustituciones dentro de esos ecosistemas, pero siempre en el tramo
+gratuito o de bajo costo.
+
+---
+REGLA DE LENGUAJE — IMPACTO DE NEGOCIO, NO JERGA:
+
+El reporte lo lee un dueño de PyME, NO un CTO. Cada vez que menciones un
+concepto técnico (serverless, edge, RAG, FaaS, low-code, ETL, CDN, asíncrono,
+desacoplado, NoSQL, vector store, embeddings, etc.) DEBE aparecer en la MISMA
+oración o en el siguiente bullet su traducción a impacto concreto de negocio:
+ahorro de tiempo, ahorro de plata, menos errores, carga más rápida, menos
+mantenimiento, menos contaminación digital.
+
+Ejemplos del estilo esperado:
+* Mal: "Usar una arquitectura edge."
+  Bien: "Hago que tu web cargue al instante incluso con mala señal, reduciendo
+  tus costos de servidor. Como el código es limpio y no desperdicia datos, tu
+  negocio contamina menos y es más eficiente."
+* Mal: "Migrar a FaaS serverless."
+  Bien: "Pasamos de pagar un servidor que corre 24/7 aunque no lo uses, a pagar
+  solo los minutos en que alguien te pide algo. Tu factura de servidor cae a
+  casi cero en horario sin actividad."
+* Mal: "Indexar la documentación con embeddings para RAG."
+  Bien: "Tu equipo encuentra la respuesta a una pregunta técnica en 5 segundos
+  en lugar de 15 minutos buscando en Google Drive. Se acabaron los 'no me
+  acuerdo dónde quedó ese documento'."
 
 ---
 HEURÍSTICA FINANCIERA (cuando no hay datos explícitos del cliente):
@@ -160,15 +237,17 @@ ESTRUCTURA OBLIGATORIA DEL REPORTE:
   cuello de botella escalable en una línea>
 
 ## 2. ARQUITECTURA DE EFICIENCIA DIGITAL — STACK RECOMENDADO EN 3 CAPAS
-<1 párrafo corto (3-5 líneas) que explique cómo una arquitectura desacoplada, \
-asíncrona y serverless elimina el desperdicio operativo y reduce el costo de \
-ejecución a prácticamente cero en reposo. Mencioná explícitamente el stack \
+<1 párrafo corto (3-5 líneas, MÁXIMO 80 palabras) que explique cómo una arquitectura \
+desacoplada elimina el desperdicio operativo y reduce el costo de ejecución a \
+prácticamente cero en reposo, glosando los términos técnicos con impacto de \
+negocio según la REGLA DE LENGUAJE. Mencioná explícitamente el stack \
 actual del cliente para anclar la propuesta.>
 
 A continuación, describí el stack recomendado organizado en exactamente 3 capas. \
-Para cada capa incluí: nombre, responsabilidad, herramientas sugeridas (serverless \
-o edge siempre que sea posible), y métrica de ahorro estimada en horas/mes \
-o USD/mes, marcada con [estimación sin auditoría].
+Para cada capa (≤ 120 palabras) incluí: nombre, responsabilidad, herramientas \
+del STACK DE REFERENCIA DEL PROVEEDOR (no otras), y métrica de ahorro \
+estimada en horas/mes o USD/mes, marcada con [estimación sin auditoría]. \
+Aplicá la REGLA DE LENGUAJE en cada bullet técnico.
 
 **Capa 1 — Captura y eventos**: \
 <qué dispara el proceso sin intervención humana; webhook, API, email-parser, \
@@ -347,12 +426,13 @@ def generate_blueprint(payload: dict) -> str:
             temperature=0.15,   # bajado a 0.15: más determinístico, mejor
                                 # adherencia al formato completo de 5
                                 # secciones (antes cortaba en sección 1)
-            max_output_tokens=5500,   # subido de 3500: el prompt v2 (125de86)
-                                       # añadió sección 5 + 2 diagramas Mermaid
-                                       # completos; las 5 secciones + 2 bloques
-                                       # Mermaid + heurística + CTA rondan los
-                                       # 4,200-4,800 tokens. El techo anterior
-                                       # cortaba mid-sección 1 ("**Ries").
+            max_output_tokens=2800,   # prompt v4: bajado de 5500 a 2800.
+                                       # Sin Mermaid y con budget por sección
+                                       # (≤ 1500 palabras / ~2200 tokens), el
+                                       # techo anterior permitía alucinaciones
+                                       # largas y recomendación de cloud
+                                       # comercial. 2800 fuerza concisión y
+                                       # respeta el budget del prompt.
         ),
     )
     return (response.text or "").strip()
