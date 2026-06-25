@@ -85,74 +85,49 @@ WIRE_TO_CANONICAL = {
     "volumen": "volumen_mensual",
 }
 
-# Prompt de sistema del brief, con f-string lazy (se aplica por request).
-# One-shot: incluye un ejemplo de output para que Gemini respete el formato
-# EXACTO. Sin el ejemplo, Gemini responde conversacionalmente ("¡Excelente!
-# Como Arquitecto de Soluciones Cloud...") en vez del Markdown estricto.
+# ---------------------------------------------------------------------------
+# Prompts por sección — refactor multi-llamada
+# ---------------------------------------------------------------------------
+# ANTES (prompt v4 monolítico, líneas 129–319 originales): una sola llamada
+# a Gemini 2.5 Flash pedía las 5 secciones en un único prompt. El historial
+# de truncamiento progresivo lo demuestra (5500→2800→3500→4500, todos
+# truncaron). La causa raíz: pedirle 1500 palabras en una sola pasada excede
+# la "ventana de output" cómoda de Gemini Flash con temperature=0.15. Subir
+# el techo trataba el síntoma, no la causa.
 #
-# Reglas activas del prompt que requieren refuerzo explícito
-# (sin él, Gemini las ignora o las suaviza):
-# - "completar las 5 secciones": el one-shot sugería un output corto
-#   y Gemini tendía a cortar antes de cerrar la última sección.
-# - "cifras como [estimación sin auditoría]": el brief del proyecto
-#   prohíbe fabricar números de rendimiento. Marcamos los rangos
-#   honestamente para que el lead los lea como orientativos.
-# - "REGLA OPERATIVA DE TAMAÑO": instruye a Gemini a usar hasta ~5,000
-#   tokens (alineado con max_output_tokens=5500 del GenerationConfig)
-#   sin recortar secciones por economía. Cobertura contra truncamiento
-#   del correo. Antes (125de86) decía ~3,500 con techo 3,500 y Gemini
-#   cortaba mid-sección 1 ("**Ries"); el prompt v2 con 5 secciones + 2
-#   Mermaids completos necesita holgura real.
-# - "índice de acoplamiento operativo" + "dos diagramas Mermaid": son
-#   las señales de seniority del reporte. Sin esta directriz explícita,
-#   Gemini vuelve al "efecto plantilla" (nodos genéricos, un solo flujo).
-# - "puente hacia cotización" (sección 5): cierra el loop para que el
-#   lead lea un CTA accionable en vez de solo informarse y archivar.
+# AHORA: el reporte se divide en 5 llamadas cortas y enfocadas. Cada llamada
+# produce ~250–450 palabras (~600 tokens), bien dentro del rango cómodo de
+# Gemini. Las llamadas son SECUENCIALES (no paralelas) para mantener
+# coherencia narrativa entre secciones: cada llamada recibe como contexto
+# acumulado el Markdown de las secciones previas.
 #
-# PROMPT v4 (commit post-390e691): con la eliminación del pipeline Mermaid
-# y la decisión de hablar a un dueño de PyME (no CTO), se invirtieron 3 cosas:
-#   1. "REGLA OPERATIVA DE TAMAÑO" reemplazada por "BUDGET DE LONGITUD" con
-#      techos por sección (sección 2 ≤ 550 palabras, total ≤ 1500).
-#   2. Nuevo bloque "STACK DE REFERENCIA DEL PROVEEDOR": prohíbe recomendar
-#      GCS/S3/Cloud Functions/Lambda/Vertex AI/Bedrock/Pub-Sub/SQS/Step
-#      Functions salvo que el cliente ya los pague. Ancla a Engram, SQLite
-#      FTS5, Obsidian/.md, Vercel Python runtime, n8n self-hosted, etc.
-#   3. Nuevo bloque "REGLA DE LENGUAJE — IMPACTO DE NEGOCIO, NO JERGA": cada
-#      mención de serverless/edge/RAG/FaaS/low-code/ETL/CDN/embeddings
-#      DEBE ir glosada con su traducción a ahorro de tiempo/plata/errores.
-#   4. max_output_tokens: bajado 5500→2800→3500 (ambos truncaron) y luego
-#      subido a 4500 tras truncamiento consistente en producción. La
-#      estimación empírica es que Gemini 2.5 Flash con prompt v4 produce
-#      ~3800-4200 tokens aunque el budget declarado sea ~2200. 4500 da margen
-#      sin permitir el desborde original de 5500. Ver comentario en
-#      GenerationConfig para el historial completo.
-SYSTEM_PROMPT_TEMPLATE = """\
+# Estructura:
+#   - SECTION_PROMPTS dict: 5 sub-prompts indexados por número de sección.
+#     Cada sub-prompt tiene solo la estructura específica de su sección
+#     (los placeholders <...>) y referencia los placeholders {cliente_*}
+#     que _build_section_prompt rellena por invocación.
+#   - COMMON_RULES_HEADER: bloque de reglas comunes (STACK DE REFERENCIA +
+#     REGLA DE LENGUAJE + HEURÍSTICA FINANCIERA + contexto de diseño) que
+#     _build_section_prompt inyecta idéntico en cada llamada.
+#   - _build_section_prompt(): arma el prompt completo de la sección N
+#     (header común + sub-prompt específico + datos del cliente + contexto
+#     acumulado de secciones previas).
+#   - _call_gemini_once() / _call_gemini_with_retry(): una llamada a Gemini
+#     con max_output_tokens=900 (techo holgado para ~450 palabras por
+#     sección) y reintento de 1 vez ante excepción.
+#   - _join_sections(): concatena las 5 secciones con headers `## N.` para
+#     preservar el contrato con _build_lead_summary (que usa str.find sobre
+#     esos headers para extraer el resumen de Sheets).
+
+COMMON_RULES_HEADER = """\
 Eres un Arquitecto de Soluciones Cloud Senior y consultor de eficiencia operativa. \
 Tu salida es EXCLUSIVAMENTE Markdown técnico de alto impacto comercial. \
 NO incluyas saludos, introducciones narrativas, ni frases conversacionales. \
-Arranca DIRECTAMENTE con el header "## 1. IMPACTO FINANCIERO Y OPERATIVO".
+Arranca DIRECTAMENTE con el header de la sección que se te pide.
 
-REGLA CRÍTICA DE EXHAUSTIVIDAD: Tu respuesta DEBE incluir las CINCO secciones completas \
-(1, 2, 3, 4 y 5) en orden estricto. NO cierres el reporte hasta completar la sección 5. \
-Está PROHIBIDO terminar con frases como "este es el reporte" o "espero que sea útil".
-
-REGLA OPERATIVA DE TAMAÑO: El output puede extenderse hasta ~5,000 tokens. \
-NO recortes secciones por economía. Si una tabla o un diagrama requiere más espacio, \
-úsalo. La prioridad es REPORTE COMPLETO > brevedad.
-
----
-BUDGET DE LONGITUD (límite duro, respetá esto en orden estricto):
-
-* Sección 1: ≤ 350 palabras (4-5 bullets cortos).
-* Sección 2: ≤ 550 palabras TOTAL — el párrafo introductorio ≤ 80 palabras,
-  cada capa ≤ 120 palabras, síntesis final ≤ 60 palabras.
-* Sección 3: ≤ 150 palabras (2 bullets).
-* Sección 4: ≤ 180 palabras.
-* Sección 5: ≤ 200 palabras (incluye CTA).
-
-TOTAL OBJETIVO: ~1400-1500 palabras (≈ 1800-2200 tokens). Si tenés que cortar,
-cortá primero los bullets redundantes de la sección 2, NUNCA las cifras de la
-sección 1 ni el CTA de la sección 5.
+REGLA CRÍTICA DE EXHAUSTIVIDAD: Tu respuesta DEBE cubrir SOLO la sección \
+indicada abajo. NO generes las otras secciones (las pido por separado). \
+NO cierres con frases como "este es el reporte" o "espero que sea útil".
 
 ---
 CONTEXTO DE DISEÑO (Green Computing):
@@ -228,31 +203,69 @@ EVALUACIÓN DE STACK (Senior level — esta línea marca tu diferencial):
   herramientas manuales distintas intervienen y cuántas dependen entre sí>
 
 ---
-ESTRUCTURA OBLIGATORIA DEL REPORTE:
+BUDGET DE LONGITUD POR SECCIÓN (límite duro):
+* Sección 1: ≤ 350 palabras (4-5 bullets cortos).
+* Sección 2: ≤ 550 palabras TOTAL — el párrafo introductorio ≤ 80 palabras,
+  cada capa ≤ 120 palabras, síntesis final ≤ 60 palabras.
+* Sección 3: ≤ 150 palabras (2 bullets).
+* Sección 4: ≤ 180 palabras.
+* Sección 5: ≤ 200 palabras (incluye CTA).
+
+TOTAL OBJETIVO ACUMULADO: ~1400-1500 palabras (≈ 1800-2200 tokens) en las \
+5 secciones. Si tenés que cortar, cortá primero los bullets redundantes de \
+la sección 2, NUNCA las cifras de la sección 1 ni el CTA de la sección 5.
+"""
+
+# Cada sub-prompt arranca con el header exacto que _build_lead_summary y
+# markdown_to_html esperan encontrar. Los placeholders <...> se mantienen
+# literarios: Gemini los reemplaza por contenido propio.
+
+SECTION_PROMPTS = {
+    1: """\
+{common_rules}
+
+---
+ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN:
 
 ## 1. IMPACTO FINANCIERO Y OPERATIVO
 - Horas/mes absorbidas por el proceso (estimación): <calcula un rango lógico \
-  basado en el volumen mensual proporcionado> [estimación sin auditoría]
-- Fuga de capital mensual estimada: <Calcula el costo asumiendo un costo operativo \
-  base de $10 USD/hora, aplica x1.3 si el proceso es propenso a retrabajos> \
-  [estimación sin auditoría]
-- Proyección de desperdicio anual (Status Quo): <Multiplica el costo mensual por 12> \
-  [estimación sin auditoría]
-- Riesgo crítico oculto: <Identifica 1 riesgo de pérdida de datos, error humano o \
-  cuello de botella escalable en una línea>
+basado en el volumen mensual proporcionado> [estimación sin auditoría]
+- Fuga de capital mensual estimada: <Calcula el costo asumiendo un costo \
+operativo base de $10 USD/hora, aplica x1.3 si el proceso es propenso a \
+retrabajos> [estimación sin auditoría]
+- Proyección de desperdicio anual (Status Quo): <Multiplica el costo mensual \
+por 12> [estimación sin auditoría]
+- Riesgo crítico oculto: <Identifica 1 riesgo de pérdida de datos, error \
+humano o cuello de botella escalable en una línea>
+
+---
+Datos del cliente para procesar:
+* Empresa: {cliente_empresa}
+* Proceso crítico manual: {cliente_proceso}
+* Stack actual: {cliente_stack}
+* Volumen mensual: {cliente_volumen}
+
+{contexto_previo}\
+""",
+
+    2: """\
+{common_rules}
+
+---
+ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN:
 
 ## 2. ARQUITECTURA DE EFICIENCIA DIGITAL — STACK RECOMENDADO EN 3 CAPAS
-<1 párrafo corto (3-5 líneas, MÁXIMO 80 palabras) que explique cómo una arquitectura \
-desacoplada elimina el desperdicio operativo y reduce el costo de ejecución a \
-prácticamente cero en reposo, glosando los términos técnicos con impacto de \
-negocio según la REGLA DE LENGUAJE. Mencioná explícitamente el stack \
-actual del cliente para anclar la propuesta.>
+<1 párrafo corto (3-5 líneas, MÁXIMO 80 palabras) que explique cómo una \
+arquitectura desacoplada elimina el desperdicio operativo y reduce el costo \
+de ejecución a prácticamente cero en reposo, glosando los términos técnicos \
+con impacto de negocio según la REGLA DE LENGUAJE. Mencioná explícitamente \
+el stack actual del cliente para anclar la propuesta.>
 
-A continuación, describí el stack recomendado organizado en exactamente 3 capas. \
-Para cada capa (≤ 120 palabras) incluí: nombre, responsabilidad, herramientas \
-del STACK DE REFERENCIA DEL PROVEEDOR (no otras), y métrica de ahorro \
-estimada en horas/mes o USD/mes, marcada con [estimación sin auditoría]. \
-Aplicá la REGLA DE LENGUAJE en cada bullet técnico.
+A continuación, describí el stack recomendado organizado en exactamente 3 \
+capas. Para cada capa (≤ 120 palabras) incluí: nombre, responsabilidad, \
+herramientas del STACK DE REFERENCIA DEL PROVEEDOR (no otras), y métrica \
+de ahorro estimada en horas/mes o USD/mes, marcada con [estimación sin \
+auditoría]. Aplicá la REGLA DE LENGUAJE en cada bullet técnico.
 
 **Capa 1 — Captura y eventos**: \
 <qué dispara el proceso sin intervención humana; webhook, API, email-parser, \
@@ -275,19 +288,51 @@ diagramas ASCII complejos, ni tablas con sintaxis especial. Solo prosa \
 narrativa + bullets simples. La prioridad es que el email se renderice \
 limpio en Gmail, Outlook y Apple Mail.
 
+---
+Datos del cliente para procesar:
+* Empresa: {cliente_empresa}
+* Proceso crítico manual: {cliente_proceso}
+* Stack actual: {cliente_stack}
+* Volumen mensual: {cliente_volumen}
+
+{contexto_previo}\
+""",
+
+    3: """\
+{common_rules}
+
+---
+ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN:
+
 ## 3. COMPLEJIDAD DEL STACK RECOMENDADO
 * Componentes sugeridos: <Menciona las capas necesarias: ej. Orquestación, \
-  Cómputo Serverless, Base de Datos ligera>
+Cómputo Serverless, Base de Datos ligera>
 * Viabilidad técnica: Explicar en 2 líneas por qué usar versiones de código \
-  nativo u optimizado es superior a implementar plataformas "No-Code" pesadas \
-  que elevan los costos de suscripción mensual y la huella de carbono digital.
+nativo u optimizado es superior a implementar plataformas "No-Code" pesadas \
+que elevan los costos de suscripción mensual y la huella de carbono digital.
+
+---
+Datos del cliente para procesar:
+* Empresa: {cliente_empresa}
+* Proceso crítico manual: {cliente_proceso}
+* Stack actual: {cliente_stack}
+* Volumen mensual: {cliente_volumen}
+
+{contexto_previo}\
+""",
+
+    4: """\
+{common_rules}
+
+---
+ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN:
 
 ## 4. BRECHA DE IMPLEMENTACIÓN Y RIESGOS OCULTOS
-Explica de forma directa que, aunque las herramientas base puedan tener capas \
-gratuitas, el riesgo de una mala implementación radica en los bucles infinitos \
-de ejecución, errores no controlados que disparan los costos de la nube, \
-fugas de seguridad de tokens y sistemas sobredimensionados que generan \
-emisiones digitales innecesarias.
+Explica de forma directa que, aunque las herramientas base puedan tener \
+capas gratuitas, el riesgo de una mala implementación radica en los bucles \
+infinitos de ejecución, errores no controlados que disparan los costos de \
+la nube, fugas de seguridad de tokens y sistemas sobredimensionados que \
+generan emisiones digitales innecesarias.
 
 **Disparador hacia el siguiente paso:** Para activar esta arquitectura sin \
 incurrir en los riesgos mencionados, el camino más seguro es partir de un \
@@ -295,28 +340,166 @@ Diagnóstico Técnico Pagado (alcance cerrado, entregable tangible) o una \
 Sesión de Calibración Gratuita de 30 minutos. Ambos caminos están \
 disponibles en la landing del proveedor.
 
+---
+Datos del cliente para procesar:
+* Empresa: {cliente_empresa}
+* Proceso crítico manual: {cliente_proceso}
+* Stack actual: {cliente_stack}
+* Volumen mensual: {cliente_volumen}
+
+{contexto_previo}\
+""",
+
+    5: """\
+{common_rules}
+
+---
+ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN:
+
 ## 5. PUENTE HACIA LA ACCIÓN — PRÓXIMO PASO DE BAJO COMPROMISO
-- Costo de NO actuar durante los próximos 6 meses: <Multiplica la fuga mensual \
-  por 6 y añade 1 línea sobre el riesgo acumulado de deuda técnica>
+- Costo de NO actuar durante los próximos 6 meses: <Multiplica la fuga \
+mensual por 6 y añade 1 línea sobre el riesgo acumulado de deuda técnica>
 - Camino recomendado: <Elige UNA de estas dos opciones según el caso:>
     * Opción A — Sesión de Calibración Técnica de 30 minutos (sin costo, \
-      sin compromiso): validamos estos números con tus datos reales, \
-      identificamos el quick win de menor esfuerzo / mayor impacto y \
-      decidimos juntos si tiene sentido avanzar.
+sin compromiso): validamos estos números con tus datos reales, \
+identificamos el quick win de menor esfuerzo / mayor impacto y \
+decidimos juntos si tiene sentido avanzar.
     * Opción B — Diagnóstico Técnico Pagado (alcance cerrado, entregable \
-      tangible en 5 días hábiles): reporte profundo con arquitectura, \
-      presupuesto y roadmap priorizado.
+tangible en 5 días hábiles): reporte profundo con arquitectura, \
+presupuesto y roadmap priorizado.
 - CTA directo (una sola línea, tono profesional, sin presión): \
-  "Para agendar la sesión de calibración o solicitar el diagnóstico pagado, \
-  respondé este correo o escribí directamente a [URL/email de contacto]."
+"Para agendar la sesión de calibración o solicitar el diagnóstico \
+pagado, respondé este correo o escribí directamente a \
+[URL/email de contacto]."
 
 ---
 Datos del cliente para procesar:
-* Empresa: {empresa}
-* Proceso crítico manual: {proceso_manual}
-* Stack actual: {herramientas}
-* Volumen mensual: {volumen_mensual}
-"""
+* Empresa: {cliente_empresa}
+* Proceso crítico manual: {cliente_proceso}
+* Stack actual: {cliente_stack}
+* Volumen mensual: {cliente_volumen}
+
+{contexto_previo}\
+""",
+}
+
+
+def _build_section_prompt(
+    section_num: int,
+    payload: dict,
+    accumulated_context: str,
+) -> str:
+    """
+    Arma el prompt completo para la sección N.
+
+    Inyecta:
+      - Bloque de reglas comunes (STACK DE REFERENCIA + REGLA DE LENGUAJE +
+        HEURÍSTICA FINANCIERA + contexto de diseño + budget por sección).
+      - Estructura específica de la sección (de SECTION_PROMPTS).
+      - Datos del cliente saneados (.strip()).
+      - Contexto acumulado de secciones previas (Markdown ya generado).
+        Vacío en la sección 1; desde la sección 2 en adelante incluye las
+        secciones previas con sus headers `## N.`, para que Gemini pueda
+        referenciar coherentemente (ej: "el ahorro estimado de la sección 1").
+
+    El contexto previo se pasa como bloque discreto al final del prompt
+    para que Gemini no lo confunda con instrucciones.
+    """
+    if section_num not in SECTION_PROMPTS:
+        raise ValueError(f"section_num fuera de rango 1..5: {section_num}")
+
+    contexto_bloque = ""
+    if accumulated_context.strip():
+        contexto_bloque = (
+            "\n---\nCONTEXTO DE SECCIONES PREVIAS (NO las repitas; usálas "
+            "solo para mantener coherencia narrativa y referenciar cifras):\n"
+            f"{accumulated_context.strip()}\n"
+        )
+
+    return SECTION_PROMPTS[section_num].format(
+        common_rules=COMMON_RULES_HEADER,
+        cliente_empresa=payload["empresa"].strip(),
+        cliente_proceso=payload["proceso_manual"].strip(),
+        cliente_stack=payload["herramientas"].strip(),
+        cliente_volumen=payload["volumen_mensual"].strip(),
+        contexto_previo=contexto_bloque,
+    )
+
+
+def _call_gemini_once(model, prompt: str, section_num: int) -> str:
+    """
+    Una llamada a Gemini 2.5 Flash. max_output_tokens=900: techo holgado
+    para las 250-450 palabras que cada sub-prompt declara como scope. Loguea
+    si Gemini cortó por tokens (finish_reason=MAX_TOKENS) para diagnóstico,
+    pero no rompe: devuelve el texto parcial (mejor reporte incompleto que
+    nada).
+    """
+    response = model.generate_content(
+        prompt,
+        generation_config=genai.types.GenerationConfig(
+            temperature=0.15,        # determinístico, buena adherencia al
+                                     # formato de cada sub-prompt específico.
+            max_output_tokens=900,    # techo cómodo para el scope de UNA
+                                     # sección (250-450 palabras). Historial
+                                     # previo con prompt monolítico: 5500→2800
+                                     # →3500→4500 todos truncaron; ahora cada
+                                     # llamada cubre solo su sección y entra
+                                     # holgada.
+        ),
+    )
+
+    finish_reason = None
+    try:
+        finish_reason = str(response.candidates[0].finish_reason)
+    except (IndexError, AttributeError):
+        pass
+    if finish_reason and "MAX_TOKENS" in finish_reason:
+        print(
+            f"[sec{section_num}] WARN truncado por max_output_tokens: "
+            f"finish_reason={finish_reason}",
+            flush=True,
+        )
+
+    return (response.text or "").strip()
+
+
+def _call_gemini_with_retry(model, prompt: str, section_num: int) -> str:
+    """
+    Wrapper con reintento de 1 vez. Si la sección N falla dos veces seguidas,
+    propaga la excepción para que el handler responda 500 limpio y el lead
+    reintente (preferible a enviar un reporte con secciones faltantes).
+    """
+    try:
+        return _call_gemini_once(model, prompt, section_num)
+    except Exception as exc:
+        print(
+            f"[sec{section_num}] primer intento falló: {exc!r}",
+            flush=True,
+        )
+        try:
+            return _call_gemini_once(model, prompt, section_num)
+        except Exception as exc2:
+            print(
+                f"[sec{section_num}] segundo intento falló: {exc2!r}",
+                flush=True,
+            )
+            raise
+
+
+def _join_sections(sections_markdown: dict) -> str:
+    """
+    Concatena las 5 secciones en orden estricto (1..5) separadas por línea
+    en blanco. Mantiene los headers `## 1.` ... `## 5.` literales que
+    _build_lead_summary (líneas 566–601) usa con str.find para extraer el
+    resumen de Sheets. NO añade header raíz propio: el Markdown final debe
+    empezar por `## 1. ...` exactamente como lo emitía la versión monolítica.
+    """
+    partes = []
+    for n in sorted(sections_markdown.keys()):
+        cuerpo = (sections_markdown[n] or "").strip()
+        if cuerpo:
+            partes.append(cuerpo)
+    return "\n\n".join(partes)
 
 
 # ---------------------------------------------------------------------------
@@ -407,63 +590,43 @@ def validate_payload(payload: dict) -> tuple[bool, str]:
 
 def generate_blueprint(payload: dict) -> str:
     """
-    Llama a Gemini 2.5 Flash y devuelve el reporte en Markdown.
-    El SDK se inicializa lazy para que el cold-start no pague el costo de
-    configuración si la request falla antes por validación.
+    Orquesta 5 llamadas secuenciales a Gemini 2.5 Flash, una por sección, y
+    devuelve el reporte Markdown completo.
+
+    Diseño (refactor multi-llamada, ver cabecera de SECTION_PROMPTS arriba):
+      - SDK inicializado lazy (cold-start paga el costo solo si la validación
+        pasa).
+      - Las 5 llamadas son SECUENCIALES (no paralelas) para mantener
+        coherencia narrativa: cada llamada recibe como contexto acumulado
+        el Markdown de las secciones previas, así la sección 2 puede
+        referenciar las cifras de la 1 sin re-preguntar.
+      - Cada llamada con max_output_tokens=900 (techo holgado para el scope
+        de una sección; la causa del truncamiento histórico era pedirle
+        1500 palabras en una sola pasada).
+      - Si una sección falla 2 veces seguidas, el helper propaga la
+        excepción → handler responde 500 limpio. Tradeoff consciente:
+        perder 4 secciones ya generadas es peor que pedirle al lead que
+        reintente el submit.
+
+    Contrato externo intacto: misma firma (payload) -> str, mismo formato
+    de salida (Markdown que arranca con `## 1.`). _build_lead_summary y
+    handler.do_POST no necesitan cambios.
     """
     genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel("gemini-2.5-flash")
 
-    prompt = SYSTEM_PROMPT_TEMPLATE.format(
-        nombre=payload["nombre"].strip(),
-        empresa=payload["empresa"].strip(),
-        proceso_manual=payload["proceso_manual"].strip(),
-        herramientas=payload["herramientas"].strip(),
-        volumen_mensual=payload["volumen_mensual"].strip(),
-    )
+    sections_markdown: dict[int, str] = {}
+    accumulated_context = ""
 
-    # Configuración deliberadamente económica: temperature baja para
-    # análisis técnico consistente, max_output_tokens acotado para minimizar
-    # el cómputo total por invocación.
-    response = model.generate_content(
-        prompt,
-        generation_config=genai.types.GenerationConfig(
-            temperature=0.15,   # bajado a 0.15: más determinístico, mejor
-                                # adherencia al formato completo de 5
-                                # secciones (antes cortaba en sección 1)
-            max_output_tokens=4500,   # prompt v4: subido 2800→3500→4500 por
-                                       # truncamiento progresivo en producción.
-                                       # Estimación empírica con Gemini 2.5
-                                       # Flash + temperature=0.15: el prompt
-                                       # v4 produce entre 3800 y 4200 tokens
-                                       # aunque el budget declarado sea ~2200.
-                                       # 4500 deja ~10-20% de margen sin volver
-                                       # al desborde original de 5500. Si vuelve
-                                       # a truncar (corte en mitad de sección),
-                                       # escalar a 5500 (original) y aceptar el
-                                       # tradeoff de longitud. Si produce correos
-                                       # >2500 palabras, endurecer el budget del
-                                       # prompt antes de bajar el techo.
-        ),
-    )
+    for section_num in range(1, 6):
+        prompt = _build_section_prompt(section_num, payload, accumulated_context)
+        markdown = _call_gemini_with_retry(model, prompt, section_num)
+        sections_markdown[section_num] = markdown
+        # Acumular para la siguiente llamada: las secciones siguientes
+        # pueden referenciar cifras/afirmaciones previas sin re-preguntar.
+        accumulated_context += f"\n\n## Sección {section_num}:\n{markdown}"
 
-    # Deteccion de truncamiento: si Gemini cortó por max_output_tokens, el
-    # finish_reason viene como MAX_TOKENS. Logueamos para detectar el caso
-    # sin necesidad de leer el cuerpo del correo. No rompemos el envio: si
-    # truncó, igual mandamos lo que haya (mejor reporte incompleto que nada).
-    finish_reason = None
-    try:
-        finish_reason = str(response.candidates[0].finish_reason)
-    except (IndexError, AttributeError):
-        pass
-    if finish_reason and "MAX_TOKENS" in finish_reason:
-        print(
-            f"[generate_blueprint] WARN truncado por max_output_tokens: "
-            f"finish_reason={finish_reason}",
-            flush=True,
-        )
-
-    return (response.text or "").strip()
+    return _join_sections(sections_markdown)
 
 
 # ---------------------------------------------------------------------------
