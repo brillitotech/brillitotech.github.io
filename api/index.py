@@ -120,11 +120,11 @@ WIRE_TO_CANONICAL = {
 #   3. Nuevo bloque "REGLA DE LENGUAJE — IMPACTO DE NEGOCIO, NO JERGA": cada
 #      mención de serverless/edge/RAG/FaaS/low-code/ETL/CDN/embeddings
 #      DEBE ir glosada con su traducción a ahorro de tiempo/plata/errores.
-#   4. max_output_tokens: bajado 5500→2800 (forzaba concisión) PERO causaba
-#      truncado mid-palabra porque Gemini 2.5 Flash expande prosa narrativa
-#      más de lo que el prompt declara. Subido a 3500 tras truncamiento en
-#      producción (correo cortado en '$2,...'). El budget del prompt sigue
-#      siendo ~2200 tokens; 3500 da ~50% de margen. Ver comentario en
+#   4. max_output_tokens: bajado 5500→2800→3500 (ambos truncaron) y luego
+#      subido a 4500 tras truncamiento consistente en producción. La
+#      estimación empírica es que Gemini 2.5 Flash con prompt v4 produce
+#      ~3800-4200 tokens aunque el budget declarado sea ~2200. 4500 da margen
+#      sin permitir el desborde original de 5500. Ver comentario en
 #      GenerationConfig para el historial completo.
 SYSTEM_PROMPT_TEMPLATE = """\
 Eres un Arquitecto de Soluciones Cloud Senior y consultor de eficiencia operativa. \
@@ -431,17 +431,19 @@ def generate_blueprint(payload: dict) -> str:
             temperature=0.15,   # bajado a 0.15: más determinístico, mejor
                                 # adherencia al formato completo de 5
                                 # secciones (antes cortaba en sección 1)
-            max_output_tokens=3500,   # prompt v4: subido de 2800 a 3500
-                                       # tras truncamiento observado en
-                                       # producción (Gemini cortó mid-palabra
-                                       # en '$2,...' con 2800). El budget del
-                                       # prompt sigue siendo ~2200 tokens; 3500
-                                       # da ~50% de margen real para prosa
-                                       # narrativa expansiva de Gemini 2.5 Flash
-                                       # sin permitir el desborde original de
-                                       # 5500. Si vuelve a truncar, subir a
-                                       # 4000; si produce correos >1800 palabras,
-                                       # bajar a 3200 y endurecer el budget.
+            max_output_tokens=4500,   # prompt v4: subido 2800→3500→4500 por
+                                       # truncamiento progresivo en producción.
+                                       # Estimación empírica con Gemini 2.5
+                                       # Flash + temperature=0.15: el prompt
+                                       # v4 produce entre 3800 y 4200 tokens
+                                       # aunque el budget declarado sea ~2200.
+                                       # 4500 deja ~10-20% de margen sin volver
+                                       # al desborde original de 5500. Si vuelve
+                                       # a truncar (corte en mitad de sección),
+                                       # escalar a 5500 (original) y aceptar el
+                                       # tradeoff de longitud. Si produce correos
+                                       # >2500 palabras, endurecer el budget del
+                                       # prompt antes de bajar el techo.
         ),
     )
 
