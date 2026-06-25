@@ -1,4 +1,4 @@
-# brillitotech.github.io
+# brillitotech-servicios.liwaisi.tech
 
 Landing page eco-eficiente de marca personal + backend serverless para captura de leads.
 

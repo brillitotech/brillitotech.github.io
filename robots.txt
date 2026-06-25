@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://brillitotech.github.io/sitemap.xml
+Sitemap: https://brillitotech-servicios.liwaisi.tech/sitemap.xml
