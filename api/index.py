@@ -65,6 +65,16 @@ DEBUG_HEADER_VALUE = "1"
 # placeholder literal que emite Gemini en el Markdown.
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "liwaisitech@gmail.com")
 
+# URL del appointment scheduler (Google Calendar) que aparece en la sección
+# 4 del reporte como CTA principal del monolítico v5. A diferencia del
+# email de contacto, esta URL se pre-procesa en el prompt ANTES de mandar
+# a Gemini (template.replace("[URL_CALENDARIO]", CALENDAR_URL)) para que
+# el LLM la reproduzca verbatim y no la rompa con reescritura libre.
+CALENDAR_URL = os.environ.get(
+    "CALENDAR_URL",
+    "https://calendar.app.google/waVhCpxqebUEP3vc9",
+)
+
 # Catálogo exacto de campos que exige el brief.
 REQUIRED_FIELDS = (
     "nombre",
@@ -86,477 +96,300 @@ WIRE_TO_CANONICAL = {
 }
 
 # ---------------------------------------------------------------------------
-# Prompts por sección — refactor multi-llamada
+# Prompt del sistema — monolítico v5 con mapa de decisión A/B/C
 # ---------------------------------------------------------------------------
-# ANTES (prompt v4 monolítico, líneas 129–319 originales): una sola llamada
-# a Gemini 2.5 Flash pedía las 5 secciones en un único prompt. El historial
-# de truncamiento progresivo lo demuestra (5500→2800→3500→4500, todos
-# truncaron). La causa raíz: pedirle 1500 palabras en una sola pasada excede
-# la "ventana de output" cómoda de Gemini Flash con temperature=0.15. Subir
-# el techo trataba el síntoma, no la causa.
+# ANTES (refactor multi-llamada, commits 2c445f8 + f5b1c3f): el reporte se
+# dividía en 5 llamadas secuenciales a Gemini (una por sección). El bug
+# persistente fue scope minimalista: cada sección salía con 1-2 oraciones
+# pese a declarar "EXACTAMENTE N bullets". El LLM interpretaba "SOLO esta
+# sección" como "produce un resumen". Además consumía 5 requests por submit
+# contra Gemini Free Tier (20 RPD → solo 4 submits/día).
 #
-# AHORA: el reporte se divide en 5 llamadas cortas y enfocadas. Cada llamada
-# produce ~250–450 palabras (~600 tokens), bien dentro del rango cómodo de
-# Gemini. Las llamadas son SECUENCIALES (no paralelas) para mantener
-# coherencia narrativa entre secciones: cada llamada recibe como contexto
-# acumulado el Markdown de las secciones previas.
+# AHORA (v5 monolítico): una sola llamada a Gemini con un prompt único que
+# declara 4 secciones con scope realista (530-750 palabras total, no 1500).
+# El scope compacto cabe holgado en max_output_tokens=2500 (margen 2.5x)
+# y elimina la fragmentación que inducía minimalismo. El mapa de decisión
+# A/B/C reemplaza la sección 2 técnica por una recomendación comercial
+# opinativa: el LLM detecta el escenario del proceso del cliente y
+# justifica la stack en lenguaje de negocio.
 #
-# Estructura:
-#   - SECTION_PROMPTS dict: 5 sub-prompts indexados por número de sección.
-#     Cada sub-prompt tiene solo la estructura específica de su sección
-#     (los placeholders <...>) y referencia los placeholders {cliente_*}
-#     que _build_section_prompt rellena por invocación.
-#   - COMMON_RULES_HEADER: bloque de reglas comunes (STACK DE REFERENCIA +
-#     REGLA DE LENGUAJE + HEURÍSTICA FINANCIERA + contexto de diseño) que
-#     _build_section_prompt inyecta idéntico en cada llamada.
-#   - _build_section_prompt(): arma el prompt completo de la sección N
-#     (header común + sub-prompt específico + datos del cliente + contexto
-#     acumulado de secciones previas).
-#   - _call_gemini_once() / _call_gemini_with_retry(): una llamada a Gemini
-#     con max_output_tokens=900 (techo holgado para ~450 palabras por
-#     sección) y reintento de 1 vez ante excepción.
-#   - _join_sections(): concatena las 5 secciones con headers `## N.` para
-#     preservar el contrato con _build_lead_summary (que usa str.find sobre
-#     esos headers para extraer el resumen de Sheets).
+# Placeholders del template (rellenados por generate_blueprint):
+#   {cliente_empresa}   {cliente_proceso}   {cliente_stack}   {cliente_volumen}
+#   [URL_CALENDARIO]    → se reemplaza por CALENDAR_URL antes de llamar a
+#                         Gemini (pre-procesamiento, no post-render).
 
-COMMON_RULES_HEADER = """\
-Eres un Arquitecto de Soluciones Cloud Senior y consultor de eficiencia operativa. \
-Tu salida es EXCLUSIVAMENTE Markdown técnico de alto impacto comercial. \
-NO incluyas saludos, introducciones narrativas, ni frases conversacionales. \
-Arranca DIRECTAMENTE con el header de la sección que se te pide.
-
-REGLA CRÍTICA DE EXHAUSTIVIDAD:
-- Cubrís SOLO la sección indicada abajo (las otras las pido por separado
-  en llamadas independientes). NO generes las otras secciones.
-- PERO la sección que cubrís DEBE estar COMPLETA según el scope explícito
-  que el sub-prompt de abajo define (cantidad de bullets, capas o
-  párrafos). NO produzcas una sola oración ni un resumen minimalista:
-  si el scope dice "4-5 bullets cortos", escribí los 4-5; si dice
-  "3 capas", escribí las 3 capas con sus bullets. Cada sección tiene
-  techo de tokens GENEROSO, no te quedes corto.
-- NO cierres con frases como "este es el reporte" o "espero que sea útil".
+SYSTEM_PROMPT_TEMPLATE = """\
+Eres un Arquitecto de Soluciones Senior y consultor de eficiencia operativa
+para PyMEs. Tu salida es EXCLUSIVAMENTE Markdown comercial, sin saludos,
+sin introducciones narrativas, sin frases de cierre. Arrancá DIRECTAMENTE
+con el header `## 1.`. NO uses bloques Mermaid ni diagramas ASCII complejos:
+solo prosa + bullets simples (prioridad: que el correo se renderice limpio
+en Gmail, Outlook y Apple Mail).
 
 ---
-CONTEXTO DE DISEÑO (Green Computing):
-Todas las soluciones propuestas deben diseñarse bajo el paradigma Serverless o \
-Edge Computing, minimizando el consumo de cómputo innecesario, reduciendo costes \
-fijos a cero en reposo y mitigando drásticamente la huella de CO2 digital de la \
-operación. El cliente debe entender que ineficiencia de software es igual a \
-desperdicio de dinero en infraestructura.
+ROL Y AUDIENCIA:
 
----
-STACK DE REFERENCIA DEL PROVEEDOR (priorizá esto o alternativas del mismo perfil):
-
-Las recomendaciones de la sección 2 DEBEN caer dentro de este perfil técnico.
-NO recomiendes Google Cloud Storage, AWS S3, Cloud Functions, Lambda, Vertex AI,
-Bedrock, Pub/Sub, SQS, Step Functions, CloudWatch, SNS ni servicios análogos de
-hiperescaladores comerciales, salvo que el cliente ya los use explícitamente
-en su stack actual.
-
-* Persistencia documental ligera: archivos Markdown (.md) en una wiki local
-  (Obsidian, Logseq, Dendron, o equivalente) + control de versiones Git.
-  Indexado y búsqueda opcional vía SQLite FTS5 sobre los .md.
-* Memoria persistente / RAG ligero: herramientas como Engram, mem.ai, o un
-  servicio MCP propio. NO recomiendes S3 / GCS / DynamoDB para esto.
-* Orquestación de procesos: funciones Python serverless (Vercel Python runtime,
-  Cloudflare Workers, Fly.io machines) o Edge Functions. NO AWS Step Functions.
-* LLMs: Gemini Flash, Claude Haiku, GPT-4o-mini, Llama local. NO Vertex AI
-  enterprise ni Bedrock salvo que el cliente ya pague por ellos.
-* Notificación: Resend, SendGrid free tier, SMTP básico, ntfy.sh.
-* Automatización de bajo código: n8n self-hosted, Windmill, Activepieces.
-  NO Zapier/Make enterprise salvo solicitud explícita.
-
-Si el stack actual del cliente es 100% Google Workspace / Microsoft 365, podés
-recomendar sustituciones dentro de esos ecosistemas, pero siempre en el tramo
-gratuito o de bajo costo.
+El reporte lo lee el dueño o líder operativo de una PyME. NO es un CTO, NO
+es un developer. Cada palabra técnica que escribas tiene que venir glosada
+en impacto de negocio (ahorro de tiempo, ahorro de plata, menos errores,
+carga más rápida, menos mantenimiento, menos contaminación digital). Si
+omitís la glosa, el lead no entiende y se va.
 
 ---
 REGLA DE LENGUAJE — IMPACTO DE NEGOCIO, NO JERGA:
 
-El reporte lo lee un dueño de PyME, NO un CTO. Cada vez que menciones un
-concepto técnico (serverless, edge, RAG, FaaS, low-code, ETL, CDN, asíncrono,
-desacoplado, NoSQL, vector store, embeddings, etc.) DEBE aparecer en la MISMA
-oración o en el siguiente bullet su traducción a impacto concreto de negocio:
-ahorro de tiempo, ahorro de plata, menos errores, carga más rápida, menos
-mantenimiento, menos contaminación digital.
+Cada vez que menciones un concepto técnico (serverless, edge, RAG, FaaS,
+low-code, ETL, CDN, asíncrono, desacoplado, NoSQL, vector store, embeddings,
+LLM, API, webhook, función serverless) DEBE aparecer en la MISMA oración
+o en el siguiente bullet su traducción a impacto concreto de negocio.
 
 Ejemplos del estilo esperado:
 * Mal: "Usar una arquitectura edge."
-  Bien: "Hago que tu web cargue al instante incluso con mala señal, reduciendo
-  tus costos de servidor. Como el código es limpio y no desperdicia datos, tu
-  negocio contamina menos y es más eficiente."
+  Bien: "Hago que tu sistema cargue al instante incluso con mala señal,
+  reduciendo tus costos de servidor. Como el código es limpio y no
+  desperdicia datos, tu negocio contamina menos y es más eficiente."
 * Mal: "Migrar a FaaS serverless."
-  Bien: "Pasamos de pagar un servidor que corre 24/7 aunque no lo uses, a pagar
-  solo los minutos en que alguien te pide algo. Tu factura de servidor cae a
-  casi cero en horario sin actividad."
-* Mal: "Indexar la documentación con embeddings para RAG."
-  Bien: "Tu equipo encuentra la respuesta a una pregunta técnica en 5 segundos
-  en lugar de 15 minutos buscando en Google Drive. Se acabaron los 'no me
-  acuerdo dónde quedó ese documento'."
+  Bien: "Pasamos de pagar un servidor que corre 24/7 aunque no lo uses, a
+  pagar solo los minutos en que alguien te pide algo. Tu factura de
+  servidor cae a casi cero en horario sin actividad."
+* Mal: "Indexar con embeddings para RAG."
+  Bien: "Tu equipo encuentra la respuesta a una pregunta técnica en 5
+  segundos en lugar de 15 minutos buscando en Google Drive. Se acabaron
+  los 'no me acuerdo dónde quedó ese documento'."
+
+---
+STACK DE REFERENCIA DEL PROVEEDOR (perfil técnico, sin nombres comerciales):
+
+NO recomiendes Google Cloud Storage, AWS S3, Cloud Functions, Lambda, Vertex
+AI, Bedrock, Pub/Sub, SQS, Step Functions, CloudWatch, SNS ni servicios
+análogos de hiperescaladores comerciales, salvo que el cliente ya los use
+explícitamente en su stack actual.
+
+Descripciones genéricas que SÍ podés usar en el reporte (el lead las lee
+como un perfil técnico, no como una marca):
+
+* "Plataforma central de automatización ligera" → perfil: corre en
+  infraestructura del cliente, sin suscripción mensual inflada, conecta
+  herramientas vía webhooks. Alternativa low-cost a Zapier/Make enterprise.
+* "Infraestructura de despliegue ultrarrápida" → perfil: el código corre
+  en la nube del proveedor y se escala solo cuando hay tráfico real;
+  escala a cero en reposo, sin servidor que mantener, carga al instante
+  incluso en zonas rurales o con señal inestable.
+* "Motores de lenguaje optimizados para bajo consumo" → perfil: modelos
+  de IA con costo por operación muy bajo, suficiente para tareas de
+  clasificación, resumen o extracción de datos, sin pagar tarifas
+  enterprise (10x más caras) que no se justifican a volumen PyME.
+
+Si el stack actual del cliente es 100% Google Workspace / Microsoft 365,
+podés recomendar sustituciones dentro de esos ecosistemas, pero siempre
+en el tramo gratuito o de bajo costo.
 
 ---
 HEURÍSTICA FINANCIERA (cuando no hay datos explícitos del cliente):
+
 * Costo operativo base por hora humana: $10 USD
 * Multiplicador de costo oculto por errores y retrabajos: x1.3 sobre el costo base
 * Multiplicador de costo por dependencia de plataformas No-Code de suscripción: x2.5 anual
 * Todo cálculo derivado de estas asunciones debe llevar el marcador \
-  [estimación sin auditoría] para que el cliente entienda que es cálculo paramétrico, \
-  no dato auditado.
+[estimación sin auditoría] para que el cliente entienda que es cálculo
+paramétrico, no dato auditado.
+* Si un cálculo te da más de 5000 USD/mes, revisá dos veces antes de
+  emitirlo: probablemente estás sobreestimando.
 
 ---
-EVALUACIÓN DE STACK (Senior level — esta línea marca tu diferencial):
-- Stack actual evaluado: <resumen de 1 línea interpretando las herramientas declaradas>
-- Índice de acoplamiento operativo: <Alto / Medio / Bajo — basado en cuántas \
-  herramientas manuales distintas intervienen y cuántas dependen entre sí>
+DETECCIÓN DE ESCENARIO (paso previo, hacelo internamente ANTES de escribir):
+
+Clasificá el proceso del cliente en UNO de estos tres escenarios basándote
+en `cliente_proceso` y `cliente_volumen`. Si dudás entre dos, elegí el
+de MENOR automatización (más conservador; es preferible prometer menos
+y entregar más, que prometer más y quedar mal).
+
+* ESCENARIO A — Automatización Directa: el proceso es 100% repetitivo,
+  basado en reglas fijas, sin ambigüedad. NO requiere interpretar texto.
+  Ejemplos: copiar datos entre planillas, enviar recordatorios
+  automáticos, mover filas de un Excel a un CRM, generar reportes
+  semanales predecibles. NO necesita LLM. Se automatiza con la
+  "plataforma central de automatización ligera" + la "infraestructura
+  de despliegue ultrarrápida" y nada más.
+
+* ESCENARIO B — Asistente Inteligente de Bajo Consumo: el proceso
+  requiere interpretar texto ambiguo, clasificar información, resumir
+  documentos o responder dudas no predecibles. Ejemplos: clasificar
+  emails entrantes, atención inicial por WhatsApp, extraer datos de
+  PDFs variables. SÍ requiere un LLM pequeño, pero acotado a una
+  función específica. Se automatiza con "motores de lenguaje
+  optimizados para bajo consumo" + "plataforma central de
+  automatización ligera" para el ruteo.
+
+* ESCENARIO C — Copiloto Operativo: el proceso es de alta fricción
+  humana, requiere toma de decisiones críticas de negocio, negociación,
+  o el riesgo de alucinación de la IA es inaceptable. Ejemplos:
+  evaluar solicitudes de crédito, cerrar ventas B2B, firmar contratos.
+  La automatización PREPARA el caso (recolecta, limpia, cruza datos
+  en segundos) pero el humano decide y firma. Se automatiza con la
+  "plataforma central de automatización ligera" para el backoffice
+  y se entrega un panel ultrarrápido para el humano.
+
+Tu salida DEBE mencionar explícitamente "Escenario X" en la sección 1.
 
 ---
-BUDGET DE LONGITUD POR SECCIÓN (límite duro):
-* Sección 1: ≤ 350 palabras (4-5 bullets cortos).
-* Sección 2: ≤ 550 palabras TOTAL — el párrafo introductorio ≤ 80 palabras,
-  cada capa ≤ 120 palabras, síntesis final ≤ 60 palabras.
-* Sección 3: ≤ 150 palabras (2 bullets).
-* Sección 4: ≤ 180 palabras.
-* Sección 5: ≤ 200 palabras (incluye CTA).
+INSTRUCCIONES POR SECCIÓN (scope exacto, no producir más ni menos):
 
-TOTAL OBJETIVO ACUMULADO: ~1400-1500 palabras (≈ 1800-2200 tokens) en las \
-5 secciones. Si tenés que cortar, cortá primero los bullets redundantes de \
-la sección 2, NUNCA las cifras de la sección 1 ni el CTA de la sección 5.
+## 1. IMPACTO RÁPIDO Y ESCENARIO DETECTADO   (100-150 palabras)
+
+Arrancá con: "Detectamos que tu proceso encaja en el **Escenario [A|B|C]**: [nombre del escenario]."
+
+Después, EXACTAMENTE 3 bullets cortos con cifras concretas (no paráfrasis):
+- **Lo que te está costando hoy:** [1 cifra en USD/mes basada en el
+  volumen declarado y la heurística financiera] [estimación sin auditoría]
+- **Lo que se pierde al año si no se actúa:** [cifra anualizada]
+- **El primer quick win:** [1 oración con la palanca más barata y rápida]
+
+NO agregues más bullets. NO agregues un párrafo de cierre largo: el
+cliente skipea y se pierde. Sé concreto y numérico.
+
+## 2. LA SOLUCIÓN ADECUADA PARA TU CASO   (250-350 palabras)
+
+(2-3 oraciones justificando por qué el escenario detectado es el correcto
+para el proceso del cliente, en lenguaje de negocio: "ahorra tiempo",
+"elimina errores", "no requiere contratar". Glosá cualquier término
+técnico según la REGLA DE LENGUAJE.)
+
+Después, una sub-sección "Stack propuesto" con EXACTAMENTE 3 bullets:
+- **Orquestación:** "plataforma central de automatización ligera"
+  (justificá en 1 línea por qué encaja con el escenario).
+- **Cómputo / LLM (solo si el escenario lo requiere):** "motores de
+  lenguaje optimizados para bajo consumo" o funciones en la
+  "infraestructura de despliegue ultrarrápida" (justificá por qué NO
+  se necesita Vertex AI ni Bedrock: costo 10x superior al volumen
+  declarado). Si el escenario es A, este bullet explica que NO hace
+  falta LLM y por qué.
+- **Persistencia ligera y notificación:** "infraestructura de
+  despliegue ultrarrápida" para los webhooks + email transaccional
+  económico (Resend, SendGrid free, o SMTP propio).
+
+Cerrá con 1 línea: "Ahorro estimado con este stack: [X] USD/mes
+[estimación sin auditoría], recuperando [Y]% del desperdicio actual.
+Tiempo de implementación: [Z] semanas."
+
+## 3. POR QUÉ ESTE ENFOQUE (Y NO OTRO)   (100-130 palabras)
+
+(2-3 oraciones descartando alternativas pesadas: "no recomendamos
+plataformas enterprise tipo Vertex AI o Bedrock porque tu volumen [X]
+no justifica el costo 10x superior al de un motor de lenguaje
+optimizado para bajo consumo"). Glosá los términos técnicos si los usás.
+
+(1-2 oraciones sobre por qué la alternativa low-code-empresarial tipo
+Zapier/Make tampoco encaja: "el costo por operación a tu escala termina
+siendo mayor que tener tu propio servidor de automatizaciones".)
+
+NO agregues un tercer párrafo. NO cierres con "espero que sirva". Esta
+sección es de descarte de alternativas caras, no de venta.
+
+## 4. SIGUIENTE PASO   (80-120 palabras)
+
+(1 oración de costo de inacción: "Al ritmo actual, en 6 meses son
+[X] USD acumulados [estimación sin auditoría].")
+
+(2-3 oraciones recomendando una llamada breve para validar estos
+números con datos reales y ver si tiene sentido avanzar. Incluí la
+URL del calendario pre-procesada al final, con anchor text explícito.
+NO uses frases como "agendá cuando puedas" ni "espero tu respuesta":
+sé directo sobre el paso concreto.)
+
+Cerrá con UNA línea de CTA:
+"Hagamos una llamada de 15 minutos para ver si esto es viable para tu
+caso. Agendala directamente acá: [URL_CALENDARIO]"
+
+---
+CANDADO ANTI-MINIMALISMO (no negociable):
+
+Este reporte lo lee un dueño de PyME para decidir si te contacta. Si
+entregás una versión minimalista (1-2 oraciones por sección), el lead
+se va sin contactarte. Por lo tanto:
+
+- Cada sección DEBE cubrir el scope declarado arriba (3 bullets en
+  sección 1, 3 bullets en sección 2, 2 párrafos en sección 3, CTA
+  concreto en sección 4). NO produzcas resúmenes ejecutivos.
+- Si dudás entre ser conciso y ser completo, ELEGÍ COMPLETO.
+- NO cierres con "espero que sea útil", "este es el reporte",
+  "cualquier duda estoy a disposición" ni variantes.
+- NO omitas ninguna sección: las 4 son obligatorias y en ese orden.
+- NO uses bloques de código, tablas con sintaxis especial ni
+  diagramas Mermaid. Solo prosa + bullets.
+
+---
+FEW-SHOT EXAMPLE (ancla visual — NO copies las cifras; tu output debe
+basarse en los datos del cliente y el escenario detectado arriba):
+
+## 1. IMPACTO RÁPIDO Y ESCENARIO DETECTADO
+
+Detectamos que tu proceso encaja en el **Escenario B**: Asistente
+Inteligente de Bajo Consumo.
+
+- **Lo que te está costando hoy:** 480 USD/mes en horas de tu equipo
+  clasificando emails de clientes a mano [estimación sin auditoría]
+- **Lo que se pierde al año si no se actúa:** 5,760 USD/año más el
+  costo oculto de errores de clasificación
+- **El primer quick win:** un clasificador automático que enruta los
+  emails en 2 segundos en vez de 8 minutos manuales
+
+## 2. LA SOLUCIÓN ADECUADA PARA TU CASO
+
+Tu proceso es 100% clasificar texto ambiguo (qué quiere cada cliente
+cuando escribe), sin reglas fijas claras. Eso descarta un escenario
+puro de reglas (allí no hace falta LLM) y descarta también un copiloto
+humano (no hay decisiones críticas delegables, solo ruteo). El punto
+medio exacto: un motor de lenguaje barato hace la clasificación, la
+plataforma central de automatización ligera enruta el resultado, y
+tu equipo solo revisa el 5% de casos ambiguos. Sin contratar Data
+Scientist, sin pagar suscripciones enterprise.
+
+**Stack propuesto:**
+
+- **Orquestación:** plataforma central de automatización ligera
+  (corre en tu servidor, sin pagar por operación; te independiza
+  de Zapier y sus costos crecientes)
+- **Clasificador LLM:** motores de lenguaje optimizados para bajo
+  consumo (gastan fracciones de centavo por email; suficiente para
+  clasificar, no para reemplazar a tu equipo)
+- **Persistencia:** infraestructura de despliegue ultrarrápida para
+  los webhooks + Resend para notificar al área correcta
+
+Ahorro estimado con este stack: 380 USD/mes [estimación sin auditoría],
+recuperando 79% del desperdicio actual. Tiempo de implementación: 2 semanas.
+
+## 3. POR QUÉ ESTE ENFOQUE (Y NO OTRO)
+
+No vamos a recomendarte plataformas enterprise tipo Vertex AI o Bedrock
+porque su costo por operación es 10x superior al de un motor de lenguaje
+optimizado para bajo consumo, y a tu volumen eso es tirar plata en
+infraestructura sobredimensionada. Tampoco recomendamos un copiloto tipo
+Zapier empresarial porque el costo por operación a tu escala termina
+siendo mayor que tener tu propio servidor de automatizaciones, y a los
+6 meses estás pagando más que el salario del clasificador humano.
+
+## 4. SIGUIENTE PASO
+
+Al ritmo actual, en 6 meses son 2,880 USD acumulados [estimación sin
+auditoría], más el costo de oportunidad de no haber escalado la
+atención al cliente.
+
+Hagamos una llamada de 15 minutos para ver si esto es viable para tu
+caso. Agendala directamente acá: [URL_CALENDARIO]
+
+---
+DATOS DEL CLIENTE PARA PROCESAR:
+
+* Empresa: {cliente_empresa}
+* Proceso crítico manual: {cliente_proceso}
+* Stack actual: {cliente_stack}
+* Volumen mensual: {cliente_volumen}
+
+El reporte arranca DIRECTAMENTE con `## 1. ...` y termina con la línea
+del CTA. NO escribas nada antes de `## 1.` ni nada después del CTA.
 """
 
-# Cada sub-prompt arranca con el header exacto que _build_lead_summary y
-# markdown_to_html esperan encontrar. Los placeholders <...> se mantienen
-# literarios: Gemini los reemplaza por contenido propio.
-
-SECTION_PROMPTS = {
-    1: """\
-{common_rules}
-
----
-ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN, PERO COMPLETA EN SU SCOPE:
-
-## 1. IMPACTO FINANCIERO Y OPERATIVO
-
-Esta sección DEBE tener EXACTAMENTE 4 bullets con cifras concretas (no
-paráfrasis, no resúmenes). Cada bullet debe terminar con el marcador
-"[estimación sin auditoría]". Después del cuarto bullet, agregá UNA línea
-de cierre con la conclusión numérica (cuánto se pierde al año si no se
-actúa). Extensión objetivo: 250–350 palabras.
-
-- **Horas/mes absorbidas por el proceso (estimación):** <calculá un
-  rango lógico basado en el volumen mensual proporcionado; explicá
-  brevemente el razonamiento> [estimación sin auditoría]
-- **Fuga de capital mensual estimada:** <Calculá el costo asumiendo un
-  costo operativo base de $10 USD/hora, aplicá x1.3 si el proceso es
-  propenso a retrabajos; mencioná el resultado en USD> [estimación
-  sin auditoría]
-- **Proyección de desperdicio anual (Status Quo):** <Multiplicá el
-  costo mensual por 12; redondeá y expresá el número en USD anuales>
-  [estimación sin auditoría]
-- **Riesgo crítico oculto:** <Identificá 1 riesgo concreto de pérdida
-  de datos, error humano o cuello de botella escalable, en una línea>
-  [estimación sin auditoría]
-
-Línea de cierre obligatoria (1 oración): "Al ritmo actual, el proceso
-le cuesta a la empresa aproximadamente <X> USD/año sin contar el
-riesgo oculto de <R>."
-
----
-Datos del cliente para procesar:
-* Empresa: {cliente_empresa}
-* Proceso crítico manual: {cliente_proceso}
-* Stack actual: {cliente_stack}
-* Volumen mensual: {cliente_volumen}
-
-{contexto_previo}\
-""",
-
-    2: """\
-{common_rules}
-
----
-ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN, PERO COMPLETA EN SU SCOPE:
-
-## 2. ARQUITECTURA DE EFICIENCIA DIGITAL — STACK RECOMENDADO EN 3 CAPAS
-
-Esta sección DEBE tener: (a) un párrafo introductorio corto, (b) las
-TRES capas completas con su bullet de ahorro, y (c) una línea de
-síntesis final. NO produzcas solo el párrafo introductorio ni omitas
-ninguna capa. Extensión objetivo: 450–550 palabras.
-
-Párrafo introductorio (3-5 líneas, MÁXIMO 80 palabras): explicá cómo
-una arquitectura desacoplada elimina el desperdicio operativo y reduce
-el costo de ejecución a prácticamente cero en reposo, glosando los
-términos técnicos con impacto de negocio según la REGLA DE LENGUAJE.
-Mencioná explícitamente el stack actual del cliente para anclar la
-propuesta.
-
-**Capa 1 — Captura y eventos** (60–120 palabras):
-- Nombre de la capa.
-- Responsabilidad: qué dispara el proceso sin intervención humana
-  (webhook, API, email-parser, formulario serverless, etc.).
-- Herramientas del STACK DE REFERENCIA DEL PROVEEDOR (NO otras).
-- Métrica de ahorro estimada en horas/mes o USD/mes, marcada con
-  [estimación sin auditoría].
-
-**Capa 2 — Procesamiento y orquestación** (60–120 palabras):
-- Nombre de la capa.
-- Responsabilidad: funciones serverless que validan, transforman y
-  enrutan bajo demanda; colas asíncronas; reglas de negocio.
-- Herramientas del STACK DE REFERENCIA DEL PROVEEDOR (NO otras).
-- Métrica de ahorro estimada en horas/mes o USD/mes [estimación sin
-  auditoría].
-
-**Capa 3 — Persistencia ligera y notificación** (60–120 palabras):
-- Nombre de la capa.
-- Responsabilidad: base de datos serverless con auditoría automática;
-  notificaciones push o email transaccional; sin servidor que mantener.
-- Herramientas del STACK DE REFERENCIA DEL PROVEEDOR (NO otras).
-- Métrica de ahorro estimada en horas/mes o USD/mes [estimación sin
-  auditoría].
-
-Línea de síntesis final (1 oración): "Las tres capas combinadas
-recuperan aproximadamente <X> USD/mes del desperdicio estimado en la
-sección 1."
-
-NO uses bloques de código Mermaid, diagramas ASCII complejos, ni
-tablas con sintaxis especial. Solo prosa narrativa + bullets simples.
-La prioridad es que el email se renderice limpio en Gmail, Outlook y
-Apple Mail.
-
----
-Datos del cliente para procesar:
-* Empresa: {cliente_empresa}
-* Proceso crítico manual: {cliente_proceso}
-* Stack actual: {cliente_stack}
-* Volumen mensual: {cliente_volumen}
-
-{contexto_previo}\
-""",
-
-    3: """\
-{common_rules}
-
----
-ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN, PERO COMPLETA EN SU SCOPE:
-
-## 3. COMPLEJIDAD DEL STACK RECOMENDADO
-
-Esta sección DEBE tener EXACTAMENTE 2 párrafos (no solo uno). Cada
-párrafo: 3-5 líneas. Extensión objetivo: 130-160 palabras.
-
-- **Párrafo 1 — Componentes sugeridos:** mencioná las capas necesarias
-  (orquestación, cómputo serverless, base de datos ligera) y por qué
-  encajan con el stack actual del cliente. Referenciá brevemente las
-  herramientas mencionadas en la sección 2 para mantener coherencia.
-- **Párrafo 2 — Viabilidad técnica:** explicá en 2-3 líneas por qué
-  usar versiones de código nativo u optimizado es superior a
-  implementar plataformas "No-Code" pesadas que elevan los costos de
-  suscripción mensual y la huella de carbono digital. Aplicá la
-  REGLA DE LENGUAJE al mencionar conceptos técnicos.
-
----
-Datos del cliente para procesar:
-* Empresa: {cliente_empresa}
-* Proceso crítico manual: {cliente_proceso}
-* Stack actual: {cliente_stack}
-* Volumen mensual: {cliente_volumen}
-
-{contexto_previo}\
-""",
-
-    4: """\
-{common_rules}
-
----
-ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN, PERO COMPLETA EN SU SCOPE:
-
-## 4. BRECHA DE IMPLEMENTACIÓN Y RIESGOS OCULTOS
-
-Esta sección DEBE tener 2-3 párrafos cortos (no solo uno). Extensión
-objetivo: 150-200 palabras.
-
-- **Párrafo 1 — El riesgo real:** explicá de forma directa que,
-  aunque las herramientas base puedan tener capas gratuitas, el riesgo
-  de una mala implementación radica en los bucles infinitos de
-  ejecución, errores no controlados que disparan los costos de la
-  nube, fugas de seguridad de tokens y sistemas sobredimensionados
-  que generan emisiones digitales innecesarias. Aplicá la REGLA DE
-  LENGUAJE para glosar conceptos técnicos con impacto de negocio.
-- **Párrafo 2 — Disparador hacia el siguiente paso:** cerrá con un
-  párrafo que presente el camino más seguro: partir de un Diagnóstico
-  Técnico Pagado (alcance cerrado, entregable tangible) o una Sesión
-  de Calibración Gratuita de 30 minutos. Ambos caminos están
-  disponibles en la landing del proveedor.
-
----
-Datos del cliente para procesar:
-* Empresa: {cliente_empresa}
-* Proceso crítico manual: {cliente_proceso}
-* Stack actual: {cliente_stack}
-* Volumen mensual: {cliente_volumen}
-
-{contexto_previo}\
-""",
-
-    5: """\
-{common_rules}
-
----
-ESTRUCTURA OBLIGATORIA — SOLO ESTA SECCIÓN, PERO COMPLETA EN SU SCOPE:
-
-## 5. PUENTE HACIA LA ACCIÓN — PRÓXIMO PASO DE BAJO COMPROMISO
-
-Esta sección DEBE tener 3 elementos (no omitas ninguno). Extensión
-objetivo: 180-220 palabras.
-
-- **Costo de NO actuar durante los próximos 6 meses:** multiplicá la
-  fuga mensual por 6 y añadí 1 línea sobre el riesgo acumulado de
-  deuda técnica. Marcá con [estimación sin auditoría].
-- **Camino recomendado:** elegí UNA de estas dos opciones según el
-  caso (no las dos):
-    * **Opción A — Sesión de Calibración Técnica de 30 minutos**
-      (sin costo, sin compromiso): validamos estos números con tus
-      datos reales, identificamos el quick win de menor esfuerzo /
-      mayor impacto y decidimos juntos si tiene sentido avanzar.
-    * **Opción B — Diagnóstico Técnico Pagado** (alcance cerrado,
-      entregable tangible en 5 días hábiles): reporte profundo con
-      arquitectura, presupuesto y roadmap priorizado.
-- **CTA directo (una sola línea, tono profesional, sin presión):**
-  "Para agendar la sesión de calibración o solicitar el diagnóstico
-  pagado, respondé este correo o escribí directamente a
-  [URL/email de contacto]."
-
----
-Datos del cliente para procesar:
-* Empresa: {cliente_empresa}
-* Proceso crítico manual: {cliente_proceso}
-* Stack actual: {cliente_stack}
-* Volumen mensual: {cliente_volumen}
-
-{contexto_previo}\
-""",
-}
-
-
-def _build_section_prompt(
-    section_num: int,
-    payload: dict,
-    accumulated_context: str,
-) -> str:
-    """
-    Arma el prompt completo para la sección N.
-
-    Inyecta:
-      - Bloque de reglas comunes (STACK DE REFERENCIA + REGLA DE LENGUAJE +
-        HEURÍSTICA FINANCIERA + contexto de diseño + budget por sección).
-      - Estructura específica de la sección (de SECTION_PROMPTS).
-      - Datos del cliente saneados (.strip()).
-      - Contexto acumulado de secciones previas (Markdown ya generado).
-        Vacío en la sección 1; desde la sección 2 en adelante incluye las
-        secciones previas con sus headers `## N.`, para que Gemini pueda
-        referenciar coherentemente (ej: "el ahorro estimado de la sección 1").
-
-    El contexto previo se pasa como bloque discreto al final del prompt
-    para que Gemini no lo confunda con instrucciones.
-    """
-    if section_num not in SECTION_PROMPTS:
-        raise ValueError(f"section_num fuera de rango 1..5: {section_num}")
-
-    contexto_bloque = ""
-    if accumulated_context.strip():
-        contexto_bloque = (
-            "\n---\nCONTEXTO DE SECCIONES PREVIAS (NO las repitas; usálas "
-            "solo para mantener coherencia narrativa y referenciar cifras):\n"
-            f"{accumulated_context.strip()}\n"
-        )
-
-    return SECTION_PROMPTS[section_num].format(
-        common_rules=COMMON_RULES_HEADER,
-        cliente_empresa=payload["empresa"].strip(),
-        cliente_proceso=payload["proceso_manual"].strip(),
-        cliente_stack=payload["herramientas"].strip(),
-        cliente_volumen=payload["volumen_mensual"].strip(),
-        contexto_previo=contexto_bloque,
-    )
-
-
-def _call_gemini_once(model, prompt: str, section_num: int) -> str:
-    """
-    Una llamada a Gemini 2.5 Flash. max_output_tokens=900: techo holgado
-    para las 250-450 palabras que cada sub-prompt declara como scope. Loguea
-    si Gemini cortó por tokens (finish_reason=MAX_TOKENS) para diagnóstico,
-    pero no rompe: devuelve el texto parcial (mejor reporte incompleto que
-    nada).
-    """
-    response = model.generate_content(
-        prompt,
-        generation_config=genai.types.GenerationConfig(
-            temperature=0.15,        # determinístico, buena adherencia al
-                                     # formato de cada sub-prompt específico.
-            max_output_tokens=900,    # techo cómodo para el scope de UNA
-                                     # sección (250-450 palabras). Historial
-                                     # previo con prompt monolítico: 5500→2800
-                                     # →3500→4500 todos truncaron; ahora cada
-                                     # llamada cubre solo su sección y entra
-                                     # holgada.
-        ),
-    )
-
-    finish_reason = None
-    try:
-        finish_reason = str(response.candidates[0].finish_reason)
-    except (IndexError, AttributeError):
-        pass
-    if finish_reason and "MAX_TOKENS" in finish_reason:
-        print(
-            f"[sec{section_num}] WARN truncado por max_output_tokens: "
-            f"finish_reason={finish_reason}",
-            flush=True,
-        )
-
-    return (response.text or "").strip()
-
-
-def _call_gemini_with_retry(model, prompt: str, section_num: int) -> str:
-    """
-    Wrapper con reintento de 1 vez. Si la sección N falla dos veces seguidas,
-    propaga la excepción para que el handler responda 500 limpio y el lead
-    reintente (preferible a enviar un reporte con secciones faltantes).
-    """
-    try:
-        return _call_gemini_once(model, prompt, section_num)
-    except Exception as exc:
-        print(
-            f"[sec{section_num}] primer intento falló: {exc!r}",
-            flush=True,
-        )
-        try:
-            return _call_gemini_once(model, prompt, section_num)
-        except Exception as exc2:
-            print(
-                f"[sec{section_num}] segundo intento falló: {exc2!r}",
-                flush=True,
-            )
-            raise
-
-
-def _join_sections(sections_markdown: dict) -> str:
-    """
-    Concatena las 5 secciones en orden estricto (1..5) separadas por línea
-    en blanco. Mantiene los headers `## 1.` ... `## 5.` literales que
-    _build_lead_summary (líneas 566–601) usa con str.find para extraer el
-    resumen de Sheets. NO añade header raíz propio: el Markdown final debe
-    empezar por `## 1. ...` exactamente como lo emitía la versión monolítica.
-    """
-    partes = []
-    for n in sorted(sections_markdown.keys()):
-        cuerpo = (sections_markdown[n] or "").strip()
-        if cuerpo:
-            partes.append(cuerpo)
-    return "\n\n".join(partes)
-
-
-# ---------------------------------------------------------------------------
 # Helpers de parseo y validación
 # ---------------------------------------------------------------------------
 
@@ -644,23 +477,20 @@ def validate_payload(payload: dict) -> tuple[bool, str]:
 
 def generate_blueprint(payload: dict) -> str:
     """
-    Orquesta 5 llamadas secuenciales a Gemini 2.5 Flash, una por sección, y
-    devuelve el reporte Markdown completo.
+    Una sola llamada a Gemini 2.5 Flash con el prompt monolítico v5.
+    Devuelve el reporte Markdown de 500-800 palabras (4 secciones).
 
-    Diseño (refactor multi-llamada, ver cabecera de SECTION_PROMPTS arriba):
-      - SDK inicializado lazy (cold-start paga el costo solo si la validación
-        pasa).
-      - Las 5 llamadas son SECUENCIALES (no paralelas) para mantener
-        coherencia narrativa: cada llamada recibe como contexto acumulado
-        el Markdown de las secciones previas, así la sección 2 puede
-        referenciar las cifras de la 1 sin re-preguntar.
-      - Cada llamada con max_output_tokens=900 (techo holgado para el scope
-        de una sección; la causa del truncamiento histórico era pedirle
-        1500 palabras en una sola pasada).
-      - Si una sección falla 2 veces seguidas, el helper propaga la
-        excepción → handler responde 500 limpio. Tradeoff consciente:
-        perder 4 secciones ya generadas es peor que pedirle al lead que
-        reintente el submit.
+    Diseño (refactor monolítico, ver cabecera de SYSTEM_PROMPT_TEMPLATE arriba):
+      - 1 sola llamada a Gemini (no 5 como en el refactor multi-llamada
+        anterior) → 1 request por submit (Free Tier: 20 RPD).
+      - Pre-procesamiento de CALENDAR_URL en el prompt ANTES de enviar
+        a Gemini, para que el LLM la reproduzca verbatim sin riesgo
+        de que la rompa con reescritura libre.
+      - max_output_tokens=2500 (techo holgado para 530-750 palabras con
+        margen 2.5x). Historial: 5500→2800→3500→4500 truncaron siempre
+        con scope de 1500 palabras monolítico; ahora el scope bajó a
+        530-750 y entra cómodo.
+      - Logueo de finish_reason=MAX_TOKENS para diagnóstico futuro.
 
     Contrato externo intacto: misma firma (payload) -> str, mismo formato
     de salida (Markdown que arranca con `## 1.`). _build_lead_summary y
@@ -669,18 +499,49 @@ def generate_blueprint(payload: dict) -> str:
     genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel("gemini-2.5-flash")
 
-    sections_markdown: dict[int, str] = {}
-    accumulated_context = ""
+    # Pre-procesar placeholders ANTES de armar el prompt: Gemini ve la URL
+    # del calendario ya resuelta y la reproduce verbatim, sin riesgo de
+    # que la rompa con reescritura libre del estilo "(link aquí)".
+    template = SYSTEM_PROMPT_TEMPLATE.replace("[URL_CALENDARIO]", CALENDAR_URL)
+    prompt = template.format(
+        cliente_empresa=payload["empresa"].strip(),
+        cliente_proceso=payload["proceso_manual"].strip(),
+        cliente_stack=payload["herramientas"].strip(),
+        cliente_volumen=payload["volumen_mensual"].strip(),
+    )
 
-    for section_num in range(1, 6):
-        prompt = _build_section_prompt(section_num, payload, accumulated_context)
-        markdown = _call_gemini_with_retry(model, prompt, section_num)
-        sections_markdown[section_num] = markdown
-        # Acumular para la siguiente llamada: las secciones siguientes
-        # pueden referenciar cifras/afirmaciones previas sin re-preguntar.
-        accumulated_context += f"\n\n## Sección {section_num}:\n{markdown}"
+    try:
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.15,       # determinístico, prosa consistente
+                max_output_tokens=2500, # ~750 palabras con margen 2.5x
+            ),
+        )
+    except Exception as exc:
+        raise RuntimeError(f"gemini_call_failed: {exc!r}") from exc
 
-    return _join_sections(sections_markdown)
+    # Loguear truncamiento para diagnóstico. Históricamente el bug era
+    # scope sobredimensionado; con max_output_tokens=2500 y scope 530-750
+    # no debería truncar. Si trunca, subir a 3000 en próxima iteración.
+    finish_reason = None
+    try:
+        finish_reason = str(response.candidates[0].finish_reason)
+    except (IndexError, AttributeError):
+        pass
+
+    markdown = (response.text or "").strip()
+    if not markdown:
+        raise RuntimeError("gemini_returned_empty")
+    if finish_reason and "MAX_TOKENS" in finish_reason:
+        word_count = len(markdown.split())
+        print(
+            f"[gemini] WARN truncado: finish_reason={finish_reason}, "
+            f"palabras_recibidas={word_count}/target 530-750",
+            flush=True,
+        )
+
+    return markdown
 
 
 # ---------------------------------------------------------------------------
