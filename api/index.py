@@ -107,7 +107,7 @@ WIRE_TO_CANONICAL = {
 #
 # AHORA (v5 monolítico): una sola llamada a Gemini con un prompt único que
 # declara 4 secciones con scope realista (530-750 palabras total, no 1500).
-# El scope compacto cabe holgado en max_output_tokens=2500 (margen 2.5x)
+# El scope compacto cabe holgado en max_output_tokens=3000 (margen 3x sobre scope 530-750; histórico: 2500 truncó en producción con v5)
 # y elimina la fragmentación que inducía minimalismo. El mapa de decisión
 # A/B/C reemplaza la sección 2 técnica por una recomendación comercial
 # opinativa: el LLM detecta el escenario del proceso del cliente y
@@ -158,43 +158,12 @@ Ejemplos del estilo esperado:
   los 'no me acuerdo dónde quedó ese documento'."
 
 ---
-STACK DE REFERENCIA DEL PROVEEDOR (perfil técnico, sin nombres comerciales):
+PROHIBICIONES (no negociable):
 
 NO recomiendes Google Cloud Storage, AWS S3, Cloud Functions, Lambda, Vertex
 AI, Bedrock, Pub/Sub, SQS, Step Functions, CloudWatch, SNS ni servicios
 análogos de hiperescaladores comerciales, salvo que el cliente ya los use
 explícitamente en su stack actual.
-
-Descripciones genéricas que SÍ podés usar en el reporte (el lead las lee
-como un perfil técnico, no como una marca):
-
-* "Plataforma central de automatización ligera" → perfil: corre en
-  infraestructura del cliente, sin suscripción mensual inflada, conecta
-  herramientas vía webhooks. Alternativa low-cost a Zapier/Make enterprise.
-* "Infraestructura de despliegue ultrarrápida" → perfil: el código corre
-  en la nube del proveedor y se escala solo cuando hay tráfico real;
-  escala a cero en reposo, sin servidor que mantener, carga al instante
-  incluso en zonas rurales o con señal inestable.
-* "Motores de lenguaje optimizados para bajo consumo" → perfil: modelos
-  de IA con costo por operación muy bajo, suficiente para tareas de
-  clasificación, resumen o extracción de datos, sin pagar tarifas
-  enterprise (10x más caras) que no se justifican a volumen PyME.
-
-Si el stack actual del cliente es 100% Google Workspace / Microsoft 365,
-podés recomendar sustituciones dentro de esos ecosistemas, pero siempre
-en el tramo gratuito o de bajo costo.
-
----
-HEURÍSTICA FINANCIERA (cuando no hay datos explícitos del cliente):
-
-* Costo operativo base por hora humana: $10 USD
-* Multiplicador de costo oculto por errores y retrabajos: x1.3 sobre el costo base
-* Multiplicador de costo por dependencia de plataformas No-Code de suscripción: x2.5 anual
-* Todo cálculo derivado de estas asunciones debe llevar el marcador \
-[estimación sin auditoría] para que el cliente entienda que es cálculo
-paramétrico, no dato auditado.
-* Si un cálculo te da más de 5000 USD/mes, revisá dos veces antes de
-  emitirlo: probablemente estás sobreestimando.
 
 ---
 DETECCIÓN DE ESCENARIO (paso previo, hacelo internamente ANTES de escribir):
@@ -319,61 +288,38 @@ se va sin contactarte. Por lo tanto:
   diagramas Mermaid. Solo prosa + bullets.
 
 ---
-FEW-SHOT EXAMPLE (ancla visual — NO copies las cifras; tu output debe
-basarse en los datos del cliente y el escenario detectado arriba):
+FEW-SHOT EXAMPLE (ancla visual de estructura — NO copies este contenido;
+es ILUSTRATIVO de la forma, no del contenido):
 
 ## 1. IMPACTO RÁPIDO Y ESCENARIO DETECTADO
 
-Detectamos que tu proceso encaja en el **Escenario B**: Asistente
-Inteligente de Bajo Consumo.
+Detectamos que tu proceso encaja en el **Escenario X**: [nombre del escenario].
 
-- **Lo que te está costando hoy:** 480 USD/mes en horas de tu equipo
-  clasificando emails de clientes a mano [estimación sin auditoría]
-- **Lo que se pierde al año si no se actúa:** 5,760 USD/año más el
-  costo oculto de errores de clasificación
-- **El primer quick win:** un clasificador automático que enruta los
-  emails en 2 segundos en vez de 8 minutos manuales
+- **Lo que te está costando hoy:** [cifra USD/mes] [estimación sin auditoría]
+- **Lo que se pierde al año si no se actúa:** [cifra anualizada]
+- **El primer quick win:** [1 oración con la palanca más rápida]
 
 ## 2. LA SOLUCIÓN ADECUADA PARA TU CASO
 
-Tu proceso es 100% clasificar texto ambiguo (qué quiere cada cliente
-cuando escribe), sin reglas fijas claras. Eso descarta un escenario
-puro de reglas (allí no hace falta LLM) y descarta también un copiloto
-humano (no hay decisiones críticas delegables, solo ruteo). El punto
-medio exacto: un motor de lenguaje barato hace la clasificación, la
-plataforma central de automatización ligera enruta el resultado, y
-tu equipo solo revisa el 5% de casos ambiguos. Sin contratar Data
-Scientist, sin pagar suscripciones enterprise.
+(2-3 oraciones justificando el escenario en lenguaje de negocio.)
 
 **Stack propuesto:**
 
-- **Orquestación:** plataforma central de automatización ligera
-  (corre en tu servidor, sin pagar por operación; te independiza
-  de Zapier y sus costos crecientes)
-- **Clasificador LLM:** motores de lenguaje optimizados para bajo
-  consumo (gastan fracciones de centavo por email; suficiente para
-  clasificar, no para reemplazar a tu equipo)
-- **Persistencia:** infraestructura de despliegue ultrarrápida para
-  los webhooks + Resend para notificar al área correcta
+- **Orquestación:** [descripción genérica de la herramienta]
+- **Cómputo / LLM (si aplica):** [descripción genérica o "no aplica"]
+- **Persistencia:** [descripción genérica]
 
-Ahorro estimado con este stack: 380 USD/mes [estimación sin auditoría],
-recuperando 79% del desperdicio actual. Tiempo de implementación: 2 semanas.
+Ahorro estimado: [X] USD/mes [estimación sin auditoría], recuperando
+[Y]% del desperdicio. Tiempo: [Z] semanas.
 
 ## 3. POR QUÉ ESTE ENFOQUE (Y NO OTRO)
 
-No vamos a recomendarte plataformas enterprise tipo Vertex AI o Bedrock
-porque su costo por operación es 10x superior al de un motor de lenguaje
-optimizado para bajo consumo, y a tu volumen eso es tirar plata en
-infraestructura sobredimensionada. Tampoco recomendamos un copiloto tipo
-Zapier empresarial porque el costo por operación a tu escala termina
-siendo mayor que tener tu propio servidor de automatizaciones, y a los
-6 meses estás pagando más que el salario del clasificador humano.
+(2-3 oraciones descartando Vertex AI, Bedrock, Zapier enterprise y
+plataformas pesadas por costo 10x superior a tu volumen.)
 
 ## 4. SIGUIENTE PASO
 
-Al ritmo actual, en 6 meses son 2,880 USD acumulados [estimación sin
-auditoría], más el costo de oportunidad de no haber escalado la
-atención al cliente.
+(1 oración de costo de inacción en 6 meses.)
 
 Hagamos una llamada de 15 minutos para ver si esto es viable para tu
 caso. Agendala directamente acá: [URL_CALENDARIO]
@@ -486,10 +432,10 @@ def generate_blueprint(payload: dict) -> str:
       - Pre-procesamiento de CALENDAR_URL en el prompt ANTES de enviar
         a Gemini, para que el LLM la reproduzca verbatim sin riesgo
         de que la rompa con reescritura libre.
-      - max_output_tokens=2500 (techo holgado para 530-750 palabras con
-        margen 2.5x). Historial: 5500→2800→3500→4500 truncaron siempre
-        con scope de 1500 palabras monolítico; ahora el scope bajó a
-        530-750 y entra cómodo.
+      - max_output_tokens=3000 (margen 3x; el histórico 2500 truncó en
+        producción con v5). Historial: 5500→2800→3500→4500→2500 truncaron
+        siempre con scope de 1500 palabras monolítico; ahora el scope bajó
+        a 530-750 y entra cómodo.
       - Logueo de finish_reason=MAX_TOKENS para diagnóstico futuro.
 
     Contrato externo intacto: misma firma (payload) -> str, mismo formato
@@ -515,15 +461,15 @@ def generate_blueprint(payload: dict) -> str:
             prompt,
             generation_config=genai.types.GenerationConfig(
                 temperature=0.15,       # determinístico, prosa consistente
-                max_output_tokens=2500, # ~750 palabras con margen 2.5x
+                max_output_tokens=3000, # margen 3x sobre scope 530-750; histórico: 2500 truncó en producción con v5
             ),
         )
     except Exception as exc:
         raise RuntimeError(f"gemini_call_failed: {exc!r}") from exc
 
     # Loguear truncamiento para diagnóstico. Históricamente el bug era
-    # scope sobredimensionado; con max_output_tokens=2500 y scope 530-750
-    # no debería truncar. Si trunca, subir a 3000 en próxima iteración.
+    # scope sobredimensionado; con max_output_tokens=3000 y scope 530-750
+    # no debería truncar. Si trunca, subir a 3500 en próxima iteración.
     finish_reason = None
     try:
         finish_reason = str(response.candidates[0].finish_reason)
