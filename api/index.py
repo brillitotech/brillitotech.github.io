@@ -106,8 +106,12 @@ WIRE_TO_CANONICAL = {
 # contra Gemini Free Tier (20 RPD → solo 4 submits/día).
 #
 # AHORA (v5 monolítico): una sola llamada a Gemini con un prompt único que
-# declara 4 secciones con scope compacto (350-450 palabras total).
-# El scope ultra-compacto cabe holgado en max_output_tokens=1500 (margen 2x sobre scope 350-450; histórico: 3000 truncó con v5.1 y 2200 truncó con v5.2 porque el LLM se extendía más allá del scope declarado; 1500 con scope ultra-compacto evita el permiso implícito de extenderse)
+# declara 4 secciones con scope realista (530-750 palabras total).
+# El scope compacto cabe holgado en max_output_tokens=5500 (techo amplio
+# con candado 'REPORTE COMPLETO > brevedad', replica el patrón del commit
+# 99e37b8 que funcionaba en producción; histórico: bajar tokens a 3000/2200/1500
+# SIEMPRE truncó antes de sección 4 porque el LLM se extendía con prosa
+# comercial y el techo bajo lo cortaba mid-frase)
 # y elimina la fragmentación que inducía minimalismo. El mapa de decisión
 # A/B/C reemplaza la sección 2 técnica por una recomendación comercial
 # opinativa: el LLM detecta el escenario del proceso del cliente y
@@ -202,78 +206,155 @@ y entregar más, que prometer más y quedar mal).
 Tu salida DEBE mencionar explícitamente "Escenario X" en la sección 1.
 
 ---
-INSTRUCCIONES POR SECCIÓN (scope exacto en ORACIONES, no en palabras — el
-LLM respeta más los límites de oraciones que de palabras):
+INSTRUCCIONES POR SECCIÓN (scope exacto por PALABRAS — funciona mejor
+que por oraciones con Gemini Flash, validado en producción v5 monolítico
+original commit 6a85c5c; total esperado: 530-750 palabras):
 
-## 1. IMPACTO RÁPIDO Y ESCENARIO DETECTADO   (3-4 oraciones TOTAL)
+## 1. IMPACTO RÁPIDO Y ESCENARIO DETECTADO   (100-150 palabras)
 
-Arrancá con: "Detectamos que tu proceso encaja en el **Escenario [A|B|C]**: [nombre del escenario]."  (1 oración)
+Arrancá con: "Detectamos que tu proceso encaja en el **Escenario [A|B|C]**: [nombre del escenario]."
 
-Después, EXACTAMENTE 3 bullets, CADA UNO de 1 oración corta (no 2, no párrafo):
-- **Lo que te está costando hoy:** [cifra USD/mes en 1 oración corta] [estimación sin auditoría]
-- **Lo que se pierde al año si no se actúa:** [cifra anualizada en 1 oración corta]
-- **El primer quick win:** [1 oración con la palanca más rápida]
+Después, EXACTAMENTE 3 bullets cortos con cifras concretas (no paráfrasis):
+- **Lo que te está costando hoy:** [1 cifra en USD/mes basada en el
+  volumen declarado y la heurística financiera] [estimación sin auditoría]
+- **Lo que se pierde al año si no se actúa:** [cifra anualizada]
+- **El primer quick win:** [1 oración con la palanca más barata y rápida]
 
-NO agregues más bullets. NO agregues un párrafo de cierre.
+NO agregues más bullets. NO agregues un párrafo de cierre largo: el
+cliente skipea y se pierde. Sé concreto y numérico.
 
-## 2. LA SOLUCIÓN ADECUADA PARA TU CASO   (4-6 oraciones TOTAL)
+## 2. LA SOLUCIÓN ADECUADA PARA TU CASO   (250-350 palabras)
 
-(1-2 oraciones justificando el escenario detectado.)
+(2-3 oraciones justificando por qué el escenario detectado es el correcto
+para el proceso del cliente, en lenguaje de negocio: "ahorra tiempo",
+"elimina errores", "no requiere contratar". Glosá cualquier término
+técnico según la REGLA DE LENGUAJE.)
 
-**Stack propuesto:** (3 bullets, CADA UNO de 1 oración:)
-- **Orquestación:** [descripción genérica + 1 oración de justificación de por qué encaja con el escenario].
-- **Cómputo / LLM (solo si el escenario lo requiere):** [descripción genérica + 1 oración justificando por qué NO Vertex AI ni Bedrock a tu volumen]. Si el escenario es A, este bullet explica que NO hace falta LLM.
-- **Persistencia ligera y notificación:** [descripción genérica + 1 oración].
+**Stack propuesto:** EXACTAMENTE 3 bullets:
+- **Orquestación:** [descripción genérica + 1 línea de justificación].
+- **Cómputo / LLM (solo si el escenario lo requiere):** [descripción genérica + 1 línea justificando por qué NO Vertex AI ni Bedrock a tu volumen]. Si el escenario es A, este bullet explica que NO hace falta LLM.
+- **Persistencia ligera y notificación:** [descripción genérica + 1 línea].
 
-Cerrá con 1 oración: "Ahorro estimado: [X] USD/mes [estimación sin auditoría], recuperando [Y]% del desperdicio. Tiempo: [Z] semanas."
+Cerrá con 1 línea: "Ahorro estimado con este stack: [X] USD/mes
+[estimación sin auditoría], recuperando [Y]% del desperdicio actual.
+Tiempo de implementación: [Z] semanas."
 
 NO uses sub-secciones con párrafos largos. NO gloses más de 1 herramienta por bullet.
 
-## 3. POR QUÉ ESTE ENFOQUE (Y NO OTRO)   (2-3 oraciones TOTAL)
+## 3. POR QUÉ ESTE ENFOQUE (Y NO OTRO)   (100-130 palabras)
 
-(1-2 oraciones descartando Vertex AI / Bedrock / hiperescaladores por costo 10x superior a tu volumen.)
-(1-2 oraciones descartando Zapier / Make enterprise por costo por operación creciente.)
+(2-3 oraciones descartando alternativas pesadas: "no recomendamos
+plataformas enterprise tipo Vertex AI o Bedrock porque tu volumen [X]
+no justifica el costo 10x superior al de un motor de lenguaje
+optimizado para bajo consumo"). Glosá los términos técnicos si los usás.
 
-NO agregues un tercer párrafo. NO gloses cada alternativa por separado: 1 mención al pasar es suficiente.
+(1-2 oraciones sobre por qué la alternativa low-code-empresarial tipo
+Zapier/Make tampoco encaja: "el costo por operación a tu escala termina
+siendo mayor que tener tu propio servidor de automatizaciones".)
 
-## 4. SIGUIENTE PASO   (1-2 oraciones TOTAL)
+NO agregues un tercer párrafo. NO cierres con "espero que sirva". Esta
+sección es de descarte de alternativas caras, no de venta.
 
-(1 oración recomendando una llamada breve para validar estos números con datos reales.)
+## 4. SIGUIENTE PASO   (80-120 palabras)
 
-Cerrá con UNA línea de CTA (sin oración previa adicional):
-"Hagamos una llamada de 15 minutos para ver si esto es viable para tu caso. Agendala directamente acá: [URL_CALENDARIO]"
+(1 oración de costo de inacción: "Al ritmo actual, en 6 meses son
+[X] USD acumulados [estimación sin auditoría].")
+
+(2-3 oraciones recomendando una llamada breve para validar estos
+números con datos reales y ver si tiene sentido avanzar. Incluí la
+URL del calendario pre-procesada al final, con anchor text explícito.
+NO uses frases como "agendá cuando puedas" ni "espero tu respuesta":
+sé directo sobre el paso concreto.)
+
+Cerrá con UNA línea de CTA:
+"Hagamos una llamada de 15 minutos para ver si esto es viable para tu
+caso. Agendala directamente acá: [URL_CALENDARIO]"
 
 ---
-REGLAS DURAS (no negociables):
+CANDADO ANTI-MINIMALISMO (no negociable, replica patrón del commit
+original 125de86 que funcionaba en producción con max_output_tokens=5500):
 
-- Total del reporte: ≤450 palabras. Si pasás, truncás.
-- Cada bullet: 1 oración. Sin párrafos.
-- Si dudás entre conciso y completo, ELEGÍ CONCISO. Siempre.
+Este reporte lo lee un dueño de PyME para decidir si te contacta. Si
+entregás una versión minimalista (1-2 oraciones por sección), el lead
+se va sin contactarte. Por lo tanto:
+
+REGLA OPERATIVA DE TAMAÑO: El output puede extenderse hasta ~5,000
+tokens. NO recortes secciones por economía. Si una tabla o un bullet
+requiere más espacio, usalo. La prioridad es REPORTE COMPLETO > brevedad.
+
+- Cada sección DEBE cubrir el scope declarado arriba (3 bullets en
+  sección 1, 3 bullets en sección 2, 2 párrafos en sección 3, CTA
+  concreto en sección 4). NO produzcas resúmenes ejecutivos.
+- NO cierres con "espero que sea útil", "este es el reporte",
+  "cualquier duda estoy a disposición" ni variantes. El CTA final es
+  la última línea.
+- NO omitas ninguna sección: las 4 son obligatorias y en ese orden.
+- NO uses bloques de código, tablas con sintaxis especial ni
+  diagramas Mermaid. Solo prosa + bullets.
 
 ---
-FEW-SHOT (forma y extensión, no contenido):
+FEW-SHOT EXAMPLE (ancla visual — NO copies las cifras; tu output debe
+basarse en los datos del cliente y el escenario detectado arriba):
 
-## 1. IMPACTO RÁPIDO
-Detectamos que tu proceso encaja en el **Escenario X**: nombre.
+## 1. IMPACTO RÁPIDO Y ESCENARIO DETECTADO
 
-- Lo que te está costando hoy: [cifra] USD/mes [estimación sin auditoría].
-- Lo que se pierde al año: [cifra] USD/año.
-- Primer quick win: [1 línea].
+Detectamos que tu proceso encaja en el **Escenario B**: Asistente
+Inteligente de Bajo Consumo.
 
-## 2. SOLUCIÓN
-(2 oraciones justificando.)
+- **Lo que te está costando hoy:** 480 USD/mes en horas de tu equipo
+  clasificando emails de clientes a mano [estimación sin auditoría]
+- **Lo que se pierde al año si no se actúa:** 5,760 USD/año más el
+  costo oculto de errores de clasificación
+- **El primer quick win:** un clasificador automático que enruta los
+  emails en 2 segundos en vez de 8 minutos manuales
 
-- Orquestación: [descripción + 1 línea].
-- Cómputo: [descripción + 1 línea].
-- Persistencia: [descripción + 1 línea].
+## 2. LA SOLUCIÓN ADECUADA PARA TU CASO
 
-Ahorro: [X] USD/mes, recuperando [Y]%. Tiempo: [Z] semanas.
+Tu proceso es 100% clasificar texto ambiguo (qué quiere cada cliente
+cuando escribe), sin reglas fijas claras. Eso descarta un escenario
+puro de reglas (allí no hace falta LLM) y descarta también un copiloto
+humano (no hay decisiones críticas delegables, solo ruteo). El punto
+medio exacto: un motor de lenguaje barato hace la clasificación, la
+plataforma central de automatización ligera enruta el resultado, y
+tu equipo solo revisa el 5% de casos ambiguos. Sin contratar Data
+Scientist, sin pagar suscripciones enterprise.
 
-## 3. POR QUÉ ESTE ENFOQUE
-(2 oraciones: hiperescaladores caro a tu volumen; Zapier/Make caro por operación.)
+**Stack propuesto:**
+
+- **Orquestación:** plataforma central de automatización ligera
+  (corre en tu servidor, sin pagar por operación; te independiza
+  de Zapier y sus costos crecientes)
+- **Clasificador LLM:** motores de lenguaje optimizados para bajo
+  consumo (gastan fracciones de centavo por email; suficiente para
+  clasificar sin pagar tarifas enterprise 10x más caras)
+- **Persistencia y notificación:** infraestructura de despliegue
+  ultrarrápida para los webhooks + email transaccional económico.
+
+Ahorro estimado con este stack: 380 USD/mes [estimación sin auditoría],
+recuperando 79% del desperdicio actual. Tiempo de implementación: 3 semanas.
+
+## 3. POR QUÉ ESTE ENFOQUE (Y NO OTRO)
+
+No recomendamos plataformas enterprise tipo Vertex AI o Bedrock porque
+tu volumen de 500 emails/mes no justifica el costo 10x superior al de
+un motor de lenguaje optimizado para bajo consumo. A tu escala, pagar
+suscripción enterprise es como contratar un camión para mover una caja
+de zapatos.
+
+La alternativa low-code empresarial tipo Zapier o Make tampoco encaja:
+el costo por operación a tu escala termina siendo mayor que tener tu
+propio servidor de automatizaciones. Además, te ata a una plataforma
+que puede cambiar precios o términos cuando quiera.
 
 ## 4. SIGUIENTE PASO
-Hagamos una llamada de 15 minutos. Agendala acá: [URL_CALENDARIO]
+
+Al ritmo actual, en 6 meses son 2,880 USD acumulados [estimación sin
+auditoría]. Validemos estos números con tus datos reales en una
+llamada breve de 15 minutos. Sin compromiso, sin venta forzada: si los
+números no cierran, te lo decimos en la llamada y te quedás con el
+reporte igual.
+
+Hagamos una llamada de 15 minutos para ver si esto es viable para tu caso. Agendala directamente acá: [URL_CALENDARIO]
 
 ---
 DATOS DEL CLIENTE PARA PROCESAR:
@@ -383,13 +464,14 @@ def generate_blueprint(payload: dict) -> str:
       - Pre-procesamiento de CALENDAR_URL en el prompt ANTES de enviar
         a Gemini, para que el LLM la reproduzca verbatim sin riesgo
         de que la rompa con reescritura libre.
-      - max_output_tokens=1500 (margen 2x sobre scope 350-450; el histórico
-        3000 truncó con v5.1 y 2200 truncó con v5.2 porque el LLM se
-        extendió más allá del scope declarado; 1500 con scope ultra-compacto
-        evita el permiso implícito de extenderse). Historial:
-        5500→2800→3500→4500→2500→3000→2200→1500
-        truncaron siempre con scope laxo; ahora el scope se endurece a
-        límites por oración y entra cómodo.
+      - max_output_tokens=5500 (techo amplio con candado 'REPORTE
+        COMPLETO > brevedad'; el histórico 3000/2200/1500 truncó siempre
+        porque el LLM se extendía con prosa comercial y el techo bajo lo
+        cortaba mid-frase; subir a 5500 replica el patrón del commit
+        99e37b8 que funcionaba en producción). Historial:
+        5500→2800→3500→4500→2500→3000→2200→1500→5500
+        El descenso nunca resolvió el truncado; la causa raíz era scope
+        laxo + tokens bajos. v5.4 vuelve al patrón ganador original.
       - Logueo de finish_reason=MAX_TOKENS para diagnóstico futuro.
 
     Contrato externo intacto: misma firma (payload) -> str, mismo formato
@@ -415,17 +497,16 @@ def generate_blueprint(payload: dict) -> str:
             prompt,
             generation_config=genai.types.GenerationConfig(
                 temperature=0.15,       # determinístico, prosa consistente
-                max_output_tokens=1500, # margen 2x sobre scope 350-450 palabras; histórico: 2200 truncó en producción con v5.2 porque el LLM se extendió más allá del scope declarado; 1500 con scope ultra-compacto evita el permiso implícito de extenderse
+                max_output_tokens=5500, # techo amplio para que el LLM entregue las 4 secciones completas; histórico: bajar tokens (3500→3000→2200→1500) SIEMPRE truncó antes de sección 4; subir a 5500 con candado 'REPORTE COMPLETO' replica el patrón del commit 99e37b8 que funcionaba
             ),
         )
     except Exception as exc:
         raise RuntimeError(f"gemini_call_failed: {exc!r}") from exc
 
     # Loguear truncamiento para diagnóstico. Históricamente el bug era
-    # scope sobredimensionado; con max_output_tokens=1500 y scope 350-450
-    # endurecido por oraciones, no debería truncar. Si trunca, bajar scope
-    # a 250-350 en próxima iteración (NO subir tokens — eso da permiso
-    # implícito de extenderse, documentado en memoria).
+    # tokens bajos (3000/2200/1500) que cortaban mid-frase; con
+    # max_output_tokens=5500 y candado 'REPORTE COMPLETO', no debería
+    # truncar. Si trunca con 5500, el problema es scope laxo, no tokens.
     finish_reason = None
     try:
         finish_reason = str(response.candidates[0].finish_reason)
@@ -442,7 +523,7 @@ def generate_blueprint(payload: dict) -> str:
         )
         print(
             f"[gemini] WARN truncado: finish_reason={finish_reason}, "
-            f"palabras_recibidas={word_count}/target 350-450, "
+            f"palabras_recibidas={word_count}/target 530-750, "
             f"secciones_presentes={secciones_presentes}/4",
             flush=True,
         )
