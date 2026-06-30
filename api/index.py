@@ -63,7 +63,7 @@ DEBUG_HEADER_VALUE = "1"
 # Email de contacto que aparece en el CTA final del reporte ("respondé
 # este correo o escribí directamente a <email>"). Se sustituye del
 # placeholder literal que emite Gemini en el Markdown.
-CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "liwaisitech@gmail.com")
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "btatacc@gmail.com")
 
 # URL del appointment scheduler (Google Calendar) que aparece en la sección
 # 4 del reporte como CTA principal del monolítico v5. A diferencia del

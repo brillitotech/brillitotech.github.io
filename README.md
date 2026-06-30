@@ -124,7 +124,7 @@ El formulario del modal (`index.html` → sección 5) envía los 6 campos al end
 | `OWNER_NOTIFICATION_EMAIL` | recomendada | — | Email que recibe copia de cada lead (lead-notification) |
 | `EMAIL_FROM` | opcional | `Brillitotech <no-reply@brillitotech.com>` | Remitente visible de los correos |
 | `SUCCESS_REDIRECT_URL` | opcional | `https://brillitotech-servicios.liwaisi.tech/gracias.html` | URL del 302 en éxito (form HTML). **Cambia este valor si tu dominio de deploy es distinto.** |
-| `CONTACT_EMAIL` | opcional | `liwaisitech@gmail.com` | Email que aparece en el CTA final del reporte ("respondé este correo o escribí directamente a…"). Si no la seteás, usa el fallback. |
+| `CONTACT_EMAIL` | opcional | `btatacc@gmail.com` | Email que aparece en el CTA final del reporte ("respondé este correo o escribí directamente a…"). Si no la seteás, usa el fallback. |
 
 ---
 
@@ -190,7 +190,7 @@ El deploy es **automático vía Vercel**: `git push` a `main` → Vercel compila
 ### Configuración inicial (solo la primera vez)
 
 1. **Importar el repo en Vercel** (https://vercel.com/new).
-2. **Environment Variables**: configurar `GEMINI_API_KEY`, `RESEND_API_KEY`, `OWNER_NOTIFICATION_EMAIL` en Project Settings → Environment Variables (Production, Preview y Development). Opcional: `CONTACT_EMAIL` (si querés que el CTA final del reporte muestre un mail distinto al default `liwaisitech@gmail.com`).
+2. **Environment Variables**: configurar `GEMINI_API_KEY`, `RESEND_API_KEY`, `OWNER_NOTIFICATION_EMAIL` en Project Settings → Environment Variables (Production, Preview y Development). Opcional: `CONTACT_EMAIL` (si querés que el CTA final del reporte muestre un mail distinto al default `btatacc@gmail.com`).
 3. **Dominio custom** (opcional): si no es `brillitotech-servicios.liwaisi.tech`, setear `SUCCESS_REDIRECT_URL` apuntando a la URL real de `gracias.html` en el deploy del servicio (ej. `https://otro-dominio.com/gracias.html`).
 4. **Deploy**.
 
