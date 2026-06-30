@@ -96,25 +96,8 @@ WIRE_TO_CANONICAL = {
 }
 
 # ---------------------------------------------------------------------------
-# Prompt del sistema — monolítico v5 con mapa de decisión A/B/C
+# Prompt del sistema — monolítico con mapa de decisión A/B/C
 # ---------------------------------------------------------------------------
-# ANTES (refactor multi-llamada, commits 2c445f8 + f5b1c3f): el reporte se
-# dividía en 5 llamadas secuenciales a Gemini (una por sección). El bug
-# persistente fue scope minimalista: cada sección salía con 1-2 oraciones
-# pese a declarar "EXACTAMENTE N bullets". El LLM interpretaba "SOLO esta
-# sección" como "produce un resumen". Además consumía 5 requests por submit
-# contra Gemini Free Tier (20 RPD → solo 4 submits/día).
-#
-# AHORA (v5 monolítico): una sola llamada a Gemini con un prompt MÍNIMO
-# (input ~400 palabras) que declara 4 secciones con scope 100-150/250-350/
-# 100-130/80-120 palabras (530-750 total). El prompt se mantuvo compacto
-# deliberadamente: prompts largos inducen 'lost in the middle' en Gemini
-# Flash, donde el LLM pierde foco en las instrucciones del medio del
-# prompt y degrada la calidad de las secciones finales. El mapa A/B/C
-# reemplaza la sección 2 técnica por una recomendación comercial donde
-# el LLM detecta el escenario del proceso y justifica el conjunto de
-# herramientas en lenguaje de negocio.
-#
 # Placeholders del template (rellenados por generate_blueprint):
 #   {cliente_empresa}   {cliente_proceso}   {cliente_stack}   {cliente_volumen}
 #   [URL_CALENDARIO]    → se reemplaza por CALENDAR_URL antes de llamar a
@@ -256,11 +239,7 @@ def generate_blueprint(payload: dict) -> str:
         a Gemini, para que el LLM la reproduzca verbatim sin riesgo
         de que la rompa con reescritura libre.
       - max_output_tokens=3500 (target output ~700 palabras ≈ 1000 tokens
-        + margen 3x para prosa comercial). Historial de cambios:
-        5500→2800→3500→4500→2500→3000→2200→1500→5500→3500.
-        El descenso a 1500/2200 truncó por restricción dura; el ascenso
-        a 5500 gastaba tokens al pedo. 3500 es el balance: deja margen
-        para prosa natural sin inducir extensión excesiva.
+        + margen 3x para prosa comercial).
       - Logueo de finish_reason=MAX_TOKENS para diagnóstico futuro.
 
     Contrato externo intacto: misma firma (payload) -> str, mismo formato
@@ -286,16 +265,15 @@ def generate_blueprint(payload: dict) -> str:
             prompt,
             generation_config=genai.types.GenerationConfig(
                 temperature=0.15,       # determinístico, prosa consistente
-                max_output_tokens=3500, # target output ~700 palabras (~1000 tokens) + margen 3x para prosa comercial que se extiende naturalmente; histórico: 5500 gastaba tokens al pedo con scope 530-750; 1500/2200 truncaban porque no daban espacio para las 4 secciones
+                max_output_tokens=3500, # target output ~700 palabras (~1000 tokens) + margen 3x para prosa comercial
             ),
         )
     except Exception as exc:
         raise RuntimeError(f"gemini_call_failed: {exc!r}") from exc
 
-    # Loguear truncamiento para diagnóstico. Históricamente el bug era
-    # tokens bajos (3000/2200/1500) que cortaban mid-frase; con
-    # max_output_tokens=3500 y scope 530-750 palabras bien declarado,
-    # no debería truncar. Si trunca, el problema es scope laxo.
+    # Loguear truncamiento para diagnóstico. Con max_output_tokens=3500 y
+    # scope 530-750 palabras bien declarado, no debería truncar. Si
+    # trunca, el problema es scope laxo, no tokens.
     finish_reason = None
     try:
         finish_reason = str(response.candidates[0].finish_reason)
@@ -617,7 +595,6 @@ def send_email(to_email: str, subject: str, markdown_body: str, html_body: str) 
             f"Resend {response.status_code}: {err_body}",
             response=response,
         )
-    response.raise_for_status()
 
 
 # ---------------------------------------------------------------------------
