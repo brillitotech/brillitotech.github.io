@@ -129,3 +129,20 @@
   outline: 2px solid var(--color-accent-cyber);
   outline-offset: 3px;
 }
+
+/* Validación visual: borde rojo cuando un campo obligatorio está
+   vacío o tiene formato inválido. Se activa DESPUÉS de que el usuario
+   tocó el campo (:not(:placeholder-shown) evita el rojo mientras el
+   campo está pristine). Coincide con .thanks-card--error de
+   gracias.html para coherencia cromática entre form y error page. */
+.modal__field input:invalid:not(:placeholder-shown),
+.modal__field textarea:invalid:not(:placeholder-shown),
+.modal__field select:invalid:not(:focus) {
+  border-color: #e74c3c;
+}
+
+.modal__field input:invalid:not(:placeholder-shown):focus,
+.modal__field textarea:invalid:not(:placeholder-shown):focus {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.25);
+}

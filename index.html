@@ -911,7 +911,7 @@
         de invocar Gemini, así que NO renombrar acá sin actualizar
         WIRE_TO_CANONICAL en api/index.py.
       -->
-      <form class="modal__form" action="/api" method="post" novalidate>
+      <form class="modal__form" action="/api" method="post">
         <!-- Redirección post-submit a la página de gracias (estática,
              misma arquitectura eco-eficiente: cero JS). -->
         <input type="hidden" name="_next" value="/gracias.html">
@@ -1003,7 +1003,12 @@
       var form = document.querySelector('.modal__form');
       var overlay = document.getElementById('diagnostico-overlay');
       if (!form || !overlay) return;
-      form.addEventListener('submit', function () {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          form.reportValidity();
+          return;
+        }
         overlay.hidden = false;
         setTimeout(function () { overlay.hidden = true; }, 90000);
       });
