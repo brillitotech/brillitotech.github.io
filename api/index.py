@@ -115,7 +115,7 @@ Si dudás entre dos, elegí el de MENOR automatización.
 
 Usá SOLO descripciones genéricas (plataforma central de automatización ligera, infraestructura de despliegue ultrarrápida, motores de lenguaje optimizados para bajo consumo). NO uses nombres comerciales (n8n, Vercel, Gemini, Vertex, Bedrock, Lambda, Zapier, Make). Glosá toda jerga técnica en impacto de negocio (ahorro de tiempo, ahorro de plata, menos errores).
 
-Estructura obligatoria (4 secciones, en orden, scope exacto por palabras):
+Estructura obligatoria (4 secciones, en orden). Cada sección DEBE completar TODOS los items listados antes de pasar a la siguiente:
 
 ## 1. IMPACTO RÁPIDO (100-150 palabras)
 "Detectamos que tu proceso encaja en el Escenario [A|B|C]: [nombre]." + 3 bullets: costo mensual en USD [estimación sin auditoría], pérdida anualizada, quick win concreto.
@@ -126,14 +126,18 @@ Estructura obligatoria (4 secciones, en orden, scope exacto por palabras):
 ## 3. POR QUÉ ESTE ENFOQUE (100-130 palabras)
 Descartá alternativas caras (plataformas empresariales 10x más caras a tu volumen; Zapier/Make caro por operación). NO agregues un tercer párrafo.
 
-## 4. SIGUIENTE PASO (80-120 palabras)
-1 oración de costo de inacción en 6 meses. 2-3 recomendando una llamada. Cerrá con UNA línea de CTA: "Hagamos una llamada de 15 minutos para ver si esto es viable para tu caso. Agendala directamente acá: [URL_CALENDARIO]"
+## 4. SIGUIENTE PASO (exactamente 3 oraciones + 1 línea CTA al final, sin más)
+- Oración 1: costo de inacción en 6 meses, con cifra en USD.
+- Oración 2: recomendá una llamada de 15 minutos para revisar la viabilidad del caso.
+- Oración 3: aclaración de que la llamada no genera compromiso, solo claridad sobre si el escenario aplica.
+- Línea CTA obligatoria como ÚLTIMA línea del reporte entero, sin punto final: "Hagamos una llamada de 15 minutos para ver si esto es viable para tu caso. Agendala directamente acá: [URL_CALENDARIO]"
+- NO agregues una 4ta oración, cierre emotivo, ni variantes.
 
 Reglas duras:
 - REPORTE COMPLETO > brevedad. NO recortes secciones. Si una sección requiere más espacio, usalo.
 - Mencioná explícitamente "Escenario X" en la sección 1.
 - NO uses bloques de código, tablas complejas, ni diagramas Mermaid. Solo prosa + bullets.
-- NO cierres con "espero que sea útil" ni variantes. El CTA es la última línea.
+- NUNCA cierres una sección con frases genéricas como "No permitas que...", "Es momento de actuar", "Espero que sea útil", "No dudes en contactarnos". Cada sección cierra con su contenido específico; la 4 cierra con la línea CTA literal.
 
 Datos del cliente:
 * Empresa: {cliente_empresa}
